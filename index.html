@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07111f" />
+  <title>AdNova — منصة الإعلانات الذكية</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #f7f9fc;
+      --surface: #ffffff;
+      --surface-2: #f1f5f9;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --blue-light: #eff6ff;
+      --green: #16a34a;
+      --red: #ef4444;
+      --shadow: 0 18px 60px rgba(15, 23, 42, .09);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Cairo", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    body.dark {
+      --bg: #07111f;
+      --surface: #0d1b2a;
+      --surface-2: #122338;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #1e334d;
+      --blue-light: #102e55;
+      --shadow: 0 18px 60px rgba(0, 0, 0, .25);
+    }
+
+    button,
+    input,
+    select {
+      font-family: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1160px, calc(100% - 36px));
+      margin: auto;
+    }
+
+    .topbar {
+      position: fixed;
+      z-index: 50;
+      top: 0;
+      right: 0;
+      left: 0;
+      padding: 15px 0;
+      background: rgba(247, 249, 252, .85);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(18px);
+    }
+
+    body.dark .topbar {
+      background: rgba(7, 17, 31, .84);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 25px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: white;
+      background: var(--primary);
+      box-shadow: 0 8px 22px rgba(37, 99, 235, .3);
+    }
+
+    .brand-icon svg {
+      width: 27px;
+      height: 27px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 27px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .nav-links a {
+      transition: .2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .theme-btn,
+    .mobile-btn {
+      width: 40px;
+      height: 40px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      font-size: 17px;
+    }
+
+    .mobile-btn {
+      display: none;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 19px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      transition: .25s;
+    }
+
+    .btn-primary {
+      color: white;
+      background: var(--primary);
+      box-shadow: 0 8px 20px rgba(37, 99, 235, .2);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      color: var(--text);
+      background: var(--surface);
+      border-color: var(--border);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .hero {
+      position: relative;
+      padding: 175px 0 110px;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      position: absolute;
+      content: "";
+      width: 500px;
+      height: 500px;
+      top: -260px;
+      left: -180px;
+      border-radius: 50%;
+      background: rgba(37, 99, 235, .09);
+      filter: blur(20px);
+    }
+
+    .hero-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 75px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      padding: 7px 12px;
+      color: var(--primary);
+      background: var(--blue-light);
+      border: 1px solid rgba(37, 99, 235, .12);
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .eyebrow i {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(22, 163, 74, .12);
+    }
+
+    h1 {
+      max-width: 620px;
+      margin-bottom: 20px;
+      font-size: clamp(38px, 5vw, 67px);
+      line-height: 1.18;
+      letter-spacing: -2.5px;
+    }
+
+    .blue {
+      color: var(--primary);
+    }
+
+    .hero-text {
+      max-width: 550px;
+      margin-bottom: 29px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 2;
+    }
+
+    .hero-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .numbers {
+      display: flex;
+      gap: 34px;
+      margin-top: 38px;
+    }
+
+    .number strong {
+      display: block;
+      font-size: 25px;
+      line-height: 1.2;
+    }
+
+    .number span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .preview {
+      position: relative;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .preview::before {
+      position: absolute;
+      content: "";
+      z-index: -1;
+      inset: 22px -18px -22px 18px;
+      border-radius: 22px;
+      background: var(--primary);
+      opacity: .07;
+    }
+
+    .preview-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .preview-title {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .preview-head strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 26px;
+    }
+
+    .growth {
+      color: var(--green);
+      background: rgba(22, 163, 74, .1);
+      border-radius: 7px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .chart {
+      height: 210px;
+      margin-top: 20px;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0 51px,
+        var(--border) 52px
+      );
+    }
+
+    .chart svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .chart-line {
+      stroke-dasharray: 700;
+      stroke-dashoffset: 700;
+      animation: chart 2s ease forwards;
+    }
+
+    @keyframes chart {
+      to { stroke-dashoffset: 0; }
+    }
+
+    .preview-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .preview-stat {
+      padding: 13px;
+      background: var(--surface-2);
+      border-radius: 10px;
+    }
+
+    .preview-stat small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .preview-stat b {
+      display: block;
+      margin-top: 5px;
+      font-size: 16px;
+    }
+
+    .section {
+      padding: 95px 0;
+    }
+
+    .section-title {
+      max-width: 600px;
+      margin: 0 auto 45px;
+      text-align: center;
+    }
+
+    .section-title h2 {
+      margin-bottom: 12px;
+      font-size: 34px;
+      letter-spacing: -.8px;
+    }
+
+    .section-title p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .feature {
+      padding: 27px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      transition: .25s;
+    }
+
+    .feature:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow);
+      border-color: rgba(37, 99, 235, .35);
+    }
+
+    .feature-icon {
+      width: 45px;
+      height: 45px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      color: var(--primary);
+      background: var(--blue-light);
+      border-radius: 12px;
+      font-size: 20px;
+    }
+
+    .feature h3 {
+      margin-bottom: 9px;
+      font-size: 17px;
+    }
+
+    .feature p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.9;
+    }
+
+    .audiences {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .audience {
+      position: relative;
+      overflow: hidden;
+      min-height: 280px;
+      padding: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 17px;
+    }
+
+    .audience::after {
+      position: absolute;
+      content: "";
+      width: 190px;
+      height: 190px;
+      left: -70px;
+      bottom: -85px;
+      border-radius: 50%;
+      background: var(--primary);
+      opacity: .08;
+    }
+
+    .audience.green::after {
+      background: var(--green);
+    }
+
+    .audience h3 {
+      margin-bottom: 10px;
+      font-size: 25px;
+    }
+
+    .audience p {
+      max-width: 430px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .audience ul {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 6px;
+      margin-top: 19px;
+      color: var(--muted);
+      list-style: none;
+      font-size: 13px;
+    }
+
+    .audience li::before {
+      content: "✓";
+      margin-left: 8px;
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .cta {
+      padding: 65px 25px;
+      text-align: center;
+      background: var(--primary);
+      border-radius: 18px;
+      color: white;
+    }
+
+    .cta h2 {
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+
+    .cta p {
+      margin-bottom: 23px;
+      color: #dbeafe;
+      font-size: 14px;
+    }
+
+    .cta .btn {
+      color: var(--primary);
+      background: white;
+    }
+
+    footer {
+      padding: 30px 0;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .footer-flex {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .modal {
+      position: fixed;
+      z-index: 200;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(2, 6, 23, .65);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal.show {
+      display: grid;
+    }
+
+    .modal-box {
+      width: min(420px, 100%);
+      padding: 27px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      box-shadow: 0 25px 90px rgba(0,0,0,.25);
+      animation: modal .25s ease;
+    }
+
+    @keyframes modal {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .modal-top h3 {
+      font-size: 21px;
+    }
+
+    .close {
+      width: 34px;
+      height: 34px;
+      color: var(--muted);
+      background: var(--surface-2);
+      border: 0;
+      border-radius: 9px;
+      font-size: 20px;
+    }
+
+    .field {
+      margin-bottom: 15px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      height: 45px;
+      padding: 0 12px;
+      color: var(--text);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      outline: none;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--primary);
+    }
+
+    .modal-submit {
+      width: 100%;
+      margin-top: 6px;
+    }
+
+    .switch {
+      margin-top: 18px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .switch button {
+      color: var(--primary);
+      background: transparent;
+      border: 0;
+      font-weight: 700;
+    }
+
+    .dashboard {
+      display: none;
+      min-height: 100vh;
+      background: var(--bg);
+    }
+
+    .dashboard.active {
+      display: block;
+    }
+
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 245px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      padding: 25px 15px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+    }
+
+    .sidebar .brand {
+      margin: 0 10px 35px;
+    }
+
+    .side-nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    .side-nav button {
+      padding: 13px;
+      color: var(--muted);
+      text-align: right;
+      background: transparent;
+      border: 0;
+      border-radius: 9px;
+      font-size: 13px;
+    }
+
+    .side-nav button:hover,
+    .side-nav button.active {
+      color: var(--primary);
+      background: var(--blue-light);
+    }
+
+    .dashboard-main {
+      padding: 30px;
+    }
+
+    .dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 27px;
+    }
+
+    .dash-header h1 {
+      margin: 0;
+      font-size: 27px;
+      letter-spacing: -.5px;
+    }
+
+    .dash-header p {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .avatar {
+      width: 39px;
+      height: 39px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: var(--primary);
+      border-radius: 50%;
+      font-weight: 700;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+    }
+
+    .stat-card small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .stat-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 25px;
+    }
+
+    .stat-card span {
+      display: block;
+      margin-top: 5px;
+      color: var(--green);
+      font-size: 11px;
+    }
+
+    .table-card {
+      padding: 22px;
+      overflow-x: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .table-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .table-title h2 {
+      font-size: 17px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 650px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 14px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+      font-size: 12px;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .badge-status {
+      padding: 4px 9px;
+      color: var(--green);
+      background: rgba(22, 163, 74, .1);
+      border-radius: 20px;
+      font-size: 10px;
+    }
+
+    .dashboard-close {
+      color: var(--primary);
+      background: transparent;
+      border: 0;
+      font-size: 13px;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(25px);
+      transition: .7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 900px) {
+      .nav-links {
+        display: none;
+      }
+
+      .mobile-btn {
+        display: block;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 55px;
+      }
+
+      .hero-content {
+        text-align: center;
+      }
+
+      .hero-text {
+        margin-right: auto;
+        margin-left: auto;
+      }
+
+      .hero-buttons,
+      .numbers {
+        justify-content: center;
+      }
+
+      .features {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        width: min(100% - 26px, 1160px);
+      }
+
+      .topbar .btn-outline {
+        display: none;
+      }
+
+      h1 {
+        font-size: 39px;
+        letter-spacing: -1.5px;
+      }
+
+      .hero {
+        padding-top: 145px;
+      }
+
+      .features,
+      .audiences {
+        grid-template-columns: 1fr;
+      }
+
+      .numbers {
+        gap: 19px;
+      }
+
+      .number strong {
+        font-size: 21px;
+      }
+
+      .preview-stats {
+        gap: 5px;
+      }
+
+      .preview-stat {
+        padding: 9px;
+      }
+
+      .preview-stat b {
+        font-size: 13px;
+      }
+
+      .dashboard-main {
+        padding: 20px 13px;
+      }
+
+      .dash-header h1 {
+        font-size: 20px;
+      }
+
+      .dash-header .btn {
+        display: none;
+      }
+
+      .footer-flex {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="topbar">
+    <div class="container nav">
+      <a class="brand" href="#home">
+        <span class="brand-icon">
+          <svg viewBox="0 0 42 42" fill="none">
+            <path d="M11 29L17.5 13H22L30.5 29H25.5L24 25.5H17L15.5 29H11ZM18.2 21.8H22.7L20.4 16.8L18.2 21.8Z" fill="white"/>
+            <path d="M27 13H31V29H27V13Z" fill="#BAE6FD"/>
+          </svg>
+        </span>
+        AdNova
+      </a>
+
+      <nav class="nav-links">
+        <a href="#home">الرئيسية</a>
+        <a href="#features">المميزات</a>
+        <a href="#publishers">للناشرين</a>
+        <a href="#advertisers">للمعلنين</a>
+        <a href="#contact">تواصل معنا</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="theme-btn" onclick="toggleTheme()" title="تغيير المظهر">☼</button>
+        <button class="btn btn-outline" onclick="openAuth('login')">تسجيل الدخول</button>
+        <button class="btn btn-primary" onclick="openAuth('register')">ابدأ الآن</button>
+        <button class="mobile-btn">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="landing">
+
+    <section class="hero" id="home">
+      <div class="container hero-grid">
+
+        <div class="hero-content reveal">
+          <div class="eyebrow">
+            <i></i>
+            منصة إعلانات رقمية متكاملة
+          </div>
+
+          <h1>
+            نمِّ أعمالك مع
+            <span class="blue">إعلانات أكثر ذكاءً</span>
+          </h1>
+
+          <p class="hero-text">
+            منصة واحدة للمعلنين والناشرين لإدارة الحملات، تحقيق الأرباح،
+            وتحليل الأداء من خلال أدوات بسيطة وقوية.
+          </p>
+
+          <div class="hero-buttons">
+            <button class="btn btn-primary" onclick="openAuth('register')">
+              إنشاء حساب مجاني
+              <span>←</span>
+            </button>
+            <a class="btn btn-outline" href="#features">اكتشف المنصة</a>
+          </div>
+
+          <div class="numbers">
+            <div class="number">
+              <strong>25K+</strong>
+              <span>ناشر نشط</span>
+            </div>
+            <div class="number">
+              <strong>8M+</strong>
+              <span>زيارة يومية</span>
+            </div>
+            <div class="number">
+              <strong>99.9%</strong>
+              <span>وقت التشغيل</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview reveal">
+          <div class="preview-head">
+            <div>
+              <div class="preview-title">إجمالي الأرباح</div>
+              <strong>$48,290.85</strong>
+            </div>
+            <span class="growth">+24.8%</span>
+          </div>
+
+          <div class="chart">
+            <svg viewBox="0 0 620 210" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#2563eb" stop-opacity=".25"/>
+                  <stop offset="1" stop-color="#2563eb" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+
+              <path
+                d="M0 185 C65 165 75 173 125 145 S205 170 260 110 S345 136 400 92 S500 125 620 25 L620 210 L0 210Z"
+                fill="url(#fill)"
+              />
+
+              <path
+                class="chart-line"
+                d="M0 185 C65 165 75 173 125 145 S205 170 260 110 S345 136 400 92 S500 125 620 25"
+                fill="none"
+                stroke="#2563eb"
+                stroke-width="4"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+
+          <div class="preview-stats">
+            <div class="preview-stat">
+              <small>الزيارات</small>
+              <b>2.84M</b>
+            </div>
+            <div class="preview-stat">
+              <small>التحويلات</small>
+              <b>18.4K</b>
+            </div>
+            <div class="preview-stat">
+              <small>CTR</small>
+              <b>4.86%</b>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-title reveal">
+          <h2>أدوات مصممة للنمو</h2>
+          <p>كل ما تحتاجه لإدارة الإعلانات وزيادة العائد من منصة واحدة.</p>
+        </div>
+
+        <div class="features">
+          <article class="feature reveal">
+            <div class="feature-icon">◈</div>
+            <h3>استهداف دقيق</h3>
+            <p>استهدف جمهورك حسب الموقع، الجهاز، اللغة، الوقت والسلوك.</p>
+          </article>
+
+          <article class="feature reveal">
+            <div class="feature-icon">↗</div>
+            <h3>تقارير مباشرة</h3>
+            <p>تابع النقرات والتحويلات والأرباح ببيانات واضحة ومباشرة.</p>
+          </article>
+
+          <article class="feature reveal">
+            <div class="feature-icon">⚡</div>
+            <h3>إطلاق سريع</h3>
+            <p>أنشئ حملة جديدة أو أضف موقعك خلال دقائق فقط.</p>
+          </article>
+
+          <article class="feature reveal">
+            <div class="feature-icon">▣</div>
+            <h3>أشكال إعلانية متعددة</h3>
+            <p>بانرات، إعلانات أصلية، فيديو، Push وإعلانات داخلية.</p>
+          </article>
+
+          <article class="feature reveal">
+            <div class="feature-icon">✓</div>
+            <h3>مدفوعات موثوقة</h3>
+            <p>تابع أرباحك ومدفوعاتك من خلال سجل واضح ومنظم.</p>
+          </article>
+
+          <article class="feature reveal">
+            <div class="feature-icon">◉</div>
+            <h3>حماية من الاحتيال</h3>
+            <p>مراقبة جودة الزيارات وتقليل الزيارات الوهمية والمشبوهة.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="publishers">
+      <div class="container">
+        <div class="audiences">
+          <article class="audience reveal">
+            <h3>للناشرين</h3>
+            <p>
+              حوّل موقعك أو تطبيقك إلى مصدر دخل مستمر، واعرض إعلانات مناسبة
+              لجمهورك بدون التأثير على تجربة المستخدم.
+            </p>
+
+            <ul>
+              <li>أرباح تنافسية</li>
+              <li>كود تركيب بسيط</li>
+              <li>إحصائيات واضحة</li>
+              <li>دعم لجميع الأجهزة</li>
+            </ul>
+          </article>
+
+          <article class="audience green reveal" id="advertisers">
+            <h3>للمعلنين</h3>
+            <p>
+              أوصل منتجك إلى جمهور جديد مع استهداف دقيق وتحكم كامل في الميزانية
+              وأداء الحملة.
+            </p>
+
+            <ul>
+              <li>حملات قابلة للتوسع</li>
+              <li>تحكم بالميزانية</li>
+              <li>قياس التحويلات</li>
+              <li>تقارير لحظية</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="container">
+        <div class="cta reveal">
+          <h2>ابدأ بناء نتائج أفضل اليوم</h2>
+          <p>أنشئ حسابك مجاناً وابدأ باستخدام المنصة خلال دقائق.</p>
+          <button class="btn" onclick="openAuth('register')">ابدأ مجاناً ←</button>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container footer-flex">
+        <span>© 2026 AdNova — جميع الحقوق محفوظة</span>
+        <span>الشروط · الخصوصية · الدعم الفني</span>
+      </div>
+    </footer>
+  </main>
+
+  <section class="dashboard" id="dashboard">
+    <div class="dashboard-layout">
+
+      <aside class="sidebar">
+        <a class="brand" href="#">
+          <span class="brand-icon">
+            <svg viewBox="0 0 42 42" fill="none">
+              <path d="M11 29L17.5 13H22L30.5 29H25.5L24 25.5H17L15.5 29H11ZM18.2 21.8H22.7L20.4 16.8L18.2 21.8Z" fill="white"/>
+              <path d="M27 13H31V29H27V13Z" fill="#BAE6FD"/>
+            </svg>
+          </span>
+          AdNova
+        </a>
+
+        <nav class="side-nav">
+          <button class="active">▦ لوحة التحكم</button>
+          <button>◈ الحملات الإعلانية</button>
+          <button>◉ المواقع والمساحات</button>
+          <button>↗ الإحصائيات</button>
+          <button>▣ المدفوعات</button>
+          <button>⚙ الإعدادات</button>
+          <button onclick="logout()">↪ تسجيل الخروج</button>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+        <div class="dash-header">
+          <div>
+            <h1>لوحة التحكم</h1>
+            <p>نظرة عامة على أداء حسابك اليوم</p>
+          </div>
+
+          <div class="user">
+            <span>حساب تجريبي</span>
+            <div class="avatar">م</div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <small>إجمالي الأرباح</small>
+            <strong>$48,290</strong>
+            <span>+24.8% هذا الشهر</span>
+          </div>
+
+          <div class="stat-card">
+            <small>إجمالي الزيارات</small>
+            <strong>2.84M</strong>
+            <span>+12.5% هذا الشهر</span>
+          </div>
+
+          <div class="stat-card">
+            <small>التحويلات</small>
+            <strong>18,492</strong>
+            <span>+8.2% هذا الشهر</span>
+          </div>
+
+          <div class="stat-card">
+            <small>الحملات النشطة</small>
+            <strong>24</strong>
+            <span>4 حملات جديدة</span>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-title">
+            <h2>آخر الحملات الإعلانية</h2>
+            <button class="btn btn-primary">إضافة حملة</button>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>اسم الحملة</th>
+                <th>الميزانية</th>
+                <th>النقرات</th>
+                <th>CTR</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>حملة الصيف 2026</td>
+                <td>$8,400</td>
+                <td>128,400</td>
+                <td>5.42%</td>
+                <td><span class="badge-status">نشطة</span></td>
+              </tr>
+              <tr>
+                <td>إطلاق التطبيق الجديد</td>
+                <td>$6,700</td>
+                <td>96,442</td>
+                <td>6.12%</td>
+                <td><span class="badge-status">نشطة</span></td>
+              </tr>
+              <tr>
+                <td>منتج التقنية</td>
+                <td>$4,900</td>
+                <td>82,120</td>
+                <td>4.91%</td>
+                <td><span class="badge-status">نشطة</span></td>
+              </tr>
+              <tr>
+                <td>عروض المتجر</td>
+                <td>$2,150</td>
+                <td>41,823</td>
+                <td>3.88%</td>
+                <td><span class="badge-status">نشطة</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <div class="modal" id="authModal">
+    <div class="modal-box">
+      <div class="modal-top">
+        <h3 id="modalTitle">تسجيل الدخول</h3>
+        <button class="close" onclick="closeAuth()">×</button>
+      </div>
+
+      <form id="authForm">
+        <div class="field" id="nameField" style="display:none">
+          <label>الاسم الكامل</label>
+          <input type="text" placeholder="مثال: محمد أحمد">
+        </div>
+
+        <div class="field">
+          <label>البريد الإلكتروني</label>
+          <input type="email" placeholder="name@example.com" required>
+        </div>
+
+        <div class="field">
+          <label>كلمة المرور</label>
+          <input type="password" placeholder="••••••••" required>
+        </div>
+
+        <div class="field" id="roleField" style="display:none">
+          <label>نوع الحساب</label>
+          <select>
+            <option>معلن</option>
+            <option>ناشر</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary modal-submit" type="submit">
+          متابعة
+        </button>
+      </form>
+
+      <div class="switch">
+        <span id="switchText">ليس لديك حساب؟</span>
+        <button onclick="switchAuth()">إنشاء حساب</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById("authModal");
+    const landing = document.getElementById("landing");
+    const dashboard = document.getElementById("dashboard");
+    const modalTitle = document.getElementById("modalTitle");
+    const nameField = document.getElementById("nameField");
+    const roleField = document.getElementById("roleField");
+    const switchText = document.getElementById("switchText");
+    const switchButton = document.querySelector(".switch button");
+    const authForm = document.getElementById("authForm");
+
+    let mode = "login";
+
+    function toggleTheme() {
+      document.body.classList.toggle("dark");
+      localStorage.setItem(
+        "adnova-theme",
+        document.body.classList.contains("dark") ? "dark" : "light"
+      );
+    }
+
+    if (localStorage.getItem("adnova-theme") === "dark") {
+      document.body.classList.add("dark");
+    }
+
+    function openAuth(type) {
+      mode = type;
+      updateAuth();
+      modal.classList.add("show");
+    }
+
+    function closeAuth() {
+      modal.classList.remove("show");
+    }
+
+    function switchAuth() {
+      mode = mode === "login" ? "register" : "login";
+      updateAuth();
+    }
+
+    function updateAuth() {
+      const register = mode === "register";
+
+      modalTitle.textContent = register
+        ? "إنشاء حساب جديد"
+        : "تسجيل الدخول";
+
+      nameField.style.display = register ? "block" : "none";
+      roleField.style.display = register ? "block" : "none";
+
+      switchText.textContent = register
+        ? "لديك حساب بالفعل؟"
+        : "ليس لديك حساب؟";
+
+      switchButton.textContent = register
+        ? "تسجيل الدخول"
+        : "إنشاء حساب";
+    }
+
+    authForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      closeAuth();
+      landing.style.display = "none";
+      dashboard.classList.add("active");
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
+
+    function logout() {
+      dashboard.classList.remove("active");
+      landing.style.display = "block";
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    modal.addEventListener("click", function(event) {
+      if (event.target === modal) closeAuth();
+    });
+
+    document.querySelectorAll(".side-nav button").forEach(button => {
+      button.addEventListener("click", function() {
+        document.querySelectorAll(".side-nav button")
+          .forEach(item => item.classList.remove("active"));
+
+        if (!this.textContent.includes("تسجيل الخروج")) {
+          this.classList.add("active");
+        }
+      });
+    });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+        }
+      });
+    }, { threshold: .12 });
+
+    document.querySelectorAll(".reveal").forEach(element => {
+      observer.observe(element);
+    });
+
+    document.querySelector(".mobile-btn").addEventListener("click", () => {
+      const links = document.querySelector(".nav-links");
+
+      if (links.style.display === "flex") {
+        links.style.display = "none";
+      } else {
+        links.style.display = "flex";
+        links.style.position = "absolute";
+        links.style.top = "76px";
+        links.style.right = "13px";
+        links.style.left = "13px";
+        links.style.padding = "18px";
+        links.style.flexDirection = "column";
+        links.style.background = "var(--surface)";
+        links.style.border = "1px solid var(--border)";
+        links.style.borderRadius = "13px";
+      }
+    });
+  </script>
+</body>
+</html>
