@@ -7,7 +7,7 @@
 - Repository: https://github.com/makremhp/adZora
 - Owner: makremhp
 - Default branch: main
-- Latest functional source commit: cac15e5105f85106f35698895a52c59853f6fe0c
+- Latest functional source commit: 61206f94ba6de40aae37874e53f322f2b04b6f32
 - Blueprint: AdZora_Master_Frontend_Blueprint
 
 ## Current objective
@@ -18,37 +18,44 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 
 ### Phase 1 — Information architecture and frontend foundation
 
-- React + Vite application foundation.
-- Separate Publisher and Advertiser workspace switcher.
-- Role-specific navigation, terminology, balance label, KPIs, and quick actions.
+- React + Vite application foundation with separate Publisher and Advertiser workspaces.
+- Role-specific navigation, terminology, balance labels, KPIs, and quick actions.
 - Centralized ad-format and pricing configuration.
 - Responsive mobile drawer with overlay, close button, active state, Escape handling, and scroll lock.
-- Deliberate empty and Coming Soon states; no dead navigation links.
 
 ### Phase 2 — Publisher inventory workflow and palette refresh
 
-- Added functional Publisher Websites flow with name, HTTPS URL, category, validation, pending status, and empty state.
-- Added functional Ad Zones flow linked to a Website, with format, size, Draft status, activation/pause controls, and empty state.
-- Added Ad Codes view linked to Website → Ad Zone, with explicit placeholder-state messaging and copy action. It is not production serving code yet.
-- Added responsive form layouts and data rows for desktop and mobile.
-- Changed the visual palette to white background with black text and blue accent only; removed gold, green, purple, dark background, and glow treatment from the UI.
-- Kept the implementation frontend-only with in-memory demo state so the real API/storage contract can be added without redesigning the workflow.
+- Functional Websites flow with HTTPS validation, category, pending state, and empty state.
+- Functional Ad Zones flow linked to a Website, with format, size, Draft status, and activate/pause controls.
+- Ad Codes view linked to Website → Ad Zone, with explicit placeholder-state messaging and copy action.
+- White background with black text and blue accent only; no gold, green, purple, dark background, or glow treatment.
+
+### Phase 3 — Blob-ready creatives and responsive hardening
+
+- Added Advertiser → Creatives workflow with image/video file selection.
+- Browser validation for JPG, PNG, WEBP, GIF, MP4, and WEBM files up to 10 MB.
+- Creates a browser Blob and FormData payload boundary, previews the selected creative, and adds it to the session library as Ready.
+- Shows an explicit contract note: storage API and production URL are not implemented yet; no fake production serving URL is generated.
+- Added drag-and-drop upload state, loading state, validation errors, empty state, preview cards, and remove action.
+- Hardened every page against horizontal overflow and layout collisions.
+- Fixed the Ad Codes copy screen for narrow widths: wrapped code, bounded pre block, responsive action buttons, and stacked mobile card layout.
+- Added responsive creative upload and library layouts for desktop, tablet, 760px mobile, and 420px mobile widths.
 
 ## Verification
 
 - Cloned the latest main branch.
 - Ran npm install --no-audit --no-fund successfully.
 - Ran npm run build successfully with Vite 5.4.21.
-- Latest build: 33 modules transformed; production output generated in dist/.
-- The first Phase 2 commit was 2952289e12968e3873000873fd9e1adabe8bc06f; the placeholder rendering fix is cac15e5105f85106f35698895a52c59853f6fe0c.
+- Latest build: 34 modules transformed; production output generated in dist/.
+- Source commit: 61206f94ba6de40aae37874e53f322f2b04b6f32.
 
 ## Next implementation order
 
-1. Persist Publisher inventory state through a backend/data layer instead of in-memory state.
-2. Define and implement the blob upload contract for advertiser creatives; record whether the blob target is app storage, object storage, or GitHub Git Blobs. Do not infer this silently.
-3. Implement Advertiser campaigns and the multi-step create-campaign flow using centralized ad-format configuration.
+1. Add a real backend endpoint for Blob/FormData upload and replace the session-only creative state with persisted records.
+2. Implement Advertiser campaign creation using the creative library and centralized ad-format configuration.
+3. Add file dimension validation and format-specific creative fields for Banner, Native, Social, Popup, and Video.
 4. Add publisher earnings/withdrawals and advertiser balance/billing as separate financial experiences.
-5. Add analytics, reports, loading/error/success states, then perform responsive QA.
+5. Add analytics, reports, loading/error/success states, then perform browser-based responsive QA.
 
 ## Handoff rules
 
@@ -60,9 +67,9 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 
 ## Progress log
 
-### 2026-09-15 — Phase 2 completed
+### 2026-09-15 — Phase 3 completed
 
-- Implemented Websites → Ad Zones → Ad Codes for Publisher.
-- Applied the requested white, black, and blue visual system.
-- Verified the production build after fixing the Ad Code placeholder markup.
-- Current next action: define the blob upload contract, then build the first Advertiser creative upload slice.
+- Added the Blob-ready Advertiser Creatives frontend slice.
+- Fixed responsive overlap and overflow risks, with special handling for Ad Codes and copy actions.
+- Verified the production build after the changes.
+- Current next action: connect the Blob/FormData boundary to a real backend storage endpoint, then start campaign creation.
