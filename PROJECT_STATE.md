@@ -121,4 +121,4 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Added format-specific Publisher requirement screens, including image requirements, HTTPS destinations, popup copy, and browser-side video validation.
 - Video uploads now accept MP4/WebM only, cap files at 20 MB, and require a detected duration between 5 and 60 seconds before confirmation.
 - Verification: `npm run build` passes with Vite 5.4.21.
-- Source commit: pending remote upload.
+- Source commit: `c7b1bcaae9ce40b1a58a13fd48ada699f52a217b`.
