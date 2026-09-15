@@ -1052,7 +1052,10 @@
     }
 
 
-    .role-choice { width:100%; margin-top:26px; }
+    .role-choice { width:100%; margin-top:0; }
+    .hero-role-row { margin-top:34px; }
+    .hero-role-row .role-choice { max-width:780px; margin:0 auto; }
+    .hero-role-row .role-choice-label { text-align:center; }
     .role-choice-label { display:block; margin-bottom:11px; color:var(--muted); text-align:right; font-size:14px; font-weight:800; }
     .role-choice-label b { color:var(--primary); direction:ltr; font-size:12px; }
     .role-choice-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; width:100%; }
@@ -1433,6 +1436,7 @@
       .analytics-grid, .wallet-layout, .settings-grid { grid-template-columns:1fr; }
       .balance-hero strong { font-size:31px; }
       .role-choice { justify-content:center; }
+      .hero-role-row { margin-top:22px; }
       .dashboard-wallet-button { min-width:74px; }
       .dashboard-logout { display:none; }
 
@@ -1505,14 +1509,6 @@
           </div>
 
 
-          <div class="role-choice" aria-label="اختيار نوع الحساب">
-            <span class="role-choice-label">هل أنت ناشر أم معلن؟ <b>Are you?</b></span>
-            <div class="role-choice-grid">
-              <button class="role-card role-card-publisher" type="button" onclick="openAuth('register', 'publisher')"><span><strong>ناشر</strong><small>أضف مواقعك واربح من الزيارات</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M5 16V5h14v11M8 13h2V9H8v4Zm6 0h2V7h-2v6Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-              <button class="role-card role-card-advertiser" type="button" onclick="openAuth('register', 'advertiser')"><span><strong>معلن</strong><small>أطلق حملاتك ووصل لجمهورك</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12 16-7-3 14-5-5-3 4-1-6-4-0Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
-            </div>
-          </div>
-
           <div class="numbers">
             <div class="number">
               <strong>25K+</strong>
@@ -1580,6 +1576,18 @@
         </div>
 
       </div>
+      <div class="container hero-role-row">
+        <div class="role-choice" aria-label="اختيار نوع الحساب">
+          <span class="role-choice-label">هل أنت ناشر أم معلن؟ <b>Are you?</b></span>
+          <div class="role-choice-grid">
+            <button class="role-card role-card-publisher" type="button" onclick="openAuth('register', 'publisher')"><span><strong>ناشر</strong><small>أضف مواقعك واربح من الزيارات</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M5 16V5h14v11M8 13h2V9H8v4Zm6 0h2V7h-2v6Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button class="role-card role-card-advertiser" type="button" onclick="openAuth('register', 'advertiser')"><span><strong>معلن</strong><small>أطلق حملاتك ووصل لجمهورك</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12 16-7-3 14-5-5-3 4-1-6-4-0Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+          </div>
+        </div>
+
+
+      </div>
+
     </section>
 
     <section class="section" id="features">
