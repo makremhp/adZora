@@ -7,7 +7,7 @@
 - Repository: https://github.com/makremhp/adZora
 - Owner: makremhp
 - Default branch: main
-- Latest functional source commit: 97289f18adbd08633e31e842b8166cd4213a5762
+- Latest functional source commit: c69fd306a8dd0b26cd91224454c68ba3712f6fc7
 - Blueprint: AdZora_Master_Frontend_Blueprint
 
 ## Current objective
@@ -41,7 +41,18 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Fixed the Ad Codes copy screen for narrow widths: wrapped code, bounded pre block, responsive action buttons, and stacked mobile card layout.
 - Added responsive creative upload and library layouts for desktop, tablet, 760px mobile, and 420px mobile widths.
 
+### Phase 4 — Publisher Direct Links and format-specific advertiser campaigns
+
+- Publisher website creation now requests only Website Name and Website URL.
+- Added per-website Create Direct Link with a unique token, copy action, destination association, and explicit Frontend-only tracking boundary.
+- Preserved the Universal AdZora Code as a single publisher code with no ad type, Creative, media, or size selection.
+- Added Popunder as a separate advertiser format with browser-safe trigger, delay, cooldown, frequency cap, and session limits.
+- Rebuilt campaign creation around format-specific Creative fields and separate Behavior, Campaign, Targeting, Budget, eligibility, preview, and tracking sections.
+- Added live previews for Banner, Native, Social, Popup, Video, Direct Link, and Popunder.
+
 ## Verification
+
+- Latest verification: npm install --no-audit --no-fund succeeded; npm run build succeeded with Vite 5.4.21 and 36 modules transformed.
 
 - Cloned the latest main branch.
 - Ran npm install --no-audit --no-fund successfully.
