@@ -1051,6 +1051,66 @@
       transform: translateY(0);
     }
 
+
+    .role-choice { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin-top:22px; }
+    .role-choice-label { color:var(--muted); font-size:12px; font-weight:700; }
+    .role-choice button { display:inline-flex; align-items:center; gap:6px; min-height:38px; padding:0 13px; color:var(--text); background:var(--surface); border:1px solid var(--border); border-radius:10px; font-size:12px; font-weight:700; transition:.2s; }
+    .role-choice button:hover { color:var(--primary); border-color:var(--primary); transform:translateY(-2px); }
+    .dashboard-topbar { position:fixed; z-index:60; top:0; right:0; left:0; min-height:70px; padding:10px 0; background:rgba(255,255,255,.92); border-bottom:1px solid var(--border); backdrop-filter:blur(18px); }
+    body.dark .dashboard-topbar { background:rgba(13,27,42,.93); }
+    .dashboard-topbar-inner { display:flex; align-items:center; gap:17px; width:min(1420px,calc(100% - 32px)); min-width:0; margin:auto; }
+    .dashboard-topbar-brand { display:flex; flex:0 0 auto; align-items:center; gap:8px; font-size:17px; font-weight:800; }
+    .dashboard-topbar-brand .brand-icon { width:34px; height:34px; border-radius:10px; }
+    .dashboard-topbar-nav { display:flex; flex:1 1 auto; align-items:center; gap:4px; min-width:0; overflow-x:auto; scrollbar-width:thin; }
+    .dashboard-topbar-nav button { flex:0 0 auto; min-height:38px; padding:0 11px; color:var(--muted); background:transparent; border:1px solid transparent; border-radius:9px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .dashboard-topbar-nav button:hover, .dashboard-topbar-nav button.active { color:var(--primary); background:var(--blue-light); border-color:rgba(37,99,235,.12); }
+    .dashboard-topbar-account { display:flex; flex:0 0 auto; align-items:center; gap:8px; }
+    .role-pill { padding:5px 9px; color:var(--primary); background:var(--blue-light); border-radius:20px; font-size:10px; font-weight:800; white-space:nowrap; }
+    .dashboard-wallet-button { display:grid; min-width:86px; padding:5px 9px; color:var(--text); text-align:right; background:var(--surface); border:1px solid var(--border); border-radius:9px; }
+    .dashboard-wallet-button small { color:var(--muted); font-size:9px; }
+    .dashboard-wallet-button strong { color:var(--green); font-size:13px; line-height:1.2; }
+    .dashboard-logout { min-height:35px; padding:0 10px; color:var(--muted); background:transparent; border:1px solid var(--border); border-radius:8px; font-size:10px; }
+    .dashboard-main { padding-top:105px; }
+    .dashboard .sidebar { padding-top:100px; }
+    .dashboard .sidebar .brand { display:none; }
+    .analytics-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:20px; }
+    .insight-card { padding:18px; background:var(--surface-2); border:1px solid var(--border); border-radius:13px; }
+    .insight-card small { color:var(--muted); font-size:11px; }
+    .insight-card strong { display:block; margin-top:8px; font-size:22px; }
+    .insight-card span { display:block; margin-top:5px; color:var(--green); font-size:11px; }
+    .wallet-layout { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr); gap:18px; }
+    .balance-hero { padding:27px; color:white; background:linear-gradient(135deg,#1d4ed8,#2563eb 55%,#0ea5e9); border-radius:16px; box-shadow:0 18px 35px rgba(37,99,235,.22); }
+    .balance-hero small { color:#dbeafe; font-size:12px; }
+    .balance-hero strong { display:block; margin:9px 0 17px; font-size:38px; letter-spacing:-1px; }
+    .balance-hero p { color:#dbeafe; font-size:12px; }
+    .deposit-card, .settings-card { padding:22px; background:var(--surface); border:1px solid var(--border); border-radius:14px; }
+    .deposit-card h2, .settings-card h2 { margin-bottom:7px; font-size:18px; }
+    .deposit-card p, .settings-card p { margin-bottom:17px; color:var(--muted); font-size:12px; }
+    .deposit-options { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin:10px 0 14px; }
+    .deposit-options button { min-height:34px; color:var(--primary); background:var(--blue-light); border:1px solid rgba(37,99,235,.15); border-radius:8px; font-size:11px; font-weight:700; }
+    .settings-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:15px; }
+    .setting-row { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:15px 0; border-bottom:1px solid var(--border); }
+    .setting-row:last-child { border-bottom:0; }
+    .setting-row strong { display:block; font-size:13px; }
+    .setting-row small { display:block; margin-top:3px; color:var(--muted); font-size:10px; }
+    .toggle { width:39px; height:22px; padding:2px; background:var(--primary); border:0; border-radius:20px; }
+    .toggle::after { display:block; width:18px; height:18px; content:""; background:white; border-radius:50%; transition:.2s; }
+    .toggle.off { background:var(--border); }
+    .toggle.off::after { transform:translateX(-17px); }
+    .zone-list { display:grid; gap:8px; margin-top:18px; }
+    .zone-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 12px; background:var(--surface); border:1px solid var(--border); border-radius:10px; }
+    .zone-row strong { display:block; font-size:12px; }
+    .zone-row small { color:var(--muted); font-size:10px; }
+    .wallet-drawer-backdrop { position:fixed; z-index:240; inset:0; display:none; background:rgba(2,6,23,.45); }
+    .wallet-drawer-backdrop.show { display:block; }
+    .wallet-drawer { position:fixed; z-index:250; top:0; right:0; width:min(390px,100%); height:100vh; padding:25px 21px; overflow-y:auto; background:var(--surface); border-left:1px solid var(--border); box-shadow:-20px 0 60px rgba(2,6,23,.2); transform:translateX(110%); transition:transform .28s ease; }
+    .wallet-drawer.open { transform:translateX(0); }
+    .wallet-drawer-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+    .wallet-drawer-head h2 { font-size:21px; }
+    .drawer-balance { margin-bottom:22px; padding:19px; color:white; background:linear-gradient(135deg,#0f766e,#059669); border-radius:13px; }
+    .drawer-balance small { color:#d1fae5; font-size:11px; }
+    .drawer-balance strong { display:block; margin-top:5px; font-size:30px; }
+    .wallet-note { margin-top:12px; color:var(--muted); font-size:10px; line-height:1.8; }
     @media (max-width: 900px) {
       .nav-links {
         display: none;
@@ -1341,6 +1401,21 @@
         padding: 20px 15px;
       }
 
+
+      .dashboard-topbar-inner { width:calc(100% - 20px); gap:7px; flex-wrap:wrap; }
+      .dashboard-topbar-brand { font-size:14px; }
+      .dashboard-topbar-brand .brand-icon { width:30px; height:30px; }
+      .dashboard-topbar-nav { order:3; flex-basis:100%; }
+      .dashboard-topbar-account { margin-right:auto; }
+      .dashboard-topbar { min-height:105px; padding:7px 0; }
+      .dashboard-main { padding-top:128px; }
+      .dashboard .sidebar { padding-top:100px; }
+      .analytics-grid, .wallet-layout, .settings-grid { grid-template-columns:1fr; }
+      .balance-hero strong { font-size:31px; }
+      .role-choice { justify-content:center; }
+      .dashboard-wallet-button { min-width:74px; }
+      .dashboard-logout { display:none; }
+
       .footer-flex {
         align-items: flex-start;
         flex-direction: column;
@@ -1407,6 +1482,13 @@
               <span>←</span>
             </button>
             <a class="btn btn-outline" href="#features">اكتشف المنصة</a>
+          </div>
+
+
+          <div class="role-choice" aria-label="اختيار نوع الحساب">
+            <span class="role-choice-label">Are you?</span>
+            <button type="button" onclick="openAuth('register', 'publisher')">◉ ناشر — اربح من موقعك</button>
+            <button type="button" onclick="openAuth('register', 'advertiser')">◈ معلن — أطلق حملتك</button>
           </div>
 
           <div class="numbers">
@@ -1580,6 +1662,15 @@
   </main>
 
   <section class="dashboard" id="dashboard">
+    <div class="dashboard-topbar">
+      <div class="dashboard-topbar-inner">
+        <a class="dashboard-topbar-brand" href="#" onclick="showDashboardView('overview'); return false;"><span class="brand-icon"><svg viewBox="0 0 42 42" fill="none" aria-hidden="true"><path d="M11 29L17.5 13H22L30.5 29H25.5L24 25.5H17L15.5 29H11ZM18.2 21.8H22.7L20.4 16.8L27 13H31V29H27V19.2L24.7 21.8H18.2Z" fill="white"/></svg></span>adZora</a>
+        <nav class="dashboard-topbar-nav" aria-label="التنقل الرئيسي داخل الحساب">
+          <button type="button" data-role="advertiser" data-dashboard-view="overview">نظرة عامة</button><button type="button" data-role="advertiser" data-dashboard-view="campaigns">الحملات</button><button type="button" data-role="publisher" data-dashboard-view="publisher">مواقعي</button><button type="button" data-role="publisher" data-dashboard-view="zones">إضافة Ad Zone</button><button type="button" data-dashboard-view="analytics">الإحصائيات</button><button type="button" data-dashboard-view="wallet">المحفظة والإيداع</button><button type="button" data-dashboard-view="settings">الإعدادات</button>
+        </nav>
+        <div class="dashboard-topbar-account"><span class="role-pill" id="dashboardRoleLabel">معلن</span><button class="dashboard-wallet-button" type="button" onclick="openWalletDrawer()" aria-label="فتح المحفظة والإيداع"><small>الرصيد</small><strong id="topBalance">$0.00</strong></button><button class="dashboard-logout" type="button" onclick="logout()">خروج</button></div>
+      </div>
+    </div>
     <div class="dashboard-layout">
 
       <aside class="sidebar">
@@ -1594,11 +1685,12 @@
         </a>
 
         <nav class="side-nav" aria-label="تنقل لوحة التحكم">
-          <button class="active" type="button" data-dashboard-view="overview">لوحة التحكم</button>
-          <button type="button" data-dashboard-view="campaigns">الحملات الإعلانية</button>
-          <button type="button" data-dashboard-view="publisher">المواقع والمساحات</button>
+          <button class="active" type="button" data-role="advertiser" data-dashboard-view="overview">لوحة المعلن</button>
+          <button type="button" data-role="advertiser" data-dashboard-view="campaigns">الحملات الإعلانية</button>
+          <button type="button" data-role="publisher" data-dashboard-view="publisher">لوحة الناشر</button>
+          <button type="button" data-role="publisher" data-dashboard-view="zones">Ad Zones</button>
           <button type="button" data-dashboard-view="analytics">الإحصائيات</button>
-          <button type="button" data-dashboard-view="payments">المدفوعات</button>
+          <button type="button" data-dashboard-view="wallet">المحفظة والإيداع</button>
           <button type="button" data-dashboard-view="settings">الإعدادات</button>
           <button type="button" onclick="logout()">تسجيل الخروج</button>
         </nav>
@@ -1608,12 +1700,7 @@
           <div class="dashboard-mobile-nav">
             <label for="dashboardMobileNav">التنقل داخل اللوحة</label>
             <select id="dashboardMobileNav">
-              <option value="overview">لوحة التحكم</option>
-              <option value="campaigns">الحملات الإعلانية</option>
-              <option value="publisher">المواقع والمساحات</option>
-              <option value="analytics">الإحصائيات</option>
-              <option value="payments">المدفوعات</option>
-              <option value="settings">الإعدادات</option>
+              <option value="overview" data-role="advertiser">لوحة المعلن</option><option value="campaigns" data-role="advertiser">الحملات الإعلانية</option><option value="publisher" data-role="publisher">لوحة الناشر</option><option value="zones" data-role="publisher">إضافة Ad Zone</option><option value="analytics">الإحصائيات</option><option value="wallet">المحفظة والإيداع</option><option value="settings">الإعدادات</option>
             </select>
           </div><div class="dashboard-view active" id="advertiserOverviewView">
         <div class="dash-header">
@@ -1711,7 +1798,7 @@
               <h1>لوحة الناشر</h1>
               <p>أدر مواقعك ومساحاتك الإعلانية من مكان واحد</p>
             </div>
-            <button class="btn btn-primary" type="button" onclick="openWebsiteModal()">إضافة موقع</button>
+            <div class="hero-buttons"><button class="btn btn-outline" type="button" onclick="openZoneModal()">إضافة Ad Zone</button><button class="btn btn-primary" type="button" onclick="openWebsiteModal()">إضافة موقع</button></div>
           </div>
 
           <div class="stats-grid">
@@ -1762,11 +1849,13 @@
 
                 <div class="website-actions">
                   <button class="btn btn-outline" type="button" onclick="showPublisherNotice('التحقق الحقيقي سيُربط بالخادم في الخطوة القادمة.')">التحقق من الموقع</button>
-                  <button class="btn btn-primary" type="button" onclick="showPublisherNotice('إدارة Ad Zones ستُفعل بعد ربط المواقع بقاعدة البيانات.')">Ad Zones (2)</button>
+                  <button class="btn btn-primary" type="button" onclick="openZoneModal()">Ad Zones (2)</button>
                 </div>
               </div>
 
-              <p class="publisher-status show" id="publisherNotice" role="status">هذه بيانات عرض مؤقتة حتى يتم ربط الناشر بقاعدة البيانات.</p>
+              
+                <div class="zone-list" aria-label="المساحات الإعلانية"><div class="zone-row"><div><strong>Header Leaderboard</strong><small>728×90 · Banner</small></div><span class="badge-status">نشطة</span></div><div class="zone-row"><div><strong>Sidebar Rectangle</strong><small>300×250 · Display</small></div><span class="badge-status">نشطة</span></div></div>
+                <p class="publisher-status show" id="publisherNotice" role="status">هذه بيانات عرض مؤقتة حتى يتم ربط الناشر بقاعدة البيانات.</p>
             </div>
 
             <div class="table-card publisher-card">
@@ -1783,6 +1872,11 @@
             </div>
           </div>
         </section>
+
+
+        <section class="dashboard-view" id="analyticsView"><div class="dash-header"><div><h1>الإحصائيات</h1><p id="analyticsSubtitle">قراءة واضحة لأداء حسابك واتجاهاته</p></div><button class="btn btn-outline" type="button" onclick="showDashboardView('overview')">العودة للرئيسية</button></div><div class="stats-grid"><div class="stat-card"><small id="metricOneLabel">إجمالي الإنفاق</small><strong id="metricOneValue">$0.00</strong><span>هذا الشهر</span></div><div class="stat-card"><small id="metricTwoLabel">الظهور</small><strong id="metricTwoValue">0</strong><span>+12.5% مقارنة بالشهر الماضي</span></div><div class="stat-card"><small id="metricThreeLabel">النقرات</small><strong id="metricThreeValue">0</strong><span>CTR 0.00%</span></div><div class="stat-card"><small id="metricFourLabel">التحويلات</small><strong id="metricFourValue">0</strong><span>بيانات تجريبية</span></div></div><div class="table-card"><div class="table-title"><h2>ملخص الأداء</h2><span class="badge-status">تجريبي</span></div><div class="analytics-grid"><div class="insight-card"><small>أفضل يوم</small><strong>الثلاثاء</strong><span>أعلى تفاعل</span></div><div class="insight-card"><small>أفضل قناة</small><strong>Web</strong><span>جودة زيارات مستقرة</span></div><div class="insight-card"><small>جودة البيانات</small><strong>جاهزة للربط</strong><span>بانتظار API</span></div></div></div></section>
+        <section class="dashboard-view" id="walletView"><div class="dash-header"><div><h1>المحفظة والإيداع</h1><p>الرصيد والمعاملات في مكان واحد، مع تجربة إيداع واضحة.</p></div><button class="btn btn-primary" type="button" onclick="openWalletDrawer()">فتح المحفظة الجانبية</button></div><div class="wallet-layout"><div class="balance-hero"><small>الرصيد الحالي</small><strong id="walletPageBalance">$0.00</strong><p>هذا رصيد تجريبي للواجهة ولن تتم أي عملية مالية حقيقية قبل ربط بوابة الدفع والخادم.</p></div><div class="deposit-card"><h2>إيداع سريع</h2><p>أدخل قيمة تجريبية لمعاينة تجربة المحفظة.</p><form id="depositForm"><div class="field"><label for="depositAmount">قيمة الإيداع بالدولار</label><input id="depositAmount" type="number" min="1" step="0.01" placeholder="100.00" required></div><div class="deposit-options"><button type="button" onclick="setDepositAmount(25)">$25</button><button type="button" onclick="setDepositAmount(100)">$100</button><button type="button" onclick="setDepositAmount(500)">$500</button></div><button class="btn btn-primary modal-submit" type="submit">إضافة رصيد تجريبي</button><p class="campaign-status" id="depositStatus" role="status"></p></form></div></div><div class="table-card" style="margin-top:18px"><div class="table-title"><h2>آخر العمليات</h2><span class="badge-status">0 عمليات</span></div><p class="campaign-help">ستظهر هنا عمليات الإيداع والصرف بعد ربط Ledger حقيقي. لا يتم حفظ أي حركة مالية حاليًا.</p></div></section>
+        <section class="dashboard-view" id="settingsView"><div class="dash-header"><div><h1>الإعدادات</h1><p>تحكم في تفضيلات الحساب وطريقة ظهور تجربتك.</p></div></div><div class="settings-grid"><div class="settings-card"><h2>الحساب</h2><p id="settingsRoleCopy">إعدادات حساب المعلن</p><div class="setting-row"><div><strong>البريد والتنبيهات</strong><small>تلقي تحديثات الأداء والحالة</small></div><button class="toggle" type="button" aria-label="تفعيل التنبيهات"></button></div><div class="setting-row"><div><strong>الوضع الليلي</strong><small>مزامنة المظهر مع المنصة</small></div><button class="toggle off" type="button" onclick="toggleTheme()" aria-label="تغيير المظهر"></button></div></div><div class="settings-card"><h2>أمان وتجربة الدور</h2><p>اختيار الدور هنا يحدد الصفحات الظاهرة في الحساب.</p><div class="field"><label for="rolePreview">الدور الحالي</label><select id="rolePreview"><option value="advertiser">معلن</option><option value="publisher">ناشر</option></select></div><button class="btn btn-outline" type="button" onclick="applyRolePreview()">تطبيق الدور على الواجهة</button></div></div></section>
 
         <section class="dashboard-view" id="dashboardPlaceholderView">
           <div class="empty-panel">
@@ -1818,13 +1912,7 @@
           <input type="password" placeholder="••••••••" required>
         </div>
 
-        <div class="field" id="roleField" style="display:none">
-          <label>نوع الحساب</label>
-          <select>
-            <option>معلن</option>
-            <option>ناشر</option>
-          </select>
-        </div>
+        <div class="field" id="roleField"><label for="authRole">نوع الحساب</label><select id="authRole"><option value="advertiser">معلن — أريد إطلاق حملات</option><option value="publisher">ناشر — أريد تحقيق دخل من موقعي</option></select></div>
 
         <button class="btn btn-primary modal-submit" type="submit">
           متابعة
@@ -1972,6 +2060,10 @@
       </form>
     </div>
   </div>
+
+  <div class="modal publisher-modal" id="zoneModal" aria-hidden="true"><div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="zoneModalTitle"><div class="modal-top"><div><h3 id="zoneModalTitle">إضافة Ad Zone</h3><p class="campaign-help">أنشئ مساحة إعلانية تجريبية لموقعك، وسيتم توليد الكود من الخادم لاحقًا.</p></div><button class="close" type="button" onclick="closeZoneModal()" aria-label="إغلاق">×</button></div><form id="zoneForm" class="campaign-form"><div class="field field-full"><label for="zoneName">اسم المساحة</label><input id="zoneName" type="text" placeholder="مثال: Header Leaderboard" required></div><div class="field"><label for="zoneFormat">نوع الإعلان</label><select id="zoneFormat"><option>Banner</option><option>Native</option><option>Video</option></select></div><div class="field"><label for="zoneSize">المقاس</label><select id="zoneSize"><option>728×90</option><option>300×250</option><option>320×100</option><option>Responsive</option></select></div><div class="field field-full"><label for="zoneWebsite">الموقع</label><select id="zoneWebsite"><option>متجر تجريبي — demo-store.example</option></select></div><p class="campaign-help field-full">هذه المعاينة لا تنشئ Zone أو كود عرض حقيقيًا قبل إضافة API والتحقق من الموقع.</p><button class="btn btn-primary modal-submit field-full" type="submit">حفظ Ad Zone تجريبي</button><p class="publisher-status field-full" id="zoneStatus" role="status"></p></form></div></div>
+  <div class="wallet-drawer-backdrop" id="walletDrawerBackdrop" onclick="closeWalletDrawer()"></div><aside class="wallet-drawer" id="walletDrawer" aria-label="المحفظة الجانبية" aria-hidden="true"><div class="wallet-drawer-head"><h2>المحفظة</h2><button class="close" type="button" onclick="closeWalletDrawer()" aria-label="إغلاق المحفظة">×</button></div><div class="drawer-balance"><small>الرصيد المتاح</small><strong id="drawerBalance">$0.00</strong></div><form id="drawerDepositForm"><div class="field"><label for="drawerDepositAmount">إيداع سريع بالدولار</label><input id="drawerDepositAmount" type="number" min="1" step="0.01" placeholder="100.00" required></div><button class="btn btn-primary modal-submit" type="submit">إضافة رصيد تجريبي</button><p class="campaign-status" id="drawerDepositStatus" role="status"></p></form><p class="wallet-note">المحفظة الحالية للعرض فقط. لن يتم تحصيل أموال أو تنفيذ تحويلات فعلية قبل ربط مزود الدفع، Ledger، والمصادقة من الخادم.</p></aside>
+
   <script>
     const campaignModal = document.getElementById("campaignModal");
     const campaignForm = document.getElementById("campaignForm");
@@ -2228,6 +2320,41 @@
     window.addEventListener("resize", () => {
       if (window.innerWidth > 900) closeMobileNav();
     });
+
+    // Role-based dashboard, wallet drawer, and publisher zone UX.
+    const roleAwareNavButtons = document.querySelectorAll("[data-dashboard-view]");
+    const roleAwareOptions = document.querySelectorAll("#dashboardMobileNav option[data-role]");
+    const authRole = document.getElementById("authRole");
+    const dashboardRoleLabel = document.getElementById("dashboardRoleLabel");
+    const walletDrawer = document.getElementById("walletDrawer");
+    const walletDrawerBackdrop = document.getElementById("walletDrawerBackdrop");
+    const zoneModal = document.getElementById("zoneModal");
+    const zoneForm = document.getElementById("zoneForm");
+    const zoneStatus = document.getElementById("zoneStatus");
+    let demoBalance = Number(localStorage.getItem("adzora-demo-balance") || 0);
+    function formatDemoBalance() { return "$" + demoBalance.toFixed(2); }
+    function renderDemoBalance() { const formatted = formatDemoBalance(); ["topBalance","walletPageBalance","drawerBalance"].forEach(id => { const element = document.getElementById(id); if (element) element.textContent = formatted; }); }
+    function setDashboardRole(role) {
+      const safeRole = role === "publisher" ? "publisher" : "advertiser"; dashboard.dataset.role = safeRole; localStorage.setItem("adzora-role", safeRole); dashboardRoleLabel.textContent = safeRole === "publisher" ? "ناشر" : "معلن";
+      roleAwareNavButtons.forEach(button => { button.hidden = Boolean(button.dataset.role && button.dataset.role !== safeRole); }); roleAwareOptions.forEach(option => { option.hidden = option.dataset.role !== safeRole; });
+      const rolePreview = document.getElementById("rolePreview"); if (rolePreview) rolePreview.value = safeRole; const settingsRoleCopy = document.getElementById("settingsRoleCopy"); if (settingsRoleCopy) settingsRoleCopy.textContent = safeRole === "publisher" ? "إعدادات حساب الناشر وإدارة المواقع" : "إعدادات حساب المعلن وإدارة الحملات"; const analyticsSubtitle = document.getElementById("analyticsSubtitle"); if (analyticsSubtitle) analyticsSubtitle.textContent = safeRole === "publisher" ? "تابع الظهور والنقرات والأرباح من مواقعك" : "تابع الإنفاق والظهور والنقرات والتحويلات لحملاتك";
+      const metricOneLabel = document.getElementById("metricOneLabel"), metricOneValue = document.getElementById("metricOneValue"), metricFourLabel = document.getElementById("metricFourLabel"); if (safeRole === "publisher") { metricOneLabel.textContent="إجمالي الأرباح"; metricOneValue.textContent="$1,284"; document.getElementById("metricTwoLabel").textContent="الظهور"; document.getElementById("metricTwoValue").textContent="284K"; document.getElementById("metricThreeValue").textContent="12,840"; metricFourLabel.textContent="المواقع النشطة"; document.getElementById("metricFourValue").textContent="2"; } else { metricOneLabel.textContent="إجمالي الإنفاق"; metricOneValue.textContent="$48,290"; document.getElementById("metricTwoLabel").textContent="إجمالي الظهور"; document.getElementById("metricTwoValue").textContent="2.84M"; document.getElementById("metricThreeValue").textContent="128,400"; metricFourLabel.textContent="التحويلات"; document.getElementById("metricFourValue").textContent="18,492"; } renderDemoBalance();
+    }
+    function openAuth(type, preferredRole) { mode=type; updateAuth(); if (preferredRole && authRole) authRole.value=preferredRole; modal.classList.add("show"); if (authRole) authRole.focus(); }
+    function updateAuth() { const register=mode === "register"; modalTitle.textContent=register ? "إنشاء حساب جديد" : "تسجيل الدخول"; nameField.style.display=register ? "block" : "none"; roleField.style.display="block"; switchText.textContent=register ? "لديك حساب بالفعل؟" : "ليس لديك حساب؟"; switchButton.textContent=register ? "تسجيل الدخول" : "إنشاء حساب"; if (authRole && !authRole.value) authRole.value=localStorage.getItem("adzora-role") || "advertiser"; }
+    authForm.addEventListener("submit", event => { event.preventDefault(); const selectedRole=authRole?.value || "advertiser"; setDashboardRole(selectedRole); closeAuth(); landing.style.display="none"; dashboard.classList.add("active"); showDashboardView(selectedRole === "publisher" ? "publisher" : "overview"); window.scrollTo({top:0,behavior:"instant"}); });
+    function showDashboardView(view) { const role=dashboard.dataset.role || localStorage.getItem("adzora-role") || "advertiser"; let effectiveView=view; if (role === "publisher" && ["overview","campaigns"].includes(view)) effectiveView="publisher"; if (role === "advertiser" && ["publisher","zones"].includes(view)) effectiveView="overview"; let targetId="dashboardPlaceholderView"; if (effectiveView === "overview") targetId="advertiserOverviewView"; if (effectiveView === "publisher") targetId="publisherView"; if (effectiveView === "analytics") targetId="analyticsView"; if (effectiveView === "wallet") targetId="walletView"; if (effectiveView === "settings") targetId="settingsView"; dashboardViews.forEach(panel => panel.classList.toggle("active", panel.id === targetId)); roleAwareNavButtons.forEach(button => button.classList.toggle("active", button.dataset.dashboardView === effectiveView && !button.hidden)); if (mobileDashboardNav) mobileDashboardNav.value=effectiveView; if (effectiveView === "campaigns") openCampaignModal(); if (effectiveView === "zones") openZoneModal(); }
+    function logout() { closeWalletDrawer(); closeCampaignModal(); closeWebsiteModal(); closeZoneModal(); dashboard.classList.remove("active"); landing.style.display="block"; window.scrollTo({top:0,behavior:"instant"}); }
+    function openWalletDrawer() { renderDemoBalance(); walletDrawer.classList.add("open"); walletDrawerBackdrop.classList.add("show"); walletDrawer.setAttribute("aria-hidden","false"); document.getElementById("drawerDepositAmount").focus(); }
+    function closeWalletDrawer() { walletDrawer.classList.remove("open"); walletDrawerBackdrop.classList.remove("show"); walletDrawer.setAttribute("aria-hidden","true"); }
+    function setDepositAmount(value) { document.getElementById("depositAmount").value=value; }
+    function applyDemoDeposit(rawAmount, statusElement) { const amount=Number(rawAmount); if (!Number.isFinite(amount) || amount <= 0) { statusElement.textContent="أدخل قيمة أكبر من صفر."; statusElement.className="campaign-status show"; return false; } demoBalance += amount; localStorage.setItem("adzora-demo-balance",demoBalance.toFixed(2)); renderDemoBalance(); statusElement.textContent="تمت إضافة " + amount.toFixed(2) + "$ تجريبيًا. لا توجد عملية مالية حقيقية."; statusElement.className="campaign-status show"; return true; }
+    document.getElementById("depositForm").addEventListener("submit", event => { event.preventDefault(); applyDemoDeposit(document.getElementById("depositAmount").value, document.getElementById("depositStatus")); }); document.getElementById("drawerDepositForm").addEventListener("submit", event => { event.preventDefault(); if (applyDemoDeposit(document.getElementById("drawerDepositAmount").value, document.getElementById("drawerDepositStatus"))) document.getElementById("drawerDepositAmount").value=""; });
+    function openZoneModal() { if ((dashboard.dataset.role || localStorage.getItem("adzora-role")) !== "publisher") { showDashboardView("overview"); return; } zoneModal.classList.add("show"); zoneModal.setAttribute("aria-hidden","false"); zoneStatus.className="publisher-status field-full"; zoneStatus.textContent=""; document.getElementById("zoneName").focus(); }
+    function closeZoneModal() { zoneModal.classList.remove("show"); zoneModal.setAttribute("aria-hidden","true"); } zoneModal.addEventListener("click", event => { if (event.target === zoneModal) closeZoneModal(); }); zoneForm.addEventListener("submit", event => { event.preventDefault(); zoneStatus.textContent="تم التحقق من Ad Zone تجريبيًا. سيُنشأ الكود الحقيقي بعد ربط الموقع والـAPI."; zoneStatus.className="publisher-status field-full show"; });
+    document.querySelectorAll(".toggle").forEach(toggle => { toggle.addEventListener("click", () => toggle.classList.toggle("off")); }); function applyRolePreview() { const selectedRole=document.getElementById("rolePreview").value; setDashboardRole(selectedRole); showDashboardView(selectedRole === "publisher" ? "publisher" : "overview"); }
+    roleAwareNavButtons.forEach(button => { button.addEventListener("click", () => showDashboardView(button.dataset.dashboardView)); }); renderDemoBalance(); setDashboardRole(localStorage.getItem("adzora-role") || "advertiser");
+
   </script>
 </body>
 </html>
