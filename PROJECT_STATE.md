@@ -122,3 +122,12 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Video uploads now accept MP4/WebM only, cap files at 20 MB, and require a detected duration between 5 and 60 seconds before confirmation.
 - Verification: `npm run build` passes with Vite 5.4.21.
 - Source commit: `c7b1bcaae9ce40b1a58a13fd48ada699f52a217b`.
+
+### 2026-09-15 — Landing navigation and website URL fixes
+
+- Replaced landing navigation buttons with functional anchor links and smooth scrolling, including mobile drawer links.
+- Loaded a final landing-only stylesheet after the legacy landing rules so the public page consistently uses the requested white, black, and blue palette.
+- Added the missing check icon used by the landing proof and capability sections.
+- Website entry now accepts `example.com`, `www.example.com`, or a full URL, normalizes protocol-less values to HTTPS, and validates the hostname.
+- Verification: `npm run build` passes with Vite 5.4.21.
+- Source commit: `63a96fedf44aab32b940f97c5f5ba4e51cb612d9`.
