@@ -337,6 +337,20 @@
     $$("[data-period]").forEach(button => button.classList.toggle("active", button.dataset.period === period));
   }
 
+  function showPublisherNotice(message) {
+    const notice = $("#publisherNotice");
+    if (notice) {
+      notice.textContent = message;
+      notice.classList.add("show");
+    }
+  }
+
+  function applyCustomRange() {
+    const from = $("#rangeFrom")?.value;
+    const to = $("#rangeTo")?.value;
+    if (from && to) renderAnalytics("custom");
+  }
+
   function renderAll() {
     renderAdvertiserOverview();
     renderPublisherOverview();
@@ -730,6 +744,12 @@
     });
     $$(".toggle").forEach(toggle => toggle.addEventListener("click", () => toggle.classList.toggle("off")));
     $("#rolePreview")?.addEventListener("change", applyRolePreview);
+    const observer = "IntersectionObserver" in window
+      ? new IntersectionObserver(entries => entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add("visible");
+        }), { threshold: 0.12 })
+      : null;
+    $$(".reveal").forEach(element => observer ? observer.observe(element) : element.classList.add("visible"));
   }
 
   Object.assign(window, {
@@ -751,7 +771,9 @@
     closeSidebar,
     closeMobileNav,
     showDashboardView,
-    applyRolePreview
+    applyRolePreview,
+    showPublisherNotice,
+    applyCustomRange
   });
 
   try {
