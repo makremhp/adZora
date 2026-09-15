@@ -7,7 +7,7 @@
 - Repository: https://github.com/makremhp/adZora
 - Owner: makremhp
 - Default branch: main
-- Latest functional source commit: 52a6e55d68d835b11ba6b0700c0fd0eb3297c5d7
+- Latest functional source commit: 016d32574f04130e6083e43ee6eeb57af76a2afa
 - Blueprint: AdZora_Master_Frontend_Blueprint
 
 ## Current objective
@@ -83,4 +83,13 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Added responsive styling for the new flows while preserving the existing mobile drawer and workspace separation.
 - Verified with `npm run build` and `git diff --check`.
 - Source commit: `52a6e55d68d835b11ba6b0700c0fd0eb3297c5d7`.
+
+### 2026-09-15 — Publisher finance UX
+
+- Added Publisher Earnings with Available Earnings, Pending Earnings, Total Earned, Withdrawn, eCPM, RPM, impressions, and clicks demo presentation.
+- Added the complete frontend withdrawal path: amount, minimum balance, payment method, validation, confirmation, pending status, and success state.
+- Added separate Publisher Transactions presentation for earnings, adjustments, and withdrawals.
+- Kept all finance behavior demo-only; no payment provider, transfer, accounting, or backend was added.
+- Verified with `npm run build` and `git diff --check`.
+- Source commit: `016d32574f04130e6083e43ee6eeb57af76a2afa`.
 - Remaining frontend gaps: publisher earnings/withdrawal screens are still placeholders; no backend, database, API, payment processing, ad serving, or real authentication was added.
