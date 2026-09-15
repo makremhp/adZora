@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AD_FORMATS, RECENT_ITEMS, ROLE_CONFIG } from "./config";
 import PublisherWorkspace from "./PublisherWorkspace";
+import AdvertiserCreatives from "./AdvertiserCreatives";
 
 function Icon({ name, size = 18 }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -54,7 +55,7 @@ function Sidebar({ workspace, setWorkspace, activePage, onNavigate, drawerOpen, 
           <Icon name={item.icon} /><span>{item.arabic}</span><small>{item.label}</small>{activePage === item.id && <span className="nav-active-line" />}
         </button>)}
       </nav>
-      <div className="sidebar-footer"><div className="footer-status"><span className="status-dot" />Demo workspace</div><span>Phase 1</span></div>
+      <div className="sidebar-footer"><div className="footer-status"><span className="status-dot" />Demo workspace</div><span>Phase 3</span></div>
     </aside>
   </>;
 }
@@ -100,6 +101,7 @@ export default function App() {
   const [activePage, setActivePage] = useState("overview");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [publisherData, setPublisherData] = useState({ websites: [], zones: [] });
+  const [creativeData, setCreativeData] = useState([]);
   const config = useMemo(() => ROLE_CONFIG[workspace], [workspace]);
 
   useEffect(() => {
@@ -116,7 +118,7 @@ export default function App() {
     <Sidebar workspace={workspace} setWorkspace={(next) => { setWorkspace(next); setActivePage("overview"); }} activePage={activePage} onNavigate={navigate} drawerOpen={drawerOpen} closeDrawer={() => setDrawerOpen(false)} />
     <main className="main-content">
       <header className="topbar"><button className="icon-button menu-button" onClick={() => setDrawerOpen(true)} aria-label="Open menu"><Icon name="menu" /></button><div className="breadcrumbs"><span>AdZora</span><Icon name="chevron" size={13} /><strong>{config.label}</strong><Icon name="chevron" size={13} /><span>{pageTitle}</span></div><div className="header-actions"><div className="header-balance"><span>{config.balanceLabel}</span><strong>$0.00</strong></div><button className="notification-button" aria-label="Notifications"><span className="notification-dot" /><Icon name="receipt" size={18} /></button><div className="avatar" aria-label="Demo account">M</div></div></header>
-      <div className="page-content">{activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : workspace === "publisher" && ["websites", "ad-zones", "ad-codes"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} onNavigate={navigate} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
+      <div className="page-content">{activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : workspace === "publisher" && ["websites", "ad-zones", "ad-codes"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} onNavigate={navigate} /> : workspace === "advertiser" && activePage === "creatives" ? <AdvertiserCreatives data={creativeData} setData={setCreativeData} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
     </main>
   </div>;
 }
