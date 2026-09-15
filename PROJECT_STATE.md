@@ -7,51 +7,45 @@
 - Repository: https://github.com/makremhp/adZora
 - Owner: makremhp
 - Default branch: main
-- Snapshot date: 2026-09-15
-- Phase 1 source commit: 36bde5e00146b40f6ce271fe857042a2efcb2b50
+- Latest functional source commit: cac15e5105f85106f35698895a52c59853f6fe0c
 - Blueprint: AdZora_Master_Frontend_Blueprint
-
-## Important repository fact
-
-The repository was empty apart from the handoff file before Phase 1. The previous frontend had been removed by these commits: assets/, RDM.md, and index.html. The new source is a clean React/Vite foundation; do not assume the deleted frontend is still active.
 
 ## Current objective
 
 Build AdZora as a real advertising marketplace similar in category to Adsterra, with structurally separate Publisher and Advertiser workflows. Follow the attached Master Frontend Blueprint as the product contract. The implementation is incremental: complete one phase, verify it, update this file, then continue.
 
-## Phase 1 — Information architecture and frontend foundation
+## Completed phases
 
-Implemented:
+### Phase 1 — Information architecture and frontend foundation
 
 - React + Vite application foundation.
 - Separate Publisher and Advertiser workspace switcher.
 - Role-specific navigation, terminology, balance label, KPIs, and quick actions.
-- Centralized ad-format configuration for Banner, Native, Social, Popup, Video, and Direct Link.
-- Centralized CPM, CPC, CPV, and future CPA pricing configuration.
-- Premium dark/gold design tokens and consistent component styling.
-- Publisher and Advertiser overview dashboards with deliberate zero-data states.
+- Centralized ad-format and pricing configuration.
 - Responsive mobile drawer with overlay, close button, active state, Escape handling, and scroll lock.
-- Explicit Coming Soon states for navigation sections that are not functional yet; no dead links.
-- README with local run instructions and current scope.
+- Deliberate empty and Coming Soon states; no dead navigation links.
 
-Verification:
+### Phase 2 — Publisher inventory workflow and palette refresh
 
-- Cloned the committed repository at the current main branch.
+- Added functional Publisher Websites flow with name, HTTPS URL, category, validation, pending status, and empty state.
+- Added functional Ad Zones flow linked to a Website, with format, size, Draft status, activation/pause controls, and empty state.
+- Added Ad Codes view linked to Website → Ad Zone, with explicit placeholder-state messaging and copy action. It is not production serving code yet.
+- Added responsive form layouts and data rows for desktop and mobile.
+- Changed the visual palette to white background with black text and blue accent only; removed gold, green, purple, dark background, and glow treatment from the UI.
+- Kept the implementation frontend-only with in-memory demo state so the real API/storage contract can be added without redesigning the workflow.
+
+## Verification
+
+- Cloned the latest main branch.
 - Ran npm install --no-audit --no-fund successfully.
 - Ran npm run build successfully with Vite 5.4.21.
-- Production output generated in dist/ with 32 modules transformed.
-
-Not implemented yet:
-
-- Authentication and real API data.
-- Blob/file upload contract and storage implementation.
-- Website, Ad Zone, Ad Code, campaign, creative, billing, withdrawals, and analytics workflows.
-- Loading, error, success, and form validation states for functional screens.
+- Latest build: 33 modules transformed; production output generated in dist/.
+- The first Phase 2 commit was 2952289e12968e3873000873fd9e1adabe8bc06f; the placeholder rendering fix is cac15e5105f85106f35698895a52c59853f6fe0c.
 
 ## Next implementation order
 
-1. Implement Publisher websites → ad zones → ad codes as the first real workflow.
-2. Define and implement the blob upload contract for creative assets; record whether the blob target is app storage, object storage, or GitHub Git Blobs. Do not infer this silently.
+1. Persist Publisher inventory state through a backend/data layer instead of in-memory state.
+2. Define and implement the blob upload contract for advertiser creatives; record whether the blob target is app storage, object storage, or GitHub Git Blobs. Do not infer this silently.
 3. Implement Advertiser campaigns and the multi-step create-campaign flow using centralized ad-format configuration.
 4. Add publisher earnings/withdrawals and advertiser balance/billing as separate financial experiences.
 5. Add analytics, reports, loading/error/success states, then perform responsive QA.
@@ -66,10 +60,9 @@ Not implemented yet:
 
 ## Progress log
 
-### 2026-09-15 — Phase 1 completed
+### 2026-09-15 — Phase 2 completed
 
-- Read and converted the attached Master Frontend Blueprint into the initial architecture.
-- Confirmed the clean repository baseline and started a React/Vite frontend rather than restoring deleted files.
-- Added the application shell, centralized configuration, responsive styles, dashboards, and deliberate empty/Coming Soon states.
-- Production build verified successfully.
-- Current next action: implement the Publisher websites workflow.
+- Implemented Websites → Ad Zones → Ad Codes for Publisher.
+- Applied the requested white, black, and blue visual system.
+- Verified the production build after fixing the Ad Code placeholder markup.
+- Current next action: define the blob upload contract, then build the first Advertiser creative upload slice.
