@@ -1,5 +1,5 @@
 export const AD_FORMATS = [
-  { id: "banner", name: "Banner", description: "Standard display placements for high-visibility inventory.", pricing: ["CPM", "CPC"], share: { publisher: 40, platform: 60 } },
+  { id: "banner", name: "Image / Banner", description: "Standard display placements for high-visibility inventory.", pricing: ["CPM", "CPC"], share: { publisher: 40, platform: 60 } },
   { id: "native", name: "Native", description: "Content-integrated ads with a clear sponsored label.", pricing: ["CPM", "CPC"], share: { publisher: 45, platform: 55 } },
   { id: "social", name: "Social", description: "Social-style creative with brand, title, and call to action.", pricing: ["CPM", "CPC"], share: { publisher: 40, platform: 60 } },
   { id: "popup", name: "Popup", description: "A controlled popup placement shown through preview states.", pricing: ["CPM", "CPC"], share: { publisher: 35, platform: 65 } },
@@ -40,14 +40,13 @@ export const ROLE_CONFIG = {
     arabicLabel: "ناشر",
     identity: "Inventory → Traffic → Earnings → Withdrawals",
     overviewTitle: "Publisher Overview",
-    overviewDescription: "تابع مخزونك الإعلاني، أداء مواقعك، والأرباح المتاحة للتحويل.",
+    overviewDescription: "أضف موقعك، احصل على Universal AdZora Code، وتابع أرباحك من مكان واحد.",
     balanceLabel: "Available earnings",
     balanceValue: 0,
     nav: [
       { id: "overview", label: "Overview", arabic: "نظرة عامة", icon: "grid" },
       { id: "websites", label: "Websites", arabic: "المواقع", icon: "globe" },
-      { id: "ad-zones", label: "Ad Zones", arabic: "المناطق الإعلانية", icon: "layout" },
-      { id: "ad-codes", label: "Ad Codes", arabic: "أكواد الإعلان", icon: "code" },
+      { id: "ad-codes", label: "Universal Ad Code", arabic: "الكود الشامل", icon: "code" },
       { id: "earnings", label: "Earnings", arabic: "الأرباح", icon: "trend" },
       { id: "transactions", label: "Transactions", arabic: "المعاملات", icon: "receipt" },
       { id: "withdrawals", label: "Withdrawals", arabic: "السحوبات", icon: "arrow-up" },
@@ -69,9 +68,9 @@ export const ROLE_CONFIG = {
     ],
     quickActions: [
       { id: "websites", label: "Add Website", arabic: "أضف موقعًا", icon: "plus" },
-      { id: "ad-zones", label: "Create Ad Zone", arabic: "أنشئ منطقة إعلانية", icon: "layout" },
-      { id: "ad-codes", label: "Get Ad Code", arabic: "احصل على كود الإعلان", icon: "code" },
+      { id: "ad-codes", label: "Get Universal Ad Code", arabic: "احصل على الكود الشامل", icon: "code" },
       { id: "earnings", label: "View Earnings", arabic: "اعرض الأرباح", icon: "trend" },
+      { id: "withdrawals", label: "Withdraw Earnings", arabic: "اسحب أرباحك", icon: "arrow-up" },
     ],
   },
   advertiser: {
@@ -126,7 +125,7 @@ export const formatMoney = (value) => new Intl.NumberFormat("en-US", {
 
 export const RECENT_ITEMS = {
   publisher: [
-    { title: "No earnings yet", detail: "Add a website and ad zone to begin", status: "Empty" },
+    { title: "No earnings yet", detail: "Add a website to receive your universal code", status: "Empty" },
   ],
   advertiser: [
     { title: "No campaigns yet", detail: "Create a campaign to start delivery", status: "Empty" },
