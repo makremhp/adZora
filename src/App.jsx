@@ -45,7 +45,6 @@ const landingFormatIcons = {
   popup: "megaphone",
   popunder: "code",
   video: "chart",
-  "direct-link": "code",
 };
 
 function LandingPage({ onLogin, onStart }) {
