@@ -1,0 +1,114 @@
+export const AD_FORMATS = [
+  { id: "banner", name: "Banner", description: "Standard display placements for high-visibility inventory.", pricing: ["CPM", "CPC"], share: { publisher: 40, platform: 60 } },
+  { id: "native", name: "Native", description: "Content-integrated ads with a clear sponsored label.", pricing: ["CPM", "CPC"], share: { publisher: 45, platform: 55 } },
+  { id: "social", name: "Social", description: "Social-style creative with brand, title, and call to action.", pricing: ["CPM", "CPC"], share: { publisher: 40, platform: 60 } },
+  { id: "popup", name: "Popup", description: "A controlled popup placement shown through preview states.", pricing: ["CPM", "CPC"], share: { publisher: 35, platform: 65 } },
+  { id: "video", name: "Video", description: "Video placements with poster, playback, and CTA states.", pricing: ["CPM", "CPV"], share: { publisher: 50, platform: 50 } },
+  { id: "direct-link", name: "Direct Link", description: "A direct destination for advertiser campaigns.", pricing: ["CPC"], share: { publisher: 50, platform: 50 } },
+];
+
+export const PRICING_MODELS = [
+  { id: "CPM", label: "CPM", description: "Cost per 1,000 impressions" },
+  { id: "CPC", label: "CPC", description: "Cost per valid click" },
+  { id: "CPV", label: "CPV", description: "Cost per qualified view" },
+  { id: "CPA", label: "CPA", description: "Future architecture — not active yet", future: true },
+];
+
+export const ROLE_CONFIG = {
+  publisher: {
+    label: "Publisher",
+    arabicLabel: "ناشر",
+    identity: "Inventory → Traffic → Earnings → Withdrawals",
+    overviewTitle: "Publisher Overview",
+    overviewDescription: "تابع مخزونك الإعلاني، أداء مواقعك، والأرباح المتاحة للتحويل.",
+    balanceLabel: "Available earnings",
+    balanceValue: 0,
+    nav: [
+      { id: "overview", label: "Overview", arabic: "نظرة عامة", icon: "grid" },
+      { id: "websites", label: "Websites", arabic: "المواقع", icon: "globe" },
+      { id: "ad-zones", label: "Ad Zones", arabic: "المناطق الإعلانية", icon: "layout" },
+      { id: "ad-codes", label: "Ad Codes", arabic: "أكواد الإعلان", icon: "code" },
+      { id: "earnings", label: "Earnings", arabic: "الأرباح", icon: "trend" },
+      { id: "transactions", label: "Transactions", arabic: "المعاملات", icon: "receipt" },
+      { id: "withdrawals", label: "Withdrawals", arabic: "السحوبات", icon: "arrow-up" },
+      { id: "analytics", label: "Analytics", arabic: "التحليلات", icon: "chart" },
+      { id: "profile", label: "Profile", arabic: "الملف الشخصي", icon: "user" },
+      { id: "settings", label: "Settings", arabic: "الإعدادات", icon: "settings" },
+    ],
+    metrics: [
+      { label: "Available Earnings", arabic: "الأرباح المتاحة", value: "$0.00", hint: "Ready according to accounting state", icon: "wallet", tone: "gold" },
+      { label: "Pending Earnings", arabic: "الأرباح المعلّقة", value: "$0.00", hint: "Awaiting validation", icon: "clock", tone: "blue" },
+      { label: "Total Earned", arabic: "إجمالي الأرباح", value: "$0.00", hint: "Lifetime approved revenue", icon: "trend", tone: "green" },
+      { label: "Total Withdrawn", arabic: "إجمالي المسحوب", value: "$0.00", hint: "Completed withdrawals", icon: "arrow-up", tone: "purple" },
+    ],
+    performance: [
+      { label: "Impressions", value: "0" },
+      { label: "Clicks", value: "0" },
+      { label: "CTR", value: "--" },
+      { label: "eCPM / RPM", value: "--" },
+    ],
+    quickActions: [
+      { id: "websites", label: "Add Website", arabic: "أضف موقعًا", icon: "plus" },
+      { id: "ad-zones", label: "Create Ad Zone", arabic: "أنشئ منطقة إعلانية", icon: "layout" },
+      { id: "ad-codes", label: "Get Ad Code", arabic: "احصل على كود الإعلان", icon: "code" },
+      { id: "earnings", label: "View Earnings", arabic: "اعرض الأرباح", icon: "trend" },
+    ],
+  },
+  advertiser: {
+    label: "Advertiser",
+    arabicLabel: "معلن",
+    identity: "Budget → Campaigns → Delivery → Performance → Billing",
+    overviewTitle: "Advertiser Overview",
+    overviewDescription: "أدر الميزانية والحملات والإبداع الإعلاني وراقب الأداء من مكان واحد.",
+    balanceLabel: "Available balance",
+    balanceValue: 0,
+    nav: [
+      { id: "overview", label: "Overview", arabic: "نظرة عامة", icon: "grid" },
+      { id: "campaigns", label: "Campaigns", arabic: "الحملات", icon: "megaphone" },
+      { id: "create-campaign", label: "Create Campaign", arabic: "إنشاء حملة", icon: "plus" },
+      { id: "creatives", label: "Creatives", arabic: "الإبداعات", icon: "image" },
+      { id: "analytics", label: "Analytics", arabic: "التحليلات", icon: "chart" },
+      { id: "reports", label: "Reports", arabic: "التقارير", icon: "file" },
+      { id: "balance", label: "Balance", arabic: "الرصيد", icon: "wallet" },
+      { id: "deposits", label: "Deposits", arabic: "الإيداعات", icon: "plus" },
+      { id: "transactions", label: "Transactions", arabic: "المعاملات", icon: "receipt" },
+      { id: "billing", label: "Billing", arabic: "الفوترة", icon: "card" },
+      { id: "profile", label: "Profile", arabic: "الملف الشخصي", icon: "user" },
+      { id: "settings", label: "Settings", arabic: "الإعدادات", icon: "settings" },
+    ],
+    metrics: [
+      { label: "Available Balance", arabic: "الرصيد المتاح", value: "$0.00", hint: "Funds available for campaigns", icon: "wallet", tone: "gold" },
+      { label: "Reserved Balance", arabic: "الرصيد المحجوز", value: "$0.00", hint: "Allocated to active campaigns", icon: "lock", tone: "blue" },
+      { label: "Total Spent", arabic: "إجمالي الإنفاق", value: "$0.00", hint: "Advertising spend to date", icon: "trend", tone: "green" },
+      { label: "Total Deposited", arabic: "إجمالي الإيداعات", value: "$0.00", hint: "Funds added to the account", icon: "arrow-down", tone: "purple" },
+    ],
+    performance: [
+      { label: "Impressions", value: "0" },
+      { label: "Clicks", value: "0" },
+      { label: "CTR", value: "--" },
+      { label: "Spend", value: "$0.00" },
+    ],
+    quickActions: [
+      { id: "deposits", label: "Add Funds", arabic: "أضف رصيدًا", icon: "plus" },
+      { id: "create-campaign", label: "Create Campaign", arabic: "أنشئ حملة", icon: "megaphone" },
+      { id: "creatives", label: "Add Creative", arabic: "أضف مادة إعلانية", icon: "image" },
+      { id: "analytics", label: "View Analytics", arabic: "اعرض التحليلات", icon: "chart" },
+    ],
+  },
+};
+
+export const formatMoney = (value) => new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+}).format(value);
+
+export const RECENT_ITEMS = {
+  publisher: [
+    { title: "No earnings yet", detail: "Add a website and ad zone to begin", status: "Empty" },
+  ],
+  advertiser: [
+    { title: "No campaigns yet", detail: "Create a campaign to start delivery", status: "Empty" },
+  ],
+};
