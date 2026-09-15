@@ -43,6 +43,7 @@ const landingFormatIcons = {
   native: "grid",
   social: "image",
   popup: "megaphone",
+  popunder: "code",
   video: "chart",
   "direct-link": "code",
 };
