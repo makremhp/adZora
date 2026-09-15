@@ -1,0 +1,124 @@
+/* Final landing page fixes. Loaded after styles.css so these rules win. */
+.landing-page {
+  --landing-bg: #ffffff;
+  --landing-surface: #ffffff;
+  --landing-surface-2: #f6f8fc;
+  --landing-line: #e2e7f0;
+  --landing-muted: #5f6b7d;
+  --landing-gold: #175cff;
+  color: #111827;
+  background: #ffffff;
+}
+
+.landing-header {
+  border-color: #e2e7f0;
+  background: rgba(255, 255, 255, .94);
+}
+
+.landing-brand .brand { color: #111827; }
+.landing-brand .brand-mark { color: #fff; background: #175cff; }
+.landing-nav a,
+.landing-login,
+.landing-footer button { color: #5f6b7d; }
+.landing-nav a:hover,
+.landing-login:hover,
+.landing-footer button:hover { color: #175cff; }
+.landing-nav a {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 0;
+  color: inherit;
+  text-decoration: none;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.landing-hero h1,
+.landing-section-heading h2,
+.role-card h3,
+.landing-format-copy h3,
+.workflow-title h3,
+.landing-footer strong { color: #111827; }
+.landing-hero h1 em,
+.landing-kicker,
+.role-tag,
+.role-link,
+.workflow-step b,
+.capability span { color: #175cff; }
+.landing-hero-copy > p,
+.landing-section-heading p,
+.role-card p,
+.landing-format-copy p,
+.landing-footer-brand p { color: #5f6b7d; }
+.landing-cta { border-color: #175cff; color: #fff; background: #175cff; }
+.landing-cta:hover { color: #fff; background: #0c3cae; }
+.landing-outline { border-color: #b9cbe7; color: #111827; background: #fff; }
+.landing-outline:hover { border-color: #175cff; color: #175cff; }
+.landing-proof { color: #6f7c8e; }
+.proof-mark,
+.role-symbol,
+.format-preview,
+.network-node-icon { color: #175cff; background: #edf3ff; }
+.proof-divider { background: #d9e4f5; }
+.network-visual {
+  border-color: #e2e7f0;
+  background: linear-gradient(145deg, #f8faff, #fff);
+  box-shadow: 0 24px 70px rgba(22, 54, 110, .1);
+}
+.network-orbit { border-color: rgba(23, 92, 255, .16); }
+.network-line { background: linear-gradient(90deg, transparent, rgba(23, 92, 255, .55), transparent); }
+.network-node {
+  border-color: #d9e4f5;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 15px 35px rgba(22, 54, 110, .1);
+}
+.network-node small,
+.network-audience small { color: #758196; }
+.network-node strong,
+.network-audience strong { color: #111827; }
+.network-audience {
+  border-color: #d9e4f5;
+  color: #111827;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(22, 54, 110, .1);
+}
+.landing-roles,
+.landing-formats,
+.landing-how,
+.landing-capabilities { border-color: #e2e7f0; }
+.landing-roles,
+.landing-how { background: #f6f8fc; }
+.landing-formats,
+.landing-capabilities { background: #fff; }
+.role-card,
+.landing-format-card,
+.workflow-column,
+.capability {
+  border-color: #d9e4f5;
+  background: #fff;
+}
+.workflow-step,
+.format-preview { border-color: #d9e4f5; }
+.landing-footer { border-color: #d9e4f5; background: #f6f8fc; }
+.landing-menu-button,
+.landing-nav-close {
+  border-color: #d9e4f5;
+  color: #111827;
+  background: #fff;
+}
+
+@media (max-width: 760px) {
+  .landing-nav a {
+    display: block;
+    width: 100%;
+    padding: 16px 0;
+    border-bottom: 1px solid #e2e7f0;
+    color: #5f6b7d;
+    text-align: right;
+  }
+  .landing-nav a:hover { color: #175cff; }
+  .landing-nav.is-open {
+    background: #fff;
+    box-shadow: -20px 0 60px rgba(22, 54, 110, .12);
+  }
+}

@@ -28,6 +28,7 @@ function Icon({ name, size = 18 }) {
     card: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18M7 15h3" /></>,
     menu: <><path d="M4 6h16M4 12h16M4 18h16" /></>,
     close: <><path d="m6 6 12 12M18 6 6 18" /></>,
+     check: <path d="m5 12 4 4L19 6" />,
     chevron: <path d="m9 18 6-6-6-6" />,
   };
   return <svg {...common}>{paths[name] || paths.grid}</svg>;
@@ -56,20 +57,24 @@ function LandingPage({ onLogin, onStart }) {
     return () => { document.removeEventListener("keydown", onKeyDown); document.body.style.overflow = ""; };
   }, [menuOpen]);
 
-  const navigate = (target) => {
+   const navigate = (target, event) => {
+     event?.preventDefault();
     setMenuOpen(false);
-    document.querySelector(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+     const section = document.getElementById(target.replace(/^#/, ""));
+     if (!section) return;
+     window.history.replaceState(null, "", target);
+     section.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return <div className="landing-page" dir="rtl">
     <header className="landing-header">
-      <a className="landing-brand" href="#home" onClick={() => navigate("#home")}><Brand /></a>
+       <a className="landing-brand" href="#home" onClick={(event) => navigate("#home", event)}><Brand /></a>
       <nav className={menuOpen ? "landing-nav is-open" : "landing-nav"} aria-label="Public navigation">
-        <button type="button" onClick={() => navigate("#home")}>الرئيسية</button>
-        <button type="button" onClick={() => navigate("#formats")}>صيغ الإعلانات</button>
-        <button type="button" onClick={() => navigate("#advertisers")}>للمعلنين</button>
-        <button type="button" onClick={() => navigate("#publishers")}>للناشرين</button>
-        <button type="button" onClick={() => navigate("#how-it-works")}>كيف تعمل المنصة</button>
+         <a href="#home" onClick={(event) => navigate("#home", event)}>الرئيسية</a>
+         <a href="#formats" onClick={(event) => navigate("#formats", event)}>صيغ الإعلانات</a>
+         <a href="#advertisers" onClick={(event) => navigate("#advertisers", event)}>للمعلنين</a>
+         <a href="#publishers" onClick={(event) => navigate("#publishers", event)}>للناشرين</a>
+         <a href="#how-it-works" onClick={(event) => navigate("#how-it-works", event)}>كيف تعمل المنصة</a>
         <button className="landing-nav-close" type="button" onClick={() => setMenuOpen(false)} aria-label="إغلاق القائمة"><Icon name="close" /></button>
       </nav>
       <div className="landing-actions">
@@ -122,7 +127,7 @@ function LandingPage({ onLogin, onStart }) {
       <section className="landing-capabilities"><div className="landing-section-heading split"><div><span className="landing-kicker">ما تحصل عليه</span><h2>أدوات أساسية، دون وعود مبالغ فيها</h2></div><p>كل ما تحتاجه لبناء عملية إعلانية مرتبة، مع مساحة للتوسع عندما تصبح البيانات جاهزة.</p></div><div className="capability-grid">{["صيغ إعلانية متعددة", "تحقيق دخل للناشرين", "إدارة الحملات", "تحليلات الأداء", "مخزون متجاوب", "كود إعلان بسيط"].map((item, index) => <div className="capability" key={item}><span>{String(index + 1).padStart(2, "0")}</span><strong>{item}</strong><Icon name="check" size={16} /></div>)}</div></section>
     </main>
 
-    <footer className="landing-footer"><div className="landing-footer-brand"><Brand /><p>شبكة إعلانية تربط الرسالة بالجمهور، والموقع بالقيمة.</p></div><div><strong>AdZora</strong><button type="button" onClick={() => navigate("#home")}>عن AdZora</button><button type="button" onClick={() => navigate("#advertisers")}>للمعلنين</button><button type="button" onClick={() => navigate("#publishers")}>للناشرين</button></div><div><strong>الدعم</strong><button type="button" onClick={() => navigate("#how-it-works")}>كيف تعمل</button><button type="button" onClick={() => navigate("#formats")}>صيغ الإعلانات</button><button type="button" onClick={onLogin}>تسجيل الدخول</button></div><div className="footer-account"><strong>جاهز للخطوة الأولى؟</strong><button className="landing-cta small" type="button" onClick={() => onStart("publisher")}>ابدأ الآن <Icon name="chevron" size={15} /></button></div></footer>
+     <footer className="landing-footer"><div className="landing-footer-brand"><Brand /><p>شبكة إعلانية تربط الرسالة بالجمهور، والموقع بالقيمة.</p></div><div><strong>AdZora</strong><button type="button" onClick={() => navigate("#home")}>عن AdZora</button><button type="button" onClick={() => navigate("#advertisers")}>للمعلنين</button><button type="button" onClick={() => navigate("#publishers")}>للناشرين</button></div><div><strong>الدعم</strong><button type="button" onClick={() => navigate("#how-it-works")}>كيف تعمل</button><button type="button" onClick={() => navigate("#formats")}>صيغ الإعلانات</button><button type="button" onClick={onLogin}>تسجيل الدخول</button></div><div className="footer-account"><strong>جاهز للخطوة الأولى؟</strong><button className="landing-cta small" type="button" onClick={() => onStart("publisher")}>ابدأ الآن <Icon name="chevron" size={15} /></button></div></footer>
   </div>;
 }
 
