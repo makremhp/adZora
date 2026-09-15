@@ -675,6 +675,177 @@
     .campaign-status.show {
       display: block;
     }
+
+    .dashboard-view {
+      display: none;
+    }
+
+    .dashboard-view.active {
+      display: block;
+    }
+
+    .publisher-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(260px, 1fr);
+      gap: 20px;
+    }
+
+    .publisher-card {
+      min-width: 0;
+    }
+
+    .website-card {
+      padding: 18px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+    }
+
+    .website-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .website-card h3 {
+      font-size: 16px;
+    }
+
+    .website-domain {
+      margin-top: 3px;
+      color: var(--muted);
+      direction: ltr;
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .website-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .website-metric {
+      min-width: 0;
+    }
+
+    .website-metric small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .website-metric strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 14px;
+    }
+
+    .website-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .website-actions .btn {
+      min-height: 38px;
+      padding: 0 13px;
+      font-size: 11px;
+    }
+
+    .publisher-status {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 12px;
+      color: var(--primary);
+      background: var(--blue-light);
+      border: 1px solid rgba(37, 99, 235, .18);
+      border-radius: 9px;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .publisher-status.show {
+      display: block;
+    }
+
+    .publisher-status.error {
+      color: var(--red);
+      background: rgba(239, 68, 68, .08);
+      border-color: rgba(239, 68, 68, .2);
+    }
+
+    .traffic-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .traffic-row strong {
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .traffic-progress {
+      height: 9px;
+      margin: 20px 0 10px;
+      overflow: hidden;
+      background: var(--surface-2);
+      border-radius: 20px;
+    }
+
+    .traffic-progress span {
+      display: block;
+      width: 62.4%;
+      height: 100%;
+      background: var(--primary);
+      border-radius: inherit;
+    }
+
+    .empty-panel {
+      padding: 70px 25px;
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .empty-panel-mark {
+      display: inline-grid;
+      width: 54px;
+      height: 54px;
+      place-items: center;
+      color: white;
+      background: var(--primary);
+      border-radius: 15px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .5px;
+    }
+
+    .empty-panel h2 {
+      margin-top: 18px;
+      font-size: 21px;
+    }
+
+    .empty-panel p {
+      max-width: 470px;
+      margin: 8px auto 20px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .publisher-modal .modal-box {
+      width: min(560px, 100%);
+    }
     .switch {
       margin-top: 18px;
       color: var(--muted);
@@ -1106,6 +1277,40 @@
         grid-column: auto;
       }
 
+      .publisher-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .publisher-panel .dash-header .btn {
+        display: inline-flex;
+        width: 100%;
+      }
+
+      .website-card-top {
+        flex-direction: column;
+      }
+
+      .website-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .website-actions {
+        flex-direction: column;
+      }
+
+      .website-actions .btn {
+        width: 100%;
+      }
+
+      .publisher-modal {
+        padding: 12px;
+      }
+
+      .publisher-modal .modal-box {
+        max-height: calc(100vh - 24px);
+        padding: 20px 15px;
+      }
+
       .footer-flex {
         align-items: flex-start;
         flex-direction: column;
@@ -1358,18 +1563,18 @@
           adZora
         </a>
 
-        <nav class="side-nav">
-          <button class="active">▦ لوحة التحكم</button>
-          <button>◈ الحملات الإعلانية</button>
-          <button>◉ المواقع والمساحات</button>
-          <button>↗ الإحصائيات</button>
-          <button>▣ المدفوعات</button>
-          <button>⚙ الإعدادات</button>
-          <button onclick="logout()">↪ تسجيل الخروج</button>
+        <nav class="side-nav" aria-label="تنقل لوحة التحكم">
+          <button class="active" type="button" data-dashboard-view="overview">لوحة التحكم</button>
+          <button type="button" data-dashboard-view="campaigns">الحملات الإعلانية</button>
+          <button type="button" data-dashboard-view="publisher">المواقع والمساحات</button>
+          <button type="button" data-dashboard-view="analytics">الإحصائيات</button>
+          <button type="button" data-dashboard-view="payments">المدفوعات</button>
+          <button type="button" data-dashboard-view="settings">الإعدادات</button>
+          <button type="button" onclick="logout()">تسجيل الخروج</button>
         </nav>
       </aside>
 
-      <main class="dashboard-main">
+      <main class="dashboard-main"><div class="dashboard-view active" id="advertiserOverviewView">
         <div class="dash-header">
           <div>
             <h1>لوحة التحكم</h1>
@@ -1457,7 +1662,95 @@
             </tbody>
           </table>
         </div>
-      </main>
+      </div>
+
+        <section class="dashboard-view publisher-panel" id="publisherView">
+          <div class="dash-header">
+            <div>
+              <h1>لوحة الناشر</h1>
+              <p>أدر مواقعك ومساحاتك الإعلانية من مكان واحد</p>
+            </div>
+            <button class="btn btn-primary" type="button" onclick="openWebsiteModal()">إضافة موقع</button>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <small>إجمالي الأرباح</small>
+              <strong>$1,284</strong>
+              <span>+14.2% هذا الشهر</span>
+            </div>
+            <div class="stat-card">
+              <small>الظهور</small>
+              <strong>284K</strong>
+              <span>+8.4% هذا الشهر</span>
+            </div>
+            <div class="stat-card">
+              <small>النقرات</small>
+              <strong>12,840</strong>
+              <span>CTR 4.52%</span>
+            </div>
+            <div class="stat-card">
+              <small>المواقع</small>
+              <strong>2</strong>
+              <span>موقع قيد المراجعة</span>
+            </div>
+          </div>
+
+          <div class="publisher-grid">
+            <div class="table-card publisher-card">
+              <div class="table-title">
+                <h2>مواقعي</h2>
+                <button class="btn btn-outline" type="button" onclick="openWebsiteModal()">إضافة موقع</button>
+              </div>
+
+              <div class="website-card">
+                <div class="website-card-top">
+                  <div>
+                    <h3>متجر تجريبي</h3>
+                    <p class="website-domain">demo-store.example</p>
+                  </div>
+                  <span class="badge-status">تحتاج التحقق</span>
+                </div>
+
+                <div class="website-metrics">
+                  <div class="website-metric"><small>Ad Zones</small><strong>2</strong></div>
+                  <div class="website-metric"><small>Impressions</small><strong>184K</strong></div>
+                  <div class="website-metric"><small>Clicks</small><strong>8,420</strong></div>
+                  <div class="website-metric"><small>Revenue</small><strong>$842</strong></div>
+                </div>
+
+                <div class="website-actions">
+                  <button class="btn btn-outline" type="button" onclick="showPublisherNotice('التحقق الحقيقي سيُربط بالخادم في الخطوة القادمة.')">التحقق من الموقع</button>
+                  <button class="btn btn-primary" type="button" onclick="showPublisherNotice('إدارة Ad Zones ستُفعل بعد ربط المواقع بقاعدة البيانات.')">Ad Zones (2)</button>
+                </div>
+              </div>
+
+              <p class="publisher-status show" id="publisherNotice" role="status">هذه بيانات عرض مؤقتة حتى يتم ربط الناشر بقاعدة البيانات.</p>
+            </div>
+
+            <div class="table-card publisher-card">
+              <div class="table-title">
+                <h2>حدود الترافيك</h2>
+                <span class="badge-status">Tier: new</span>
+              </div>
+              <div class="traffic-row"><span>الحد اليومي</span><strong>10,000</strong></div>
+              <div class="traffic-row"><span>المستخدم اليوم</span><strong>6,240</strong></div>
+              <div class="traffic-row"><span>المتبقي</span><strong>3,760</strong></div>
+              <div class="traffic-progress" aria-label="استخدام 62.4% من الحد اليومي"><span></span></div>
+              <p class="campaign-help">الأرقام الحالية للعرض فقط. الحد الحقيقي يجب أن يأتي من إعدادات الخادم.</p>
+              <button class="btn btn-outline" type="button" onclick="showPublisherNotice('إعدادات حدود الترافيك ستكون Server-Side مع لوحة الإدارة.')">عرض التفاصيل</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="dashboard-view" id="dashboardPlaceholderView">
+          <div class="empty-panel">
+            <span class="empty-panel-mark" aria-hidden="true">adZora</span>
+            <h2 id="placeholderTitle">القسم قيد البناء</h2>
+            <p id="placeholderText">هذا القسم سيُبنى في خطوة مستقلة مع ربطه بالـAPI، بدل وضع بيانات وهمية كمصدر للحقيقة.</p>
+            <button class="btn btn-primary" type="button" onclick="showDashboardView('overview')">العودة للوحة التحكم</button>
+          </div>
+        </section></main>
     </div>
   </section>
 
@@ -1587,6 +1880,57 @@
     </div>
   </div>
 
+
+  <div class="modal publisher-modal" id="websiteModal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="websiteModalTitle">
+      <div class="modal-top">
+        <div>
+          <h3 id="websiteModalTitle">إضافة موقع</h3>
+          <p class="campaign-help">ستبدأ حالة الموقع بالمراجعة بعد بناء التحقق Server-Side.</p>
+        </div>
+        <button class="close" type="button" onclick="closeWebsiteModal()" aria-label="إغلاق">×</button>
+      </div>
+
+      <form id="websiteForm" class="campaign-form">
+        <div class="field field-full">
+          <label for="websiteName">اسم الموقع</label>
+          <input id="websiteName" type="text" placeholder="مثال: مجلة التقنية" required>
+        </div>
+
+        <div class="field field-full">
+          <label for="websiteUrl">رابط الموقع</label>
+          <input id="websiteUrl" type="url" placeholder="https://example.com" required>
+        </div>
+
+        <div class="field">
+          <label for="websiteCategory">التصنيف</label>
+          <select id="websiteCategory">
+            <option>تقنية</option>
+            <option>أخبار</option>
+            <option>تجارة إلكترونية</option>
+            <option>ترفيه</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="websiteTraffic">الترافيك الشهري</label>
+          <select id="websiteTraffic">
+            <option>أقل من 1K</option>
+            <option>1K–10K</option>
+            <option>10K–50K</option>
+            <option>50K–100K</option>
+            <option>100K–500K</option>
+            <option>500K–1M</option>
+            <option>1M+</option>
+          </select>
+        </div>
+
+        <p class="campaign-help field-full">لن يُضاف الموقع فعليًا ولن يُنشأ Verification Token حتى يتم ربط النموذج بالخادم.</p>
+        <button class="btn btn-primary modal-submit field-full" type="submit">إرسال للمراجعة</button>
+        <p class="publisher-status field-full" id="websiteStatus" role="status"></p>
+      </form>
+    </div>
+  </div>
   <script>
     const campaignModal = document.getElementById("campaignModal");
     const campaignForm = document.getElementById("campaignForm");
@@ -1615,6 +1959,7 @@
       if (event.target === campaignModal) closeCampaignModal();
     });
 
+    const publisherPanelReady = document.getElementById("publisherView");
     const modal = document.getElementById("authModal");
     const landing = document.getElementById("landing");
     const dashboard = document.getElementById("dashboard");
@@ -1683,6 +2028,7 @@
     });
 
     function logout() {
+      showDashboardView("overview");
       dashboard.classList.remove("active");
       landing.style.display = "block";
       window.scrollTo({ top: 0, behavior: "instant" });
@@ -1692,15 +2038,97 @@
       if (event.target === modal) closeAuth();
     });
 
-    document.querySelectorAll(".side-nav button").forEach(button => {
-      button.addEventListener("click", function() {
-        document.querySelectorAll(".side-nav button")
-          .forEach(item => item.classList.remove("active"));
+    const dashboardViews = document.querySelectorAll(".dashboard-view");
+    const dashboardNavButtons = document.querySelectorAll(".side-nav button[data-dashboard-view]");
+    const placeholderTitle = document.getElementById("placeholderTitle");
+    const placeholderText = document.getElementById("placeholderText");
+    const publisherNotice = document.getElementById("publisherNotice");
+    const websiteModal = document.getElementById("websiteModal");
+    const websiteForm = document.getElementById("websiteForm");
+    const websiteStatus = document.getElementById("websiteStatus");
 
-        if (!this.textContent.includes("تسجيل الخروج")) {
-          this.classList.add("active");
-        }
+    const pendingSections = {
+      analytics: {
+        title: "الإحصائيات",
+        text: "ستظهر هنا تقارير Impressions وClicks وCTR وRevenue مع فلاتر زمنية ورسوم مناسبة للهاتف."
+      },
+      payments: {
+        title: "المدفوعات",
+        text: "سيتم بناء الرصيد وعمليات الإيداع والسحب من خلال Ledger Server-Side، وليس من بيانات الواجهة."
+      },
+      settings: {
+        title: "الإعدادات",
+        text: "ستتضمن هذه الصفحة إعدادات الحساب والأمان والتفضيلات بعد إضافة المصادقة الحقيقية."
+      }
+    };
+
+    function showDashboardView(view) {
+      let targetId = "dashboardPlaceholderView";
+      if (view === "overview" || view === "campaigns") targetId = "advertiserOverviewView";
+      if (view === "publisher") targetId = "publisherView";
+
+      dashboardViews.forEach(panel => {
+        panel.classList.toggle("active", panel.id === targetId);
       });
+
+      dashboardNavButtons.forEach(button => {
+        button.classList.toggle("active", button.dataset.dashboardView === view);
+      });
+
+      if (targetId === "dashboardPlaceholderView") {
+        placeholderTitle.textContent = pendingSections[view]?.title || "القسم قيد البناء";
+        placeholderText.textContent = pendingSections[view]?.text || "هذا القسم سيُبنى في خطوة مستقلة مع ربطه بالـAPI.";
+      }
+
+      if (view === "campaigns") openCampaignModal();
+    }
+
+    dashboardNavButtons.forEach(button => {
+      button.addEventListener("click", () => showDashboardView(button.dataset.dashboardView));
+    });
+
+    function showPublisherNotice(message) {
+      publisherNotice.textContent = message;
+      publisherNotice.classList.add("show");
+    }
+
+    function openWebsiteModal() {
+      websiteModal.classList.add("show");
+      websiteModal.setAttribute("aria-hidden", "false");
+      websiteStatus.className = "publisher-status field-full";
+      websiteStatus.textContent = "";
+      document.getElementById("websiteName").focus();
+    }
+
+    function closeWebsiteModal() {
+      websiteModal.classList.remove("show");
+      websiteModal.setAttribute("aria-hidden", "true");
+    }
+
+    websiteForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const rawUrl = document.getElementById("websiteUrl").value.trim();
+      let parsedUrl;
+      try {
+        parsedUrl = new URL(rawUrl);
+      } catch (error) {
+        websiteStatus.textContent = "أدخل رابطًا صحيحًا يبدأ بـ http:// أو https://.";
+        websiteStatus.className = "publisher-status field-full show error";
+        return;
+      }
+
+      if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+        websiteStatus.textContent = "يسمح فقط بروابط HTTP وHTTPS، ولن يتم قبول javascript أو data.";
+        websiteStatus.className = "publisher-status field-full show error";
+        return;
+      }
+
+      websiteStatus.textContent = "تم التحقق من صيغة الرابط تجريبيًا. لم يُضف الموقع بعد لأن الحفظ والتحقق يحتاجان إلى Backend.";
+      websiteStatus.className = "publisher-status field-full show";
+    });
+
+    websiteModal.addEventListener("click", event => {
+      if (event.target === websiteModal) closeWebsiteModal();
     });
 
     const observer = new IntersectionObserver(entries => {
@@ -1745,6 +2173,7 @@
       if (event.key === "Escape") {
         closeMobileNav();
         closeCampaignModal();
+        closeWebsiteModal();
       }
     });
 
