@@ -92,6 +92,7 @@
     }
 
     .nav {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -834,6 +835,31 @@
         display: none;
       }
 
+      .nav-links.open {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        padding: 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+      }
+
+      .nav-links.open a {
+        padding: 11px 12px;
+        border-radius: 10px;
+      }
+
+      .nav-links.open a:hover {
+        background: var(--surface-2);
+      }
+
       .mobile-btn {
         display: block;
       }
@@ -951,7 +977,7 @@
         adZora
       </a>
 
-      <nav class="nav-links">
+      <nav class="nav-links" id="primaryNav">
         <a href="#home">الرئيسية</a>
         <a href="#features">المميزات</a>
         <a href="#publishers">للناشرين</a>
@@ -963,7 +989,7 @@
         <button class="theme-btn" onclick="toggleTheme()" title="تغيير المظهر">☼</button>
         <button class="btn btn-outline" onclick="openAuth('login')">تسجيل الدخول</button>
         <button class="btn btn-primary" onclick="openAuth('register')">ابدأ الآن</button>
-        <button class="mobile-btn">☰</button>
+        <button class="mobile-btn" type="button" aria-controls="primaryNav" aria-expanded="false" aria-label="فتح القائمة">☰</button>
       </div>
     </div>
   </header>
@@ -1428,23 +1454,38 @@
       observer.observe(element);
     });
 
-    document.querySelector(".mobile-btn").addEventListener("click", () => {
-      const links = document.querySelector(".nav-links");
+    const mobileButton = document.querySelector(".mobile-btn");
+    const navLinks = document.querySelector(".nav-links");
 
-      if (links.style.display === "flex") {
-        links.style.display = "none";
-      } else {
-        links.style.display = "flex";
-        links.style.position = "absolute";
-        links.style.top = "76px";
-        links.style.right = "13px";
-        links.style.left = "13px";
-        links.style.padding = "18px";
-        links.style.flexDirection = "column";
-        links.style.background = "var(--surface)";
-        links.style.border = "1px solid var(--border)";
-        links.style.borderRadius = "13px";
+    function closeMobileNav() {
+      navLinks.classList.remove("open");
+      mobileButton.setAttribute("aria-expanded", "false");
+      mobileButton.setAttribute("aria-label", "فتح القائمة");
+    }
+
+    mobileButton.addEventListener("click", event => {
+      event.stopPropagation();
+      const isOpen = navLinks.classList.toggle("open");
+      mobileButton.setAttribute("aria-expanded", String(isOpen));
+      mobileButton.setAttribute("aria-label", isOpen ? "إغلاق القائمة" : "فتح القائمة");
+    });
+
+    navLinks.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", closeMobileNav);
+    });
+
+    document.addEventListener("click", event => {
+      if (!navLinks.contains(event.target) && !mobileButton.contains(event.target)) {
+        closeMobileNav();
       }
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeMobileNav();
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 900) closeMobileNav();
     });
   </script>
 </body>
