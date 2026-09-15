@@ -112,3 +112,13 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Verification: `npm run build` passes with Vite 5.4.21.
 - Source commit: `95f3a7d031d6487b093c0f6d0c9eb3c63f111ef5`.
 - Next task: review the uploaded build in a browser at the required mobile widths, then continue with the remaining profile/settings and analytics screens.
+
+### 2026-09-15 — Landing palette and format requirements
+
+- Changed the public landing page palette to white background, black text, and blue action accents while keeping the existing dashboard palette unchanged.
+- Replaced website category selection with custom visual website-type cards.
+- Added centralized format requirement definitions for Banner, Native, Social, Popup, Video, and Direct Link.
+- Added format-specific Publisher requirement screens, including image requirements, HTTPS destinations, popup copy, and browser-side video validation.
+- Video uploads now accept MP4/WebM only, cap files at 20 MB, and require a detected duration between 5 and 60 seconds before confirmation.
+- Verification: `npm run build` passes with Vite 5.4.21.
+- Source commit: pending remote upload.

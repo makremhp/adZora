@@ -16,6 +16,24 @@ export const PRICING_MODELS = [
 
 export const BANNER_SIZES = ["320×50", "300×250", "336×280", "728×90", "970×250"];
 
+export const WEBSITE_TYPES = [
+  { id: "news", label: "News & Media", arabic: "أخبار وإعلام", description: "مواقع الأخبار والمقالات والمجلات." },
+  { id: "technology", label: "Technology", arabic: "تقنية", description: "منتجات وأدوات ومحتوى تقني." },
+  { id: "entertainment", label: "Entertainment", arabic: "ترفيه", description: "فيديو ومحتوى ترفيهي ومجتمعات." },
+  { id: "business", label: "Business", arabic: "أعمال", description: "أعمال وأسواق وخدمات مهنية." },
+  { id: "sports", label: "Sports", arabic: "رياضة", description: "أخبار ونتائج ومحتوى رياضي." },
+  { id: "other", label: "Other", arabic: "نوع آخر", description: "اختر هذا إذا لم يناسبك تصنيف آخر." },
+];
+
+export const AD_ZONE_REQUIREMENTS = {
+  banner: { title: "Banner requirements", summary: "Choose one supported banner size.", fields: ["size"] },
+  native: { title: "Native requirements", summary: "Add an image and a short content title.", fields: ["image", "title"] },
+  social: { title: "Social requirements", summary: "Add an image and a social-style headline.", fields: ["image", "title"] },
+  popup: { title: "Popup requirements", summary: "Add the message and destination visitors will see.", fields: ["title", "destination"] },
+  video: { title: "Video requirements", summary: "Upload an MP4 or WebM video up to 20 MB and 5–60 seconds.", fields: ["video"] },
+  "direct-link": { title: "Direct Link requirements", summary: "Add the HTTPS destination for the promotional link.", fields: ["destination"] },
+};
+
 export const ROLE_CONFIG = {
   publisher: {
     label: "Publisher",

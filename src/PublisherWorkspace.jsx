@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { AD_FORMATS, BANNER_SIZES } from "./config";
+import { AD_FORMATS, AD_ZONE_REQUIREMENTS, BANNER_SIZES, WEBSITE_TYPES } from "./config";
 
 function MiniIcon({ name, size = 17 }) {
   const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -8,6 +8,8 @@ function MiniIcon({ name, size = 17 }) {
     globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18" /></>,
     layout: <><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M9 9v11" /></>,
     code: <><path d="m8 9-4 3 4 3M16 9l4 3-4 3M14 5l-4 14" /></>,
+    image: <><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9" r="1.5" /><path d="m21 15-5-5L5 20" /></>,
+    chart: <><path d="M4 19V5M4 19h17" /><path d="m7 15 3-4 3 2 5-7" /></>,
     edit: <><path d="m4 16-.8 4.8L8 20l10.7-10.7a2.1 2.1 0 0 0-3-3zM14.5 7.5l2 2" /></>,
     copy: <><rect x="8" y="8" width="11" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2" /></>,
     check: <path d="m5 12 4 4L19 6" />,
@@ -39,7 +41,7 @@ const zoneDefaults = { name: "", websiteId: "", format: "banner", size: BANNER_S
 
 function WebsiteForm({ form, setForm, errors, onCancel, onSubmit }) {
   const update = (key, value) => setForm(previous => ({ ...previous, [key]: value }));
-  return <section className="form-panel light-panel"><div className="panel-heading"><div><span className="eyebrow">NEW INVENTORY SOURCE</span><h2>Add website</h2></div><button className="link-button" type="button" onClick={onCancel}>Cancel</button></div><div className="form-grid"><Field label="Website name" hint="A recognizable name for your team" error={errors.name}><input className="input" value={form.name} onChange={event => update("name", event.target.value)} placeholder="My news website" /></Field><Field label="Website URL" hint="Use an HTTPS address" error={errors.url}><input className="input" value={form.url} onChange={event => update("url", event.target.value)} placeholder="https://example.com" inputMode="url" /></Field><Field label="Category" hint="Helps match relevant campaigns" error={errors.category}><select className="input select" value={form.category} onChange={event => update("category", event.target.value)}><option value="">Select a category</option><option>News & Media</option><option>Technology</option><option>Entertainment</option><option>Business</option><option>Sports</option></select></Field><Field label="Website description"><textarea className="input textarea" value={form.description} onChange={event => update("description", event.target.value)} placeholder="What kind of audience visits this site?" /></Field><Field label="Demo status"><select className="input select" value={form.status} onChange={event => update("status", event.target.value)}><option>Pending</option><option>Approved</option><option>Available</option></select></Field></div><div className="form-actions"><button className="primary-button" type="button" onClick={onSubmit}><MiniIcon name="check" size={16} />Add website</button><button className="ghost-button" type="button" onClick={onCancel}>Cancel</button></div></section>;
+  return <section className="form-panel light-panel"><div className="panel-heading"><div><span className="eyebrow">NEW INVENTORY SOURCE</span><h2>Add website</h2></div><button className="link-button" type="button" onClick={onCancel}>Cancel</button></div><div className="form-grid"><Field label="Website name" hint="A recognizable name for your team" error={errors.name}><input className="input" value={form.name} onChange={event => update("name", event.target.value)} placeholder="My news website" /></Field><Field label="Website URL" hint="Use an HTTPS address" error={errors.url}><input className="input" value={form.url} onChange={event => update("url", event.target.value)} placeholder="https://example.com" inputMode="url" /></Field><Field label="Website type" hint="Choose the audience category" error={errors.category}><div className="choice-grid website-type-choice">{WEBSITE_TYPES.map(type => <button className={form.category === type.label ? "choice-card selected" : "choice-card"} type="button" key={type.id} onClick={() => update("category", type.label)}><strong>{type.arabic}</strong><small>{type.description}</small><span className="selection-check"><MiniIcon name="check" size={14} /></span></button>)}</div></Field><Field label="Website description"><textarea className="input textarea" value={form.description} onChange={event => update("description", event.target.value)} placeholder="What kind of audience visits this site?" /></Field><Field label="Demo status"><select className="input select" value={form.status} onChange={event => update("status", event.target.value)}><option>Pending</option><option>Approved</option><option>Available</option></select></Field></div><div className="form-actions"><button className="primary-button" type="button" onClick={onSubmit}><MiniIcon name="check" size={16} />Add website</button><button className="ghost-button" type="button" onClick={onCancel}>Cancel</button></div></section>;
 }
 
 function WebsitesPage({ data, setData, onNavigate, setNotice }) {
@@ -94,25 +96,83 @@ function SimpleFormatPreview({ format, size }) {
   return <ZonePreview form={preview} />;
 }
 
+function FormatRequirementsStep({ formatId, values, setValues, error }) {
+  const update = (key, value) => setValues(previous => ({ ...previous, [key]: value }));
+  const requirements = AD_ZONE_REQUIREMENTS[formatId];
+  const inspectFile = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const isVideo = formatId === "video";
+    const validType = isVideo ? ["video/mp4", "video/webm"].includes(file.type) : file.type.startsWith("image/");
+    const maxBytes = isVideo ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (!validType) { update("fileError", isVideo ? "Upload an MP4 or WebM video." : "Upload a JPG, PNG, WEBP, or GIF image."); return; }
+    if (file.size > maxBytes) { update("fileError", `The file must be smaller than ${isVideo ? "20 MB" : "5 MB"}.`); return; }
+    if (!isVideo) { setValues(previous => ({ ...previous, file, fileName: file.name, fileSize: file.size, fileError: "" })); return; }
+    const objectUrl = URL.createObjectURL(file);
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.onloadedmetadata = () => {
+      const duration = video.duration;
+      URL.revokeObjectURL(objectUrl);
+      if (duration < 5 || duration > 60) { update("fileError", "Video duration must be between 5 and 60 seconds."); return; }
+      setValues(previous => ({ ...previous, file, fileName: file.name, fileSize: file.size, duration: Math.round(duration), fileError: "" }));
+    };
+    video.onerror = () => { URL.revokeObjectURL(objectUrl); update("fileError", "We could not read this video. Try another MP4 or WebM file."); };
+    video.src = objectUrl;
+  };
+  return <section className="light-panel requirements-panel">
+    <div className="panel-heading"><div><span className="eyebrow">FORMAT REQUIREMENTS</span><h2>{requirements.title}</h2><p className="requirements-summary">{requirements.summary}</p></div><span className="phase-chip">Required</span></div>
+    {["native", "social"].includes(formatId) && <><label className="field"><span>Creative image</span><div className="file-choice"><input id="publisher-media-upload" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={inspectFile} /><label htmlFor="publisher-media-upload" className="file-choice-button"><MiniIcon name="image" size={18} />{values.fileName ? "Change image" : "Choose image"}</label><span>{values.fileName || "JPG, PNG, WEBP, or GIF · up to 5 MB"}</span></div></label><label className="field"><span>{formatId === "social" ? "Social headline" : "Content title"}</span><input className="input" value={values.title} onChange={event => update("title", event.target.value)} placeholder={formatId === "social" ? "A short social-style headline" : "A natural content title"} /></label></>}
+    {formatId === "video" && <label className="field"><span>Video creative</span><div className="file-choice video-file-choice"><input id="publisher-video-upload" type="file" accept="video/mp4,video/webm" onChange={inspectFile} /><label htmlFor="publisher-video-upload" className="file-choice-button"><MiniIcon name="chart" size={18} />{values.fileName ? "Change video" : "Choose video"}</label><span>{values.fileName || "MP4 or WebM · up to 20 MB · 5–60 seconds"}</span>{values.duration && <small>Detected duration: {values.duration} seconds · {(values.fileSize / (1024 * 1024)).toFixed(1)} MB</small>}</div></label>}
+    {["popup", "direct-link"].includes(formatId) && <label className="field"><span>{formatId === "popup" ? "Popup message" : "Destination URL"}</span>{formatId === "popup" ? <textarea className="input textarea" value={values.title} onChange={event => update("title", event.target.value)} placeholder="Write the short offer visitors will see." /> : <input className="input" value={values.destination} onChange={event => update("destination", event.target.value)} placeholder="https://example.com/offer" inputMode="url" />}</label>}
+    {formatId === "popup" && <label className="field"><span>Destination URL</span><input className="input" value={values.destination} onChange={event => update("destination", event.target.value)} placeholder="https://example.com/offer" inputMode="url" /></label>}
+    {(error || values.fileError) && <small className="field-error requirements-error">{error || values.fileError}</small>}
+  </section>;
+}
+
 function SimpleAdFlow({ websites, setData, onCancel, onNavigate, setNotice }) {
   const [step, setStep] = useState(websites.length === 1 ? "format" : "website");
   const [websiteId, setWebsiteId] = useState(websites.length === 1 ? websites[0].id : "");
   const [formatId, setFormatId] = useState("banner");
   const [size, setSize] = useState(BANNER_SIZES[1]);
+  const [requirements, setRequirements] = useState({ file: null, fileName: "", fileSize: 0, duration: 0, title: "", destination: "", fileError: "" });
+  const [requirementsError, setRequirementsError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [createdZoneId, setCreatedZoneId] = useState("");
   const website = websites.find(item => item.id === websiteId);
   const format = AD_FORMATS.find(item => item.id === formatId) || AD_FORMATS[0];
   const needsSize = formatId === "banner";
-  const code = "<!-- AdZora ad code -->\n<script data-adzora-zone=\"zone-preview\" data-adzora-format=\"" + formatId + "\" async></script>";
+  const needsRequirements = formatId !== "banner";
+  const code = "<!-- AdZora ad code -->\n<script data-adzora-zone=\"" + createdZoneId + "\" data-adzora-format=\"" + formatId + "\" async></script>";
 
   const chooseFormat = (nextFormat) => {
     setFormatId(nextFormat);
     setSize(nextFormat === "banner" ? BANNER_SIZES[1] : "");
+    setRequirements({ file: null, fileName: "", fileSize: 0, duration: 0, title: "", destination: "", fileError: "" });
+    setRequirementsError("");
+  };
+  const validateRequirements = () => {
+    if (["native", "social"].includes(formatId) && !requirements.file) return "Choose an image for this ad format.";
+    if (["native", "social", "popup"].includes(formatId) && !requirements.title.trim()) return "Add the required title or message.";
+    if (["popup", "direct-link"].includes(formatId)) {
+      try { if (!requirements.destination || new URL(requirements.destination).protocol !== "https:") return "Use a valid HTTPS destination URL."; } catch { return "Use a valid HTTPS destination URL."; }
+    }
+    if (formatId === "video" && !requirements.file) return "Choose a video before continuing.";
+    if (formatId === "video" && (!requirements.duration || requirements.fileError)) return requirements.fileError || "The video must be between 5 and 60 seconds.";
+    return "";
+  };
+  const continueToConfirm = () => {
+    const error = needsRequirements ? validateRequirements() : "";
+    setRequirementsError(error);
+    if (!error) setStep("confirm");
   };
   const confirm = () => {
     const id = "zone-" + Date.now();
-    const zone = { ...zoneDefaults, id, name: `${format.name} placement`, websiteId, format: formatId, size: needsSize ? size : "", status: "Draft", createdAt: new Date().toLocaleDateString("en-US"), impressions: 0, clicks: 0, revenue: "$0.00" };
+    const error = needsRequirements ? validateRequirements() : "";
+    if (error) { setRequirementsError(error); setStep("requirements"); return; }
+    const zone = { ...zoneDefaults, id, name: `${format.name} placement`, websiteId, format: formatId, size: needsSize ? size : "", title: requirements.title, destination: requirements.destination, requirements: { fileName: requirements.fileName, fileSize: requirements.fileSize, duration: requirements.duration }, status: "Draft", createdAt: new Date().toLocaleDateString("en-US"), impressions: 0, clicks: 0, revenue: "$0.00" };
     setData(previous => ({ ...previous, zones: [...previous.zones, zone], websites: previous.websites.map(item => item.id === websiteId ? { ...item, zones: item.zones + 1 } : item) }));
+    setCreatedZoneId(id);
     setStep("code");
     setNotice("Ad code generated. It is a frontend demo snippet and is not connected to live serving.");
   };
@@ -124,12 +184,13 @@ function SimpleAdFlow({ websites, setData, onCancel, onNavigate, setNotice }) {
 
   return <div className="workspace-page simple-ad-flow">
     <div className="workspace-page-header"><div><span className="eyebrow">PUBLISHER / SIMPLE SETUP</span><h1>{step === "code" ? "Your Ad Code Is Ready" : "Add advertisement"}</h1><p>{step === "code" ? "انسخ الكود وضعه في المكان الذي تريد أن يظهر فيه الإعلان على موقعك." : "اختر موقعًا، ثم نوع الإعلان، واحصل على الكود دون إعدادات تقنية معقدة."}</p></div><button className="ghost-button" type="button" onClick={onCancel}>Cancel</button></div>
-    {step !== "code" && <div className="flow-progress" aria-label="Progress"><span className={step === "website" ? "active" : "done"}>01 <small>الموقع</small></span><i /><span className={step === "format" ? "active" : step === "size" || step === "confirm" ? "done" : ""}>02 <small>نوع الإعلان</small></span><i /><span className={step === "size" ? "active" : step === "confirm" ? "done" : ""}>03 <small>الحجم</small></span><i /><span className={step === "confirm" ? "active" : ""}>04 <small>التأكيد</small></span></div>}
+    {step !== "code" && <div className="flow-progress" aria-label="Progress"><span className={step === "website" ? "active" : "done"}>01 <small>الموقع</small></span><i /><span className={step === "format" ? "active" : "done"}>02 <small>نوع الإعلان</small></span><i /><span className={step === "size" || step === "requirements" ? "active" : step === "confirm" ? "done" : ""}>03 <small>{needsSize ? "الحجم" : "المتطلبات"}</small></span><i /><span className={step === "confirm" ? "active" : ""}>04 <small>التأكيد</small></span></div>}
     {step === "website" && <section className="light-panel selection-panel"><div className="panel-heading"><div><span className="eyebrow">STEP 1</span><h2>Choose your website</h2></div><span className="phase-chip">Required</span></div><div className="selection-grid website-selection">{websites.map(item => <button className={websiteId === item.id ? "selection-card selected" : "selection-card"} type="button" key={item.id} onClick={() => setWebsiteId(item.id)}><span className="selection-icon"><MiniIcon name="globe" /></span><span><strong>{item.name}</strong><small>{item.url}</small></span><em>{item.status}</em><span className="selection-check"><MiniIcon name="check" size={15} /></span></button>)}</div><div className="form-actions"><button className="primary-button" type="button" disabled={!websiteId} onClick={() => setStep("format")}>Continue <MiniIcon name="arrow" size={16} /></button></div></section>}
-    {step === "format" && <section className="light-panel selection-panel"><div className="panel-heading"><div><span className="eyebrow">STEP 2</span><h2>Choose an ad format</h2></div><button className="link-button" type="button" onClick={() => setStep("website")}>Change website</button></div><div className="selected-context"><MiniIcon name="globe" size={15} /><span>{website?.name} · {website?.url}</span></div><div className="selection-grid format-selection">{AD_FORMATS.map(item => <button className={formatId === item.id ? "selection-card format-selection-card selected" : "selection-card format-selection-card"} type="button" key={item.id} onClick={() => chooseFormat(item.id)}><span className="format-card-preview"><MiniIcon name={item.id === "banner" ? "layout" : item.id === "video" ? "chart" : item.id === "direct-link" ? "code" : item.id === "popup" ? "megaphone" : "image"} size={22} /></span><strong>{item.name}</strong><small>{item.description}</small><span className="selection-check"><MiniIcon name="check" size={15} /></span></button>)}</div><div className="form-actions"><button className="primary-button" type="button" onClick={() => setStep(needsSize ? "size" : "confirm")}>Continue <MiniIcon name="arrow" size={16} /></button></div></section>}
+    {step === "format" && <section className="light-panel selection-panel"><div className="panel-heading"><div><span className="eyebrow">STEP 2</span><h2>Choose an ad format</h2></div><button className="link-button" type="button" onClick={() => setStep("website")}>Change website</button></div><div className="selected-context"><MiniIcon name="globe" size={15} /><span>{website?.name} · {website?.url}</span></div><div className="selection-grid format-selection">{AD_FORMATS.map(item => <button className={formatId === item.id ? "selection-card format-selection-card selected" : "selection-card format-selection-card"} type="button" key={item.id} onClick={() => chooseFormat(item.id)}><span className="format-card-preview"><MiniIcon name={item.id === "banner" ? "layout" : item.id === "video" ? "chart" : item.id === "direct-link" ? "code" : item.id === "popup" ? "megaphone" : "image"} size={22} /></span><strong>{item.name}</strong><small>{AD_ZONE_REQUIREMENTS[item.id].summary}</small><span className="selection-check"><MiniIcon name="check" size={15} /></span></button>)}</div><div className="form-actions"><button className="primary-button" type="button" onClick={() => setStep(needsSize ? "size" : "requirements")}>Continue <MiniIcon name="arrow" size={16} /></button></div></section>}
     {step === "size" && <section className="light-panel selection-panel"><div className="panel-heading"><div><span className="eyebrow">STEP 3</span><h2>Choose a banner size</h2></div><button className="link-button" type="button" onClick={() => setStep("format")}>Change format</button></div><div className="selection-grid size-selection">{BANNER_SIZES.map(item => <button className={size === item ? "selection-card size-card selected" : "selection-card size-card"} type="button" key={item} onClick={() => setSize(item)}><span className="size-preview" style={{ aspectRatio: item.replace("×", " / ") }} /><strong>{item}</strong><small>Banner placement</small><span className="selection-check"><MiniIcon name="check" size={15} /></span></button>)}</div><div className="form-actions"><button className="primary-button" type="button" onClick={() => setStep("confirm")}>Review selection <MiniIcon name="arrow" size={16} /></button></div></section>}
-    {step === "confirm" && <section className="light-panel selection-panel confirm-simple-panel"><div className="panel-heading"><div><span className="eyebrow">STEP 4</span><h2>Confirm your ad setup</h2></div><button className="link-button" type="button" onClick={() => setStep(needsSize ? "size" : "format")}>Edit</button></div><div className="simple-review"><span><b>Website</b>{website?.url}</span><span><b>Format</b>{format.name}</span>{needsSize && <span><b>Size</b>{size}</span>}</div><SimpleFormatPreview format={format} size={size} /><div className="form-actions"><button className="primary-button" type="button" onClick={confirm}><MiniIcon name="check" size={16} />Confirm & get code</button><button className="ghost-button" type="button" onClick={onCancel}>Cancel</button></div></section>}
-    {step === "code" && <section className="light-panel code-ready-panel"><div className="code-ready-mark"><MiniIcon name="check" size={26} /></div><h2>Your Ad Code Is Ready</h2><p>1. انسخ الكود  ·  2. ألصقه في المكان المطلوب  ·  3. احفظ موقعك</p><div className="simple-review"><span><b>Website</b>{website?.url}</span><span><b>Format</b>{format.name}</span>{needsSize && <span><b>Size</b>{size}</span>}</div><pre className="code-box"><code>{code}</code></pre><div className="code-actions"><button className="primary-button" type="button" onClick={copyCode}><MiniIcon name={copied ? "check" : "copy"} size={16} />{copied ? "Code copied" : "Copy code"}</button><button className="ghost-button" type="button" onClick={onCancel}>Done</button></div><small className="demo-note">Frontend demo only. Live ad serving will be connected when the delivery API is implemented.</small></section>}
+    {step === "requirements" && <><FormatRequirementsStep formatId={formatId} values={requirements} setValues={setRequirements} error={requirementsError} /><div className="selection-panel-flow-actions"><button className="ghost-button" type="button" onClick={() => setStep("format")}>Change format</button><button className="primary-button" type="button" onClick={continueToConfirm}>Continue <MiniIcon name="arrow" size={16} /></button></div></>}
+    {step === "confirm" && <section className="light-panel selection-panel confirm-simple-panel"><div className="panel-heading"><div><span className="eyebrow">STEP 4</span><h2>Confirm your ad setup</h2></div><button className="link-button" type="button" onClick={() => setStep(needsSize ? "size" : "requirements")}>Edit</button></div><div className="simple-review"><span><b>Website</b>{website?.url}</span><span><b>Format</b>{format.name}</span>{needsSize && <span><b>Size</b>{size}</span>}{requirements.fileName && <span><b>File</b>{requirements.fileName}</span>}{requirements.duration > 0 && <span><b>Duration</b>{requirements.duration} seconds</span>}</div><SimpleFormatPreview format={format} size={size} /><div className="form-actions"><button className="primary-button" type="button" onClick={confirm}><MiniIcon name="check" size={16} />Confirm & get code</button><button className="ghost-button" type="button" onClick={onCancel}>Cancel</button></div></section>}
+    {step === "code" && <section className="light-panel code-ready-panel"><div className="code-ready-mark"><MiniIcon name="check" size={26} /></div><h2>Your Ad Code Is Ready</h2><p>1. انسخ الكود  ·  2. ألصقه في المكان المطلوب  ·  3. احفظ موقعك</p><div className="simple-review"><span><b>Website</b>{website?.url}</span><span><b>Format</b>{format.name}</span>{needsSize && <span><b>Size</b>{size}</span>}{requirements.fileName && <span><b>File</b>{requirements.fileName}</span>}</div><pre className="code-box"><code>{code}</code></pre><div className="code-actions"><button className="primary-button" type="button" onClick={copyCode}><MiniIcon name={copied ? "check" : "copy"} size={16} />{copied ? "Code copied" : "Copy code"}</button><button className="ghost-button" type="button" onClick={onCancel}>Done</button></div><small className="demo-note">Frontend demo only. Live ad serving will be connected when the delivery API is implemented.</small></section>}
   </div>;
 }
 
