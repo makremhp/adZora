@@ -80,3 +80,40 @@
     .drawer-balance small { color:#d1fae5; font-size:11px; }
     .drawer-balance strong { display:block; margin-top:5px; font-size:30px; }
     .wallet-note { margin-top:12px; color:var(--muted); font-size:10px; line-height:1.8; }
+
+
+/* Drawer headers */
+.nav-drawer-head,
+.drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nav-drawer-head,
+.drawer-head {
+  color: var(--text);
+}
+
+.nav-drawer-head {
+  display: none;
+}
+
+.nav-drawer-close,
+.drawer-close {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.drawer-close {
+  display: none;
+}

@@ -218,18 +218,25 @@ const campaignModal = document.getElementById("campaignModal");
 
     const mobileButton = document.querySelector(".mobile-btn");
     const navLinks = document.querySelector(".nav-links");
+     const navDrawerBackdrop = document.getElementById("navDrawerBackdrop");
 
     function closeMobileNav() {
-      navLinks.classList.remove("open");
-      mobileButton.setAttribute("aria-expanded", "false");
-      mobileButton.setAttribute("aria-label", "فتح القائمة");
-    }
+       navLinks.classList.remove("open");
+       navDrawerBackdrop?.classList.remove("show");
+       document.body.classList.remove("landing-drawer-open");
+       navLinks.setAttribute("aria-hidden", "true");
+       mobileButton.setAttribute("aria-expanded", "false");
+       mobileButton.setAttribute("aria-label", "فتح القائمة");
+     }
 
     mobileButton.addEventListener("click", event => {
       event.stopPropagation();
       const isOpen = navLinks.classList.toggle("open");
-      mobileButton.setAttribute("aria-expanded", String(isOpen));
-      mobileButton.setAttribute("aria-label", isOpen ? "إغلاق القائمة" : "فتح القائمة");
+       navDrawerBackdrop?.classList.toggle("show", isOpen);
+       document.body.classList.toggle("landing-drawer-open", isOpen);
+       navLinks.setAttribute("aria-hidden", String(!isOpen));
+       mobileButton.setAttribute("aria-expanded", String(isOpen));
+       mobileButton.setAttribute("aria-label", isOpen ? "إغلاق القائمة" : "فتح القائمة");
     });
 
     navLinks.querySelectorAll("a").forEach(link => {
@@ -245,6 +252,8 @@ const campaignModal = document.getElementById("campaignModal");
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") {
         closeMobileNav();
+        closeSidebar();
+        closeWalletDrawer();
         closeCampaignModal();
         closeWebsiteModal();
       }
@@ -287,7 +296,7 @@ const campaignModal = document.getElementById("campaignModal");
     function openZoneModal() { if ((dashboard.dataset.role || localStorage.getItem("adzora-role")) !== "publisher") { showDashboardView("overview"); return; } zoneModal.classList.add("show"); zoneModal.setAttribute("aria-hidden","false"); zoneStatus.className="publisher-status field-full"; zoneStatus.textContent=""; document.getElementById("zoneName").focus(); }
     function closeZoneModal() { zoneModal.classList.remove("show"); zoneModal.setAttribute("aria-hidden","true"); } zoneModal.addEventListener("click", event => { if (event.target === zoneModal) closeZoneModal(); }); zoneForm.addEventListener("submit", event => { event.preventDefault(); zoneStatus.textContent="تم التحقق من Ad Zone تجريبيًا. سيُنشأ الكود الحقيقي بعد ربط الموقع والـAPI."; zoneStatus.className="publisher-status field-full show"; });
     document.querySelectorAll(".toggle").forEach(toggle => { toggle.addEventListener("click", () => toggle.classList.toggle("off")); }); function applyRolePreview() { const selectedRole=document.getElementById("rolePreview").value; setDashboardRole(selectedRole); showDashboardView(selectedRole === "publisher" ? "publisher" : "overview"); }
-    roleAwareNavButtons.forEach(button => { button.addEventListener("click", () => showDashboardView(button.dataset.dashboardView)); }); renderDemoBalance(); setDashboardRole(localStorage.getItem("adzora-role") || "advertiser"); showDashboardView(getCurrentRole() === "publisher" ? "publisher" : "overview");
+    roleAwareNavButtons.forEach(button => { button.addEventListener("click", () => showDashboardView(button.dataset.dashboardView)); }); renderDemoBalance(); setDashboardRole(localStorage.getItem("adzora-role") || "advertiser");
 
 
     // Final role rules for the current frontend milestone.
@@ -328,4 +337,4 @@ const campaignModal = document.getElementById("campaignModal");
     function applyCustomRange() { const from=document.getElementById("rangeFrom").value; const to=document.getElementById("rangeTo").value; if(from && to) applyAnalyticsPeriod("custom"); }
     document.querySelectorAll("[data-period]").forEach(button=>button.addEventListener("click",()=>{ const customRange=document.getElementById("customRange"); customRange.hidden=button.dataset.period !== "custom"; if(button.dataset.period !== "custom") applyAnalyticsPeriod(button.dataset.period); }));
     window.addEventListener("resize", () => { if (window.innerWidth > 900) closeSidebar(); });
-    renderDemoBalance();
+    if (window.innerWidth <= 900) closeMobileNav(); renderDemoBalance(); showDashboardView(getCurrentRole() === "publisher" ? "publisher" : "overview");
