@@ -102,3 +102,13 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Verified with `npm run build` and `git diff --check`.
 - Source commit: `97289f18adbd08633e31e842b8166cd4213a5762`.
 - Remaining frontend gaps: publisher earnings/withdrawal screens are still placeholders; no backend, database, API, payment processing, ad serving, or real authentication was added.
+
+### 2026-09-15 — Public landing and simplified publisher setup
+
+- Added a public RTL landing page with AdZora-specific dark/gold visual identity, advertiser and publisher entry points, format showcase, workflows, capability section, footer, and responsive mobile drawer.
+- Added a simplified Publisher advertisement flow: choose website → choose format → choose banner size when required → confirm → copy generated code.
+- Preserved the existing Ad Zone object shape and website-to-zone relationship; advanced configuration remains internal and is no longer exposed in the primary flow.
+- Added custom visual selection cards, progress states, responsive layouts, and inline copy feedback for the new flow.
+- Verification: `npm run build` passes with Vite 5.4.21.
+- Source commit: pending remote upload.
+- Next task: review the uploaded build in a browser at the required mobile widths, then continue with the remaining profile/settings and analytics screens.

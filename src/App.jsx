@@ -37,6 +37,95 @@ function Brand() {
   return <div className="brand"><span className="brand-mark">A</span><span>AdZora</span></div>;
 }
 
+const landingFormatIcons = {
+  banner: "layout",
+  native: "grid",
+  social: "image",
+  popup: "megaphone",
+  video: "chart",
+  "direct-link": "code",
+};
+
+function LandingPage({ onLogin, onStart }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const onKeyDown = (event) => { if (event.key === "Escape") setMenuOpen(false); };
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.removeEventListener("keydown", onKeyDown); document.body.style.overflow = ""; };
+  }, [menuOpen]);
+
+  const navigate = (target) => {
+    setMenuOpen(false);
+    document.querySelector(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return <div className="landing-page" dir="rtl">
+    <header className="landing-header">
+      <a className="landing-brand" href="#home" onClick={() => navigate("#home")}><Brand /></a>
+      <nav className={menuOpen ? "landing-nav is-open" : "landing-nav"} aria-label="Public navigation">
+        <button type="button" onClick={() => navigate("#home")}>الرئيسية</button>
+        <button type="button" onClick={() => navigate("#formats")}>صيغ الإعلانات</button>
+        <button type="button" onClick={() => navigate("#advertisers")}>للمعلنين</button>
+        <button type="button" onClick={() => navigate("#publishers")}>للناشرين</button>
+        <button type="button" onClick={() => navigate("#how-it-works")}>كيف تعمل المنصة</button>
+        <button className="landing-nav-close" type="button" onClick={() => setMenuOpen(false)} aria-label="إغلاق القائمة"><Icon name="close" /></button>
+      </nav>
+      <div className="landing-actions">
+        <button className="landing-login" type="button" onClick={onLogin}>تسجيل الدخول</button>
+        <button className="landing-cta small" type="button" onClick={() => onStart("publisher")}>ابدأ الآن <Icon name="chevron" size={15} /></button>
+      </div>
+      <button className="landing-menu-button" type="button" onClick={() => setMenuOpen(true)} aria-label="فتح القائمة"><Icon name="menu" /></button>
+    </header>
+
+    <main>
+      <section className="landing-hero" id="home">
+        <div className="landing-hero-copy">
+          <span className="landing-kicker"><i /> شبكة إعلانية تجمع الطرفين</span>
+          <h1>إعلانات تصل إلى جمهورك.<br /><em>ومواقع تكسب من محتواها.</em></h1>
+          <p>AdZora تربط المعلنين بالناشرين في تجربة واضحة لإطلاق الحملات، اختيار الصيغ المناسبة، وتحويل الزيارات إلى قيمة.</p>
+          <div className="landing-hero-actions">
+            <button className="landing-cta" type="button" onClick={() => onStart("advertiser")}>أعلن مع AdZora <Icon name="chevron" size={16} /></button>
+            <button className="landing-outline" type="button" onClick={() => onStart("publisher")}>حقق الدخل من موقعك <Icon name="chevron" size={16} /></button>
+          </div>
+          <div className="landing-proof"><span className="proof-mark"><Icon name="check" size={13} /></span><span>تجربة منظمة للمعلن والناشر</span><span className="proof-divider" /><span>صيغ إعلانية متعددة</span></div>
+        </div>
+        <div className="network-visual" aria-label="مسار الإعلان من المعلن إلى الجمهور">
+          <div className="network-orbit orbit-one" /><div className="network-orbit orbit-two" />
+          <div className="network-line line-one" /><div className="network-line line-two" /><div className="network-line line-three" /><div className="network-line line-four" />
+          <div className="network-node node-advertiser"><span className="network-node-icon"><Icon name="megaphone" size={20} /></span><small>المعلن</small><strong>حملة جديدة</strong></div>
+          <div className="network-node node-campaign"><span className="network-node-icon"><Icon name="chart" size={20} /></span><small>AdZora</small><strong>توزيع ذكي</strong></div>
+          <div className="network-node node-publisher"><span className="network-node-icon"><Icon name="globe" size={20} /></span><small>موقع الناشر</small><strong>مساحة مناسبة</strong></div>
+          <div className="network-audience"><span className="audience-dots"><i /><i /><i /></span><span><small>الجمهور</small><strong>تفاعل حقيقي</strong></span></div>
+        </div>
+      </section>
+
+      <section className="landing-roles" id="advertisers">
+        <div className="landing-section-heading"><span className="landing-kicker">مساران واضحان</span><h2>كل طرف يعرف خطوته التالية</h2><p>من أول نقرة حتى ظهور النتائج، صممنا التجربة لتبقى عملية ومباشرة.</p></div>
+        <div className="role-cards">
+          <article className="role-card advertiser-card"><div className="role-card-top"><span className="role-symbol"><Icon name="megaphone" size={22} /></span><span className="role-tag">للمعلنين</span></div><h3>حوّل ميزانيتك إلى حملات تصل</h3><p>أنشئ حملتك، اختر الصيغة المناسبة، حدد الميزانية وتابع الأداء من مساحة واحدة.</p><ul><li>إنشاء حملات منظمة</li><li>اختيار صيغ إعلانية متعددة</li><li>متابعة الأداء والإنفاق</li></ul><button className="role-link" type="button" onClick={() => onStart("advertiser")}>ابدأ الإعلان <Icon name="chevron" size={15} /></button></article>
+          <article className="role-card publisher-card" id="publishers"><div className="role-card-top"><span className="role-symbol"><Icon name="globe" size={22} /></span><span className="role-tag">للناشرين</span></div><h3>اجعل موقعك مساحة إعلانية أفضل</h3><p>أضف موقعك، اختر نوع الإعلان، احصل على الكود وابدأ ببناء مصدر دخل من جمهورك.</p><ul><li>إضافة المواقع بسهولة</li><li>اختيار مكان الإعلان بصريًا</li><li>كود جاهز للنسخ</li></ul><button className="role-link" type="button" onClick={() => onStart("publisher")}>ابدأ تحقيق الدخل <Icon name="chevron" size={15} /></button></article>
+        </div>
+      </section>
+
+      <section className="landing-formats" id="formats">
+        <div className="landing-section-heading split"><div><span className="landing-kicker">صيغ مصممة للاستخدام</span><h2>اختر الطريقة التي تناسب رسالتك</h2></div><p>من الوحدات المرئية إلى الروابط المباشرة، لكل صيغة وظيفة واضحة داخل رحلة المستخدم.</p></div>
+        <div className="landing-format-grid">{AD_FORMATS.map((format) => <article className="landing-format-card" key={format.id}><div className={"format-preview format-preview-" + format.id}><Icon name={landingFormatIcons[format.id]} size={21} /><span>{format.name}</span></div><div className="landing-format-copy"><h3>{format.name}</h3><p>{format.description}</p><small>{format.id === "video" ? "للمحتوى المتحرك" : format.id === "native" ? "للمحتوى المتكامل" : "لظهور واضح ومباشر"}</small></div></article>)}</div>
+      </section>
+
+      <section className="landing-how" id="how-it-works">
+        <div className="landing-section-heading"><span className="landing-kicker">كيف تعمل</span><h2>طريق قصير من الفكرة إلى الظهور</h2><p>لا تحتاج إلى فهم إعدادات تقنية معقدة كي تبدأ.</p></div>
+        <div className="workflow-columns"><div className="workflow-column"><div className="workflow-title"><span className="role-symbol"><Icon name="megaphone" size={18} /></span><h3>رحلة المعلن</h3></div>{["أنشئ الحملة", "اختر الصيغة", "حدد الميزانية", "أطلق الحملة", "تابع الأداء"].map((step, index) => <div className="workflow-step" key={step}><b>{String(index + 1).padStart(2, "0")}</b><span>{step}</span></div>)}</div><div className="workflow-column"><div className="workflow-title"><span className="role-symbol"><Icon name="globe" size={18} /></span><h3>رحلة الناشر</h3></div>{["أضف موقعك", "اختر نوع الإعلان", "أكد الاختيار", "احصل على الكود", "حقق الدخل"].map((step, index) => <div className="workflow-step" key={step}><b>{String(index + 1).padStart(2, "0")}</b><span>{step}</span></div>)}</div></div>
+      </section>
+
+      <section className="landing-capabilities"><div className="landing-section-heading split"><div><span className="landing-kicker">ما تحصل عليه</span><h2>أدوات أساسية، دون وعود مبالغ فيها</h2></div><p>كل ما تحتاجه لبناء عملية إعلانية مرتبة، مع مساحة للتوسع عندما تصبح البيانات جاهزة.</p></div><div className="capability-grid">{["صيغ إعلانية متعددة", "تحقيق دخل للناشرين", "إدارة الحملات", "تحليلات الأداء", "مخزون متجاوب", "كود إعلان بسيط"].map((item, index) => <div className="capability" key={item}><span>{String(index + 1).padStart(2, "0")}</span><strong>{item}</strong><Icon name="check" size={16} /></div>)}</div></section>
+    </main>
+
+    <footer className="landing-footer"><div className="landing-footer-brand"><Brand /><p>شبكة إعلانية تربط الرسالة بالجمهور، والموقع بالقيمة.</p></div><div><strong>AdZora</strong><button type="button" onClick={() => navigate("#home")}>عن AdZora</button><button type="button" onClick={() => navigate("#advertisers")}>للمعلنين</button><button type="button" onClick={() => navigate("#publishers")}>للناشرين</button></div><div><strong>الدعم</strong><button type="button" onClick={() => navigate("#how-it-works")}>كيف تعمل</button><button type="button" onClick={() => navigate("#formats")}>صيغ الإعلانات</button><button type="button" onClick={onLogin}>تسجيل الدخول</button></div><div className="footer-account"><strong>جاهز للخطوة الأولى؟</strong><button className="landing-cta small" type="button" onClick={() => onStart("publisher")}>ابدأ الآن <Icon name="chevron" size={15} /></button></div></footer>
+  </div>;
+}
+
 function Sidebar({ workspace, setWorkspace, activePage, onNavigate, drawerOpen, closeDrawer }) {
   const config = ROLE_CONFIG[workspace];
   return <>
@@ -97,7 +186,7 @@ function ComingSoon({ workspace, page, onNavigate }) {
   return <section className="coming-page"><div className="coming-orbit"><span /><span /><span /><Icon name={item.icon} size={32} /></div><span className="eyebrow">{config.label.toUpperCase()} WORKSPACE</span><h1>{item.arabic}</h1><p>هذه الشاشة موجودة في بنية المنتج وستُبنى في المرحلة التالية. لن تكون رابطًا ميتًا؛ سنضيف إليها حالات التحميل والفراغ والخطأ والنجاح مع منطقها الفعلي.</p><div className="coming-meta"><span><b>Section</b>{item.label}</span><span><b>Next phase</b>Functional workflow</span></div><button className="secondary-button" onClick={() => onNavigate("overview")}><Icon name="grid" size={16} />العودة إلى النظرة العامة</button></section>;
 }
 
-function AccountAccess({ onClose }) {
+function AccountAccess({ onClose, onSuccess }) {
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ email: "", password: "", name: "" });
   const [error, setError] = useState("");
@@ -113,11 +202,13 @@ function AccountAccess({ onClose }) {
     await new Promise(resolve => setTimeout(resolve, 350));
     setLoading(false);
     setNotice(mode === "login" ? "Demo login successful." : mode === "signup" ? "Demo account created successfully." : "Password reset instructions are ready in this demo.");
+    if (mode === "login" || mode === "signup") onSuccess();
   };
   return <div className="modal-backdrop" role="presentation" onMouseDown={event => event.target === event.currentTarget && onClose()}><section className="access-modal light-panel" role="dialog" aria-modal="true" aria-labelledby="access-title"><div className="panel-heading"><div><span className="eyebrow">ACCOUNT ACCESS</span><h2 id="access-title">{mode === "login" ? "Welcome back" : mode === "signup" ? "Create your account" : mode === "forgot" ? "Forgot password" : "Reset password"}</h2></div><button className="icon-button" type="button" onClick={onClose} aria-label="Close account dialog"><Icon name="close" /></button></div>{(mode === "login" || mode === "signup") && <div className="access-tabs"><button className={mode === "login" ? "access-tab active" : "access-tab"} type="button" onClick={() => { setMode("login"); setError(""); }}>Login</button><button className={mode === "signup" ? "access-tab active" : "access-tab"} type="button" onClick={() => { setMode("signup"); setError(""); }}>Sign up</button></div>}<form className="access-form" onSubmit={submit}>{mode === "signup" && <label className="field"><span>Name</span><input className="input" value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} placeholder="Your name" /></label>}{mode !== "reset" && <label className="field"><span>Email</span><input className="input" type="email" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} placeholder="you@example.com" autoComplete="email" /></label>}{(mode === "login" || mode === "signup" || mode === "reset") && <label className="field"><span>{mode === "reset" ? "New password" : "Password"}</span><input className="input" type="password" value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} placeholder="At least 6 characters" autoComplete={mode === "login" ? "current-password" : "new-password"} /></label>}{error && <small className="field-error access-error" role="alert">{error}</small>}{notice && <div className="notice" role="status">{notice}</div>}<button className="primary-button access-submit" type="submit" disabled={loading}>{loading ? "Please wait…" : mode === "login" ? "Login" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset instructions" : "Reset password"}</button></form>{mode === "login" && <button className="text-button access-link" type="button" onClick={() => { setMode("forgot"); setError(""); }}>Forgot password?</button>}{(mode === "forgot" || mode === "reset") && <button className="text-button access-link" type="button" onClick={() => { setMode("reset"); setError(""); }}>Continue to password reset</button>}<p className="demo-note">Frontend demo only. No authentication server or credentials are connected.</p></section></div>;
 }
 
 export default function App() {
+  const [view, setView] = useState("landing");
   const [workspace, setWorkspace] = useState("publisher");
   const [activePage, setActivePage] = useState("overview");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -137,7 +228,10 @@ export default function App() {
   }, [drawerOpen]);
 
   const navigate = (page) => { setActivePage(page); setDrawerOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const openWorkspace = (role, page = "overview") => { setWorkspace(role); setActivePage(page); setView("workspace"); };
   const pageTitle = config.nav.find(item => item.id === activePage)?.arabic || "نظرة عامة";
+
+  if (view === "landing") return <><LandingPage onLogin={() => setAccountOpen(true)} onStart={(role) => openWorkspace(role, role === "publisher" ? "websites" : "create-campaign")} />{accountOpen && <AccountAccess onClose={() => setAccountOpen(false)} onSuccess={() => { setAccountOpen(false); setView("workspace"); }} />}</>;
 
   return <div className="app-shell">
     <Sidebar workspace={workspace} setWorkspace={(next) => { setWorkspace(next); setActivePage("overview"); }} activePage={activePage} onNavigate={navigate} drawerOpen={drawerOpen} closeDrawer={() => setDrawerOpen(false)} />
@@ -145,6 +239,6 @@ export default function App() {
       <header className="topbar"><button className="icon-button menu-button" onClick={() => setDrawerOpen(true)} aria-label="Open menu"><Icon name="menu" /></button><div className="breadcrumbs"><span>AdZora</span><Icon name="chevron" size={13} /><strong>{config.label}</strong><Icon name="chevron" size={13} /><span>{pageTitle}</span></div><div className="header-actions"><div className="header-balance"><span>{config.balanceLabel}</span><strong>$0.00</strong></div><button className="notification-button" aria-label="Notifications"><span className="notification-dot" /><Icon name="receipt" size={18} /></button><button className="avatar avatar-button" aria-label="Open account access" onClick={() => setAccountOpen(true)}>M</button></div></header>
       <div className="page-content">{activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : workspace === "publisher" && ["websites", "ad-zones", "ad-codes", "earnings", "transactions", "withdrawals"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} finance={publisherFinance} setFinance={setPublisherFinance} withdrawals={publisherWithdrawals} setWithdrawals={setPublisherWithdrawals} onNavigate={navigate} /> : workspace === "advertiser" && activePage === "creatives" ? <AdvertiserCreatives data={creativeData} setData={setCreativeData} /> : workspace === "advertiser" && ["campaigns", "create-campaign", "balance", "deposits", "transactions", "billing", "analytics", "reports"].includes(activePage) ? <AdvertiserWorkspace page={activePage} data={campaignData} setData={setCampaignData} creatives={creativeData} onNavigate={navigate} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
     </main>
-    {accountOpen && <AccountAccess onClose={() => setAccountOpen(false)} />}
+    {accountOpen && <AccountAccess onClose={() => setAccountOpen(false)} onSuccess={() => { setAccountOpen(false); setView("workspace"); }} />}
   </div>;
 }
