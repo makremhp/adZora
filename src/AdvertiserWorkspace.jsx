@@ -43,7 +43,7 @@ const TYPE_OPTIONS = [
 const INITIAL_FORM = {
   name: "", format: "banner", budget: "", pricingModel: "CPM", duration: "30", size: BANNER_SIZES[1],
   title: "", description: "", cta: "", destination: "", content: "", file: null, fileName: "", fileType: "", fileSize: 0,
-  previewUrl: "", videoDuration: 0, videoWidth: 0, videoHeight: 0,
+  previewUrl: "", videoDuration: 0, videoWidth: 0, videoHeight: 0, mediaWidth: 0, mediaHeight: 0,
 };
 
 function formatSize(bytes) {
@@ -59,20 +59,56 @@ function getAcceptedTypes(format) {
   return [];
 }
 
+function resizeBannerImage(file, size) {
+  return new Promise((resolve, reject) => {
+    const [targetWidth, targetHeight] = size.split("×").map(Number);
+    const sourceUrl = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const context = canvas.getContext("2d");
+      const scale = Math.max(targetWidth / image.width, targetHeight / image.height);
+      const drawWidth = image.width * scale;
+      const drawHeight = image.height * scale;
+      context.drawImage(image, (targetWidth - drawWidth) / 2, (targetHeight - drawHeight) / 2, drawWidth, drawHeight);
+      canvas.toBlob(blob => {
+        URL.revokeObjectURL(sourceUrl);
+        if (!blob) { reject(new Error("Unable to resize image")); return; }
+        const resizedFile = new File([blob], file.name.replace(/\\.[^.]+$/, "") + "-" + targetWidth + "x" + targetHeight + ".jpg", { type: "image/jpeg" });
+        resolve({ file: resizedFile, previewUrl: URL.createObjectURL(resizedFile), width: targetWidth, height: targetHeight });
+      }, "image/jpeg", 0.9);
+    };
+    image.onerror = () => { URL.revokeObjectURL(sourceUrl); reject(new Error("Unable to read image")); };
+    image.src = sourceUrl;
+  });
+}
+
+function mediaFrameStyle(form, format) {
+  if (format === "banner" && form.size) {
+    const [width, height] = form.size.split("×").map(Number);
+    if (width && height) return { aspectRatio: width + " / " + height };
+  }
+  if (form.mediaWidth && form.mediaHeight) return { aspectRatio: form.mediaWidth + " / " + form.mediaHeight };
+  return undefined;
+}
+
 function MediaPreview({ form, format, compact = false }) {
+  const frameStyle = mediaFrameStyle(form, format);
   if (!form.previewUrl) return <div className={compact ? "campaign-media-placeholder compact" : "campaign-media-placeholder"}><Icon name={format === "video" ? "video" : "image"} size={compact ? 22 : 28} /><span>{format === "video" ? "Video preview" : "Image preview"}</span></div>;
-  if (form.fileType.startsWith("video/")) return <video className="campaign-media-preview" src={form.previewUrl} controls muted preload="metadata" />;
-  return <img className="campaign-media-preview" src={form.previewUrl} alt={form.fileName || "Campaign creative"} />;
+  if (form.fileType.startsWith("video/")) return <video className="campaign-media-preview" style={frameStyle} src={form.previewUrl} controls muted preload="metadata" />;
+  return <img className="campaign-media-preview" style={frameStyle} src={form.previewUrl} alt={form.fileName || "Campaign creative"} />;
 }
 
 function MediaUpload({ form, format, error, optional, onChange }) {
   const accepts = getAcceptedTypes(format);
   if (!accepts.length) return null;
-  return <div className="campaign-media-field"><div className="file-choice"><input id="campaign-creative-upload" type="file" accept={accepts.join(",")} onChange={onChange} /><label htmlFor="campaign-creative-upload" className="file-choice-button"><Icon name={format === "video" ? "video" : "upload"} size={17} />{form.fileName ? "Change media" : "Upload " + (format === "video" ? "video" : "media")}</label><span>{form.fileName || (optional ? "Optional media · " : "") + accepts.map(item => item.split("/")[1].toUpperCase()).join(", ")}</span></div>{form.fileName && <div className="campaign-upload-preview"><MediaPreview form={form} format={format} compact /><div><strong>{form.fileName}</strong><small>{form.fileType} · {formatSize(form.fileSize)}{form.videoDuration ? " · " + form.videoDuration.toFixed(1) + "s" : ""}</small></div></div>}{error && <small className="field-error">{error}</small>}</div>;
+  return <div className="campaign-media-field"><div className="file-choice"><input id="campaign-creative-upload" type="file" accept={accepts.join(",")} onChange={onChange} /><label htmlFor="campaign-creative-upload" className="file-choice-button"><Icon name={format === "video" ? "video" : "upload"} size={17} />{form.fileName ? "Change media" : "Upload " + (format === "video" ? "video" : "media")}</label><span>{form.fileName || (optional ? "Optional media · " : "") + accepts.map(item => item.split("/")[1].toUpperCase()).join(", ")}</span></div>{form.fileName && <div className="campaign-upload-preview"><MediaPreview form={form} format={format} compact /><div><strong>{form.fileName}</strong><small>{form.fileType} · {formatSize(form.fileSize)}{form.videoDuration ? " · " + form.videoDuration.toFixed(1) + "s" : ""}{form.mediaWidth ? " · " + form.mediaWidth + "×" + form.mediaHeight : ""}</small></div></div>}{error && <small className="field-error">{error}</small>}</div>;
 }
 
 function CreativeFields({ format, form, update, errors, onMedia }) {
-  if (format === "banner") return <div className="form-grid"><Field label="Upload Image" error={errors.media}><MediaUpload form={form} format={format} error={errors.media} onChange={onMedia} /></Field><Field label="Ad Title" error={errors.title}><input className="input" value={form.title} onChange={event => update("title", event.target.value)} placeholder="A clear campaign headline" /></Field><Field label="Destination URL" error={errors.destination}><input className="input" value={form.destination} onChange={event => update("destination", event.target.value)} placeholder="https://example.com/offer" inputMode="url" /></Field><Field label="Ad size"><select className="input select" value={form.size} onChange={event => update("size", event.target.value)}>{BANNER_SIZES.map(size => <option key={size}>{size}</option>)}</select></Field></div>;
+  if (format === "banner") return <div className="form-grid"><Field label="Upload Image" error={errors.media}><MediaUpload form={form} format={format} error={errors.media} onChange={onMedia} /></Field><Field label="Ad Title" error={errors.title}><input className="input" value={form.title} onChange={event => update("title", event.target.value)} placeholder="A clear campaign headline" /></Field><Field label="Destination URL" error={errors.destination}><input className="input" value={form.destination} onChange={event => update("destination", event.target.value)} placeholder="https://example.com/offer" inputMode="url" /></Field><Field label="Ad size"><select className="input select" value={form.size} onChange={event => update("size", event.target.value)}>{BANNER_SIZES.map(size => <option key={size}>{size}</option>)}</select><small>سيتم قص الصورة وتغيير حجمها تلقائيًا إلى {form.size}.</small></Field></div>;
   if (format === "video") return <div className="form-grid"><Field label="Upload Video" error={errors.media}><MediaUpload form={form} format={format} error={errors.media} onChange={onMedia} /><small>MP4, WebM, or MOV · up to 50 MB · 1–60 seconds · minimum 320×180</small></Field><Field label="Ad Title" error={errors.title}><input className="input" value={form.title} onChange={event => update("title", event.target.value)} placeholder="A clear video campaign headline" /></Field><Field label="Destination URL" error={errors.destination}><input className="input" value={form.destination} onChange={event => update("destination", event.target.value)} placeholder="https://example.com" inputMode="url" /></Field></div>;
   if (format === "native") return <div className="form-grid"><Field label="Image" error={errors.media}><MediaUpload form={form} format={format} error={errors.media} onChange={onMedia} /></Field><Field label="Title" error={errors.title}><input className="input" value={form.title} onChange={event => update("title", event.target.value)} placeholder="Native content title" /></Field><Field label="Description"><textarea className="input textarea" value={form.description} onChange={event => update("description", event.target.value)} placeholder="Short supporting description" /></Field><Field label="CTA"><input className="input" value={form.cta} onChange={event => update("cta", event.target.value)} placeholder="Read more" /></Field><Field label="Destination URL" error={errors.destination}><input className="input" value={form.destination} onChange={event => update("destination", event.target.value)} placeholder="https://example.com" inputMode="url" /></Field></div>;
   if (format === "social") return <div className="form-grid"><Field label="Image / Media" error={errors.media}><MediaUpload form={form} format={format} error={errors.media} onChange={onMedia} /></Field><Field label="Text" error={errors.content}><textarea className="input textarea" value={form.content} onChange={event => update("content", event.target.value)} placeholder="Write the social ad text" /></Field><Field label="CTA"><input className="input" value={form.cta} onChange={event => update("cta", event.target.value)} placeholder="Discover" /></Field><Field label="Destination URL" error={errors.destination}><input className="input" value={form.destination} onChange={event => update("destination", event.target.value)} placeholder="https://example.com" inputMode="url" /></Field></div>;
@@ -91,16 +127,20 @@ function CreateCampaign({ data, setData, onNavigate }) {
   const [notice, setNotice] = useState("");
   const format = form.format;
   const update = (key, value) => { setForm(previous => ({ ...previous, [key]: value })); setErrors(previous => ({ ...previous, [key]: "" })); };
-  const chooseFormat = nextFormat => { setForm(previous => ({ ...previous, format: nextFormat, pricingModel: nextFormat === "direct-link" ? "CPC" : nextFormat === "video" ? "CPV" : "CPM", file: null, fileName: "", fileType: "", fileSize: 0, previewUrl: "", videoDuration: 0, videoWidth: 0, videoHeight: 0 })); setErrors({}); };
-  const handleMedia = event => {
+  const chooseFormat = nextFormat => { setForm(previous => ({ ...previous, format: nextFormat, pricingModel: nextFormat === "direct-link" ? "CPC" : nextFormat === "video" ? "CPV" : "CPM", file: null, fileName: "", fileType: "", fileSize: 0, previewUrl: "", videoDuration: 0, videoWidth: 0, videoHeight: 0, mediaWidth: 0, mediaHeight: 0 })); setErrors({}); };
+  const handleMedia = async event => {
     const file = event.target.files?.[0];
     if (!file) return;
     const accepted = getAcceptedTypes(format);
     const maxSize = format === "video" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
-    if (!accepted.includes(file.type)) { setErrors(previous => ({ ...previous, media: "Unsupported file type for this ad format." })); return; }
-    if (file.size > maxSize) { setErrors(previous => ({ ...previous, media: "The file is too large. Maximum size is " + (format === "video" ? "50 MB" : "10 MB") + "." })); return; }
-    const previewUrl = URL.createObjectURL(file);
-    const nextMedia = { file, fileName: file.name, fileType: file.type, fileSize: file.size, previewUrl, videoDuration: 0, videoWidth: 0, videoHeight: 0 };
+    if (!accepted.includes(file.type)) { setErrors(previous => ({ ...previous, media: "Unsupported file type for this ad format." })); event.target.value = ""; return; }
+    if (file.size > maxSize) { setErrors(previous => ({ ...previous, media: "The file is too large. Maximum size is " + (format === "video" ? "50 MB" : "10 MB") + "." })); event.target.value = ""; return; }
+    let prepared = { file, previewUrl: URL.createObjectURL(file), width: 0, height: 0 };
+    if (format === "banner") {
+      try { const resized = await resizeBannerImage(file, form.size); URL.revokeObjectURL(prepared.previewUrl); prepared = resized; }
+      catch { setErrors(previous => ({ ...previous, media: "The image could not be resized for the selected banner size." })); event.target.value = ""; return; }
+    }
+    const nextMedia = { file: prepared.file, fileName: prepared.file.name, fileType: prepared.file.type, fileSize: prepared.file.size, previewUrl: prepared.previewUrl, videoDuration: 0, videoWidth: 0, videoHeight: 0, mediaWidth: prepared.width, mediaHeight: prepared.height };
     if (file.type.startsWith("video/")) {
       const probe = document.createElement("video");
       probe.preload = "metadata";
@@ -108,13 +148,13 @@ function CreateCampaign({ data, setData, onNavigate }) {
         const duration = probe.duration;
         const width = probe.videoWidth;
         const height = probe.videoHeight;
-        if (!Number.isFinite(duration) || duration < 1 || duration > 60) { setErrors(previous => ({ ...previous, media: "Video duration must be between 1 and 60 seconds." })); }
-        else if (width < 320 || height < 180) { setErrors(previous => ({ ...previous, media: "Video dimensions must be at least 320×180 pixels." })); }
+        if (!Number.isFinite(duration) || duration < 1 || duration > 60) setErrors(previous => ({ ...previous, media: "Video duration must be between 1 and 60 seconds." }));
+        else if (width < 320 || height < 180) setErrors(previous => ({ ...previous, media: "Video dimensions must be at least 320×180 pixels." }));
         else setErrors(previous => ({ ...previous, media: "" }));
-        setForm(previous => ({ ...previous, ...nextMedia, videoDuration: duration, videoWidth: width, videoHeight: height }));
+        setForm(previous => ({ ...previous, ...nextMedia, videoDuration: duration, videoWidth: width, videoHeight: height, mediaWidth: width, mediaHeight: height }));
       };
       probe.onerror = () => setErrors(previous => ({ ...previous, media: "The video metadata could not be read. Choose a valid advertising video." }));
-      probe.src = previewUrl;
+      probe.src = prepared.previewUrl;
     } else { setForm(previous => ({ ...previous, ...nextMedia })); setErrors(previous => ({ ...previous, media: "" })); }
     event.target.value = "";
   };
@@ -133,7 +173,7 @@ function CreateCampaign({ data, setData, onNavigate }) {
   };
   const submit = () => {
     const next = validate(); setErrors(next); if (Object.keys(next).length) return;
-    const campaign = { id: "campaign-" + Date.now(), name: form.name.trim(), format, budget: Number(form.budget), pricingModel: form.pricingModel, duration: Number(form.duration), spend: 0, status: "Draft", createdAt: new Date().toLocaleDateString("en-US"), creative: { type: format, fileName: form.fileName, fileType: form.fileType, fileSize: form.fileSize, previewUrl: form.previewUrl, videoDuration: form.videoDuration, title: form.title, description: form.description, text: form.content, cta: form.cta, destination: form.destination, size: form.size } };
+    const campaign = { id: "campaign-" + Date.now(), name: form.name.trim(), format, budget: Number(form.budget), pricingModel: form.pricingModel, duration: Number(form.duration), spend: 0, status: "Draft", createdAt: new Date().toLocaleDateString("en-US"), creative: { type: format, fileName: form.fileName, fileType: form.fileType, fileSize: form.fileSize, previewUrl: form.previewUrl, videoDuration: form.videoDuration, width: form.mediaWidth, height: form.mediaHeight, title: form.title, description: form.description, text: form.content, cta: form.cta, destination: form.destination, size: form.size } };
     setData(previous => [...previous, campaign]); setNotice("Campaign and Creative saved as Draft. The Ad Server can match it to eligible publisher inventory when delivery is connected."); setForm(INITIAL_FORM); setErrors({});
   };
   const pricingOptions = PRICING_MODELS.filter(item => !item.future && (format === "video" ? ["CPV", "CPM", "CPC"].includes(item.id) : format === "direct-link" ? ["CPC", "CPA"].includes(item.id) : ["CPM", "CPC", "CPA"].includes(item.id)));
