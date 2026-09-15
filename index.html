@@ -327,7 +327,8 @@
           </div>
         </div>
 
-        <div class="stats-grid">
+        <p class="campaign-help" style="margin:0 0 16px">وضع Demo: الأرصدة والإحصائيات الحالية للمعاينة فقط، وليست مصدرًا ماليًا موثوقًا من الخادم.</p>
+        <div class="stats-grid" id="advertiserStatsGrid">
           <div class="stat-card">
             <small>إجمالي الأرباح</small>
             <strong>$48,290</strong>
@@ -370,7 +371,7 @@
               </tr>
             </thead>
 
-            <tbody>
+            <tbody id="campaignTableBody">
               <tr>
                 <td data-label="اسم الحملة">حملة الصيف 2026</td>
                 <td data-label="الميزانية">$8,400</td>
@@ -415,7 +416,7 @@
 
           <p class="publisher-status show publisher-earnings-note">رصيد الناشر يُحتسب من أرباح مواقعه وAd Zones فقط. لا توجد خانة إيداع أو إضافة رصيد للناشر.</p>
 
-          <div class="stats-grid">
+           <div class="stats-grid" id="publisherStatsGrid">
             <div class="stat-card">
               <small>إجمالي الأرباح</small>
               <strong>$1,284</strong>
@@ -562,7 +563,8 @@
           <select id="pricingModel">
             <option value="cpm">CPM — لكل ألف ظهور</option>
             <option value="cpc">CPC — لكل نقرة</option>
-            <option value="cpa">CPA — لكل تحويل</option>
+             <option value="cpv">CPV — لكل مشاهدة</option>
+             <option value="cpa">CPA — بنية مستقبلية فقط</option>
           </select>
         </div>
 
@@ -570,10 +572,16 @@
           <label for="adFormat">نوع الإعلان</label>
           <select id="adFormat">
             <option value="banner">Banner</option>
-            <option value="native">Native — لاحقًا</option>
-            <option value="video">Video — لاحقًا</option>
+             <option value="native">Native</option>
+             <option value="social">Social</option>
+             <option value="popup">Popup — تجهيز فقط</option>
+             <option value="video">Video — معاينة فقط</option>
+             <option value="direct-link">Direct Link</option>
           </select>
         </div>
+
+         <div id="creativeFields" class="field-full"></div>
+         <div id="creativePreview" class="campaign-help field-full" hidden></div>
 
         <div class="field">
           <label for="totalBudget">الميزانية الإجمالية</label>
