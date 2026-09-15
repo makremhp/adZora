@@ -7,7 +7,7 @@
 - Repository: https://github.com/makremhp/adZora
 - Owner: makremhp
 - Default branch: main
-- Latest functional source commit: 016d32574f04130e6083e43ee6eeb57af76a2afa
+- Latest functional source commit: 97289f18adbd08633e31e842b8166cd4213a5762
 - Blueprint: AdZora_Master_Frontend_Blueprint
 
 ## Current objective
@@ -92,4 +92,13 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Kept all finance behavior demo-only; no payment provider, transfer, accounting, or backend was added.
 - Verified with `npm run build` and `git diff --check`.
 - Source commit: `016d32574f04130e6083e43ee6eeb57af76a2afa`.
+
+### 2026-09-15 — Creative library campaign handoff
+
+- Connected the existing session Creative Library to Advertiser Campaign Creation.
+- Added a creative selector that reuses uploaded image/video records and maps the selection to the format-specific campaign field.
+- Preserved manual placeholder entry when no library item is selected.
+- Kept storage, serving, and production URL behavior unchanged.
+- Verified with `npm run build` and `git diff --check`.
+- Source commit: `97289f18adbd08633e31e842b8166cd4213a5762`.
 - Remaining frontend gaps: publisher earnings/withdrawal screens are still placeholders; no backend, database, API, payment processing, ad serving, or real authentication was added.
