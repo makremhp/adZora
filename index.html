@@ -846,6 +846,10 @@
     .publisher-modal .modal-box {
       width: min(560px, 100%);
     }
+
+    .dashboard-mobile-nav {
+      display: none;
+    }
     .switch {
       margin-top: 18px;
       color: var(--muted);
@@ -1277,6 +1281,32 @@
         grid-column: auto;
       }
 
+      .dashboard-mobile-nav {
+        display: grid;
+        gap: 6px;
+        margin-bottom: 18px;
+        padding: 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 13px;
+      }
+
+      .dashboard-mobile-nav label {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .dashboard-mobile-nav select {
+        width: 100%;
+        height: 42px;
+        padding: 0 10px;
+        color: var(--text);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        font-family: inherit;
+      }
+
       .publisher-grid {
         grid-template-columns: 1fr;
       }
@@ -1574,7 +1604,18 @@
         </nav>
       </aside>
 
-      <main class="dashboard-main"><div class="dashboard-view active" id="advertiserOverviewView">
+      <main class="dashboard-main">
+          <div class="dashboard-mobile-nav">
+            <label for="dashboardMobileNav">التنقل داخل اللوحة</label>
+            <select id="dashboardMobileNav">
+              <option value="overview">لوحة التحكم</option>
+              <option value="campaigns">الحملات الإعلانية</option>
+              <option value="publisher">المواقع والمساحات</option>
+              <option value="analytics">الإحصائيات</option>
+              <option value="payments">المدفوعات</option>
+              <option value="settings">الإعدادات</option>
+            </select>
+          </div><div class="dashboard-view active" id="advertiserOverviewView">
         <div class="dash-header">
           <div>
             <h1>لوحة التحكم</h1>
@@ -2040,6 +2081,7 @@
 
     const dashboardViews = document.querySelectorAll(".dashboard-view");
     const dashboardNavButtons = document.querySelectorAll(".side-nav button[data-dashboard-view]");
+    const mobileDashboardNav = document.getElementById("dashboardMobileNav");
     const placeholderTitle = document.getElementById("placeholderTitle");
     const placeholderText = document.getElementById("placeholderText");
     const publisherNotice = document.getElementById("publisherNotice");
@@ -2075,6 +2117,8 @@
         button.classList.toggle("active", button.dataset.dashboardView === view);
       });
 
+      if (mobileDashboardNav) mobileDashboardNav.value = view;
+
       if (targetId === "dashboardPlaceholderView") {
         placeholderTitle.textContent = pendingSections[view]?.title || "القسم قيد البناء";
         placeholderText.textContent = pendingSections[view]?.text || "هذا القسم سيُبنى في خطوة مستقلة مع ربطه بالـAPI.";
@@ -2085,6 +2129,10 @@
 
     dashboardNavButtons.forEach(button => {
       button.addEventListener("click", () => showDashboardView(button.dataset.dashboardView));
+    });
+
+    mobileDashboardNav?.addEventListener("change", event => {
+      showDashboardView(event.target.value);
     });
 
     function showPublisherNotice(message) {
