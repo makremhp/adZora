@@ -243,6 +243,7 @@
           <td data-label="النوع">${escapeHtml(adTypeLabel(campaign.adType))}</td>
           <td data-label="الميزانية">${money(campaign.budgetCents)}</td>
           <td data-label="الإنفاق">${money(campaign.spentCents)}</td>
+          <td data-label="الظهور">${integer(campaign.impressions)}</td>
           <td data-label="النقرات">${integer(campaign.clicks)}</td>
           <td data-label="CTR">${ctr}%</td>
           <td data-label="الحالة"><span class="badge-status">${escapeHtml(statusLabel(campaign.status))}</span></td>
@@ -283,6 +284,52 @@
         </div>
       `).join("");
     }
+
+    const websitesList = $("#publisherWebsitesList");
+    if (websitesList) {
+      websitesList.innerHTML = publisher.websites.map(website => `
+        <div class="website-card-top">
+          <div>
+            <h3>${escapeHtml(website.name)}</h3>
+            <p class="website-domain">${escapeHtml(website.url.replace(/^https?:\/\//, ""))}</p>
+          </div>
+          <span class="badge-status">${escapeHtml(statusLabel(website.status))}</span>
+        </div>
+        <div class="website-metrics">
+          <div class="website-metric"><small>Ad Zones</small><strong>${website.zones}</strong></div>
+          <div class="website-metric"><small>Impressions</small><strong>${integer(publisher.impressions)}</strong></div>
+          <div class="website-metric"><small>Clicks</small><strong>${integer(publisher.clicks)}</strong></div>
+          <div class="website-metric"><small>Revenue</small><strong>${money(publisher.totalEarnedCents)}</strong></div>
+        </div>
+        <div class="website-actions">
+          <button class="btn btn-outline" type="button" onclick="showPublisherNotice('التحقق الحقيقي سيُربط بالخادم في الخطوة القادمة.')">التحقق من الموقع</button>
+          <button class="btn btn-primary" type="button" onclick="openZoneModal()">Ad Zones (${website.zones})</button>
+        </div>
+      `).join("");
+    }
+
+    const zonesList = $("#publisherZonesList");
+    if (zonesList) {
+      zonesList.innerHTML = publisher.zones.map(zone => `
+        <div class="zone-row">
+          <div><strong>${escapeHtml(zone.name)}</strong><small>${escapeHtml(zone.size)} · ${escapeHtml(adTypeLabel(zone.type))}</small></div>
+          <span class="badge-status">${escapeHtml(statusLabel(zone.status))}</span>
+        </div>
+      `).join("");
+    }
+    renderPublisherWithdrawals();
+  }
+
+  function renderPublisherWithdrawals() {
+    const stats = $("#publisherWithdrawalStats");
+    if (!stats) return;
+    const publisher = demoState.publisher;
+    stats.innerHTML = `
+      <div class="stat-card"><small>الأرباح المتاحة</small><strong>${money(publisher.availableCents)}</strong><span>تخضع لحد السحب من الخادم</span></div>
+      <div class="stat-card"><small>الأرباح المعلقة</small><strong>${money(publisher.pendingCents)}</strong><span>غير قابلة للسحب</span></div>
+      <div class="stat-card"><small>إجمالي المسحوب</small><strong>${money(publisher.withdrawnCents)}</strong><span>بيانات Demo</span></div>
+      <div class="stat-card"><small>حالة الحساب</small><strong>جاهز للربط</strong><span>لا توجد دفعة فعلية</span></div>
+    `;
   }
 
   function renderWallet() {
@@ -376,6 +423,13 @@
     if (analyticsSubtitle) analyticsSubtitle.textContent = role === "publisher"
       ? "تابع الظهور والنقرات والأرباح من مواقعك"
       : "تابع الإنفاق والظهور والنقرات للحملات";
+    const metricLabels = role === "publisher"
+      ? ["إجمالي الأرباح", "الظهور", "النقرات", "المواقع النشطة"]
+      : ["إجمالي الإنفاق", "الظهور", "النقرات", "التحويلات"];
+    ["metricOneLabel", "metricTwoLabel", "metricThreeLabel", "metricFourLabel"].forEach((id, index) => {
+      const node = document.getElementById(id);
+      if (node) node.textContent = metricLabels[index];
+    });
     renderAnalytics();
   }
 
@@ -387,6 +441,7 @@
     const targetId = {
       overview: "advertiserOverviewView",
       publisher: "publisherView",
+      withdrawals: "publisherWithdrawalsView",
       analytics: "analyticsView",
       wallet: "walletView",
       settings: "settingsView"
@@ -505,7 +560,13 @@
       impressions: 0,
       clicks: 0,
       status: "draft",
-      destinationUrl: String(form.get("destinationUrl") || "").trim()
+      destinationUrl: String(form.get("destinationUrl") || "").trim(),
+      startDate: String(form.get("startDate") || ""),
+      endDate: String(form.get("endDate") || ""),
+      targeting: {
+        countries: String(form.get("targetCountry") || "").trim(),
+        devices: String(form.get("targetDevices") || "all")
+      }
     });
     renderAll();
     if (isCpa) {
@@ -584,6 +645,7 @@
       size: $("#zoneSize").value,
       status: "active"
     });
+    if (demoState.publisher.websites[0]) demoState.publisher.websites[0].zones += 1;
     renderPublisherOverview();
     $("#zoneStatus").textContent = "تم حفظ Ad Zone تجريبيًا. لن يتم توليد Ad Code حقيقي قبل ربط الخادم.";
     $("#zoneStatus").className = "publisher-status field-full show";
