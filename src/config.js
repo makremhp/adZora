@@ -3,6 +3,7 @@ export const AD_FORMATS = [
   { id: "native", name: "Native", description: "Content-integrated ads with a clear sponsored label.", pricing: ["CPM", "CPC"], share: { publisher: 45, platform: 55 } },
   { id: "social", name: "Social", description: "Social-style creative with brand, title, and call to action.", pricing: ["CPM", "CPC"], share: { publisher: 40, platform: 60 } },
   { id: "popup", name: "Popup", description: "A controlled popup placement shown through preview states.", pricing: ["CPM", "CPC"], share: { publisher: 35, platform: 65 } },
+  { id: "popunder", name: "Popunder", description: "A browser-safe triggered destination with frequency controls.", pricing: ["CPC"], share: { publisher: 45, platform: 55 } },
   { id: "video", name: "Video", description: "Video placements with poster, playback, and CTA states.", pricing: ["CPM", "CPV"], share: { publisher: 50, platform: 50 } },
   { id: "direct-link", name: "Direct Link", description: "A direct destination for advertiser campaigns.", pricing: ["CPC"], share: { publisher: 50, platform: 50 } },
 ];
