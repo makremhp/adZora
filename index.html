@@ -647,6 +647,7 @@
     }
 
     .dashboard {
+      overflow-x: hidden;
       display: none;
       min-height: 100vh;
       background: var(--bg);
@@ -658,6 +659,7 @@
 
     .dashboard-layout {
       display: grid;
+      min-width: 0;
       grid-template-columns: 245px 1fr;
       min-height: 100vh;
     }
@@ -694,6 +696,7 @@
     }
 
     .dashboard-main {
+      min-width: 0;
       padding: 30px;
     }
 
@@ -944,11 +947,98 @@
       }
 
       .dashboard-main {
-        padding: 20px 13px;
+        width: 100%;
+        min-width: 0;
+        padding: 82px 13px 24px;
+      }
+
+      .dash-header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 14px;
       }
 
       .dash-header h1 {
         font-size: 20px;
+      }
+
+      .user {
+        justify-content: space-between;
+        width: 100%;
+        padding: 10px 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+
+      .stats-grid {
+        gap: 10px;
+      }
+
+      .stat-card {
+        min-width: 0;
+        padding: 14px 12px;
+      }
+
+      .stat-card strong {
+        font-size: 20px;
+      }
+
+      .table-card {
+        min-width: 0;
+        padding: 16px 12px;
+        overflow: visible;
+      }
+
+      .table-title {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .table-title .btn {
+        width: 100%;
+      }
+
+      table {
+        min-width: 0;
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tbody,
+      tr,
+      td {
+        display: block;
+        width: 100%;
+      }
+
+      tr {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      tr:last-child {
+        border-bottom: 0;
+      }
+
+      td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 7px 0;
+        border: 0;
+        text-align: right;
+      }
+
+      td::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-weight: 500;
       }
 
       .dash-header .btn {
@@ -1276,32 +1366,32 @@
 
             <tbody>
               <tr>
-                <td>حملة الصيف 2026</td>
-                <td>$8,400</td>
-                <td>128,400</td>
-                <td>5.42%</td>
-                <td><span class="badge-status">نشطة</span></td>
+                <td data-label="اسم الحملة">حملة الصيف 2026</td>
+                <td data-label="الميزانية">$8,400</td>
+                <td data-label="النقرات">128,400</td>
+                <td data-label="CTR">5.42%</td>
+                <td data-label="الحالة"><span class="badge-status">نشطة</span></td>
               </tr>
               <tr>
-                <td>إطلاق التطبيق الجديد</td>
-                <td>$6,700</td>
-                <td>96,442</td>
-                <td>6.12%</td>
-                <td><span class="badge-status">نشطة</span></td>
+                <td data-label="اسم الحملة">إطلاق التطبيق الجديد</td>
+                <td data-label="الميزانية">$6,700</td>
+                <td data-label="النقرات">96,442</td>
+                <td data-label="CTR">6.12%</td>
+                <td data-label="الحالة"><span class="badge-status">نشطة</span></td>
               </tr>
               <tr>
-                <td>منتج التقنية</td>
-                <td>$4,900</td>
-                <td>82,120</td>
-                <td>4.91%</td>
-                <td><span class="badge-status">نشطة</span></td>
+                <td data-label="اسم الحملة">منتج التقنية</td>
+                <td data-label="الميزانية">$4,900</td>
+                <td data-label="النقرات">82,120</td>
+                <td data-label="CTR">4.91%</td>
+                <td data-label="الحالة"><span class="badge-status">نشطة</span></td>
               </tr>
               <tr>
-                <td>عروض المتجر</td>
-                <td>$2,150</td>
-                <td>41,823</td>
-                <td>3.88%</td>
-                <td><span class="badge-status">نشطة</span></td>
+                <td data-label="اسم الحملة">عروض المتجر</td>
+                <td data-label="الميزانية">$2,150</td>
+                <td data-label="النقرات">41,823</td>
+                <td data-label="CTR">3.88%</td>
+                <td data-label="الحالة"><span class="badge-status">نشطة</span></td>
               </tr>
             </tbody>
           </table>
