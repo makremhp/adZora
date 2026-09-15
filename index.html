@@ -632,6 +632,49 @@
       margin-top: 6px;
     }
 
+
+    .campaign-modal .modal-box {
+      width: min(720px, 100%);
+      max-height: min(760px, calc(100vh - 32px));
+      overflow-y: auto;
+    }
+
+    .campaign-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 14px;
+    }
+
+    .campaign-form .field {
+      margin-bottom: 13px;
+    }
+
+    .field-full {
+      grid-column: 1 / -1;
+    }
+
+    .campaign-help {
+      margin: 2px 0 12px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .campaign-status {
+      display: none;
+      margin: 10px 0 0;
+      padding: 10px 12px;
+      color: var(--primary);
+      background: var(--blue-light);
+      border: 1px solid rgba(37, 99, 235, .18);
+      border-radius: 9px;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .campaign-status.show {
+      display: block;
+    }
     .switch {
       margin-top: 18px;
       color: var(--muted);
@@ -1045,6 +1088,24 @@
         display: none;
       }
 
+      .campaign-modal {
+        padding: 12px;
+      }
+
+      .campaign-modal .modal-box {
+        max-height: calc(100vh - 24px);
+        padding: 20px 15px;
+      }
+
+      .campaign-form {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .field-full {
+        grid-column: auto;
+      }
+
       .footer-flex {
         align-items: flex-start;
         flex-direction: column;
@@ -1350,7 +1411,7 @@
         <div class="table-card">
           <div class="table-title">
             <h2>آخر الحملات الإعلانية</h2>
-            <button class="btn btn-primary">إضافة حملة</button>
+            <button class="btn btn-primary" type="button" onclick="openCampaignModal()" aria-haspopup="dialog">إضافة حملة</button>
           </div>
 
           <table>
@@ -1443,7 +1504,117 @@
     </div>
   </div>
 
+
+  <div class="modal campaign-modal" id="campaignModal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="campaignModalTitle">
+      <div class="modal-top">
+        <div>
+          <h3 id="campaignModalTitle">إنشاء حملة جديدة</h3>
+          <p class="campaign-help">هذه واجهة تجريبية، وسيتم ربطها بالحفظ الحقيقي بعد بناء الـAPI.</p>
+        </div>
+        <button class="close" type="button" onclick="closeCampaignModal()" aria-label="إغلاق">×</button>
+      </div>
+
+      <form id="campaignForm" class="campaign-form">
+        <div class="field field-full">
+          <label for="campaignName">اسم الحملة</label>
+          <input id="campaignName" type="text" placeholder="مثال: حملة إطلاق المنتج" required>
+        </div>
+
+        <div class="field">
+          <label for="pricingModel">نوع التسعير</label>
+          <select id="pricingModel">
+            <option value="cpm">CPM — لكل ألف ظهور</option>
+            <option value="cpc">CPC — لكل نقرة</option>
+            <option value="cpa">CPA — لكل تحويل</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="adFormat">نوع الإعلان</label>
+          <select id="adFormat">
+            <option value="banner">Banner</option>
+            <option value="native">Native — لاحقًا</option>
+            <option value="video">Video — لاحقًا</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="totalBudget">الميزانية الإجمالية</label>
+          <input id="totalBudget" type="number" min="0" step="0.01" placeholder="1000" required>
+        </div>
+
+        <div class="field">
+          <label for="dailyBudget">الميزانية اليومية</label>
+          <input id="dailyBudget" type="number" min="0" step="0.01" placeholder="100" required>
+        </div>
+
+        <div class="field">
+          <label for="bidAmount">سعر العرض</label>
+          <input id="bidAmount" type="number" min="0" step="0.01" placeholder="0.50" required>
+        </div>
+
+        <div class="field">
+          <label for="targetCountry">الدول المستهدفة</label>
+          <input id="targetCountry" type="text" placeholder="تونس، الجزائر، المغرب">
+        </div>
+
+        <div class="field">
+          <label for="targetDevices">الأجهزة</label>
+          <select id="targetDevices">
+            <option value="all">كل الأجهزة</option>
+            <option value="mobile">Mobile</option>
+            <option value="desktop">Desktop</option>
+            <option value="tablet">Tablet</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="startDate">تاريخ البداية</label>
+          <input id="startDate" type="date">
+        </div>
+
+        <div class="field">
+          <label for="endDate">تاريخ النهاية</label>
+          <input id="endDate" type="date">
+        </div>
+
+        <p class="campaign-help field-full">لن يتم خصم أي رصيد أو إطلاق حملة فعلية حتى يتم بناء المصادقة والـAPI والـLedger على الخادم.</p>
+
+        <button class="btn btn-primary modal-submit field-full" type="submit">حفظ كمسودة تجريبية</button>
+        <p class="campaign-status field-full" id="campaignStatus" role="status"></p>
+      </form>
+    </div>
+  </div>
+
   <script>
+    const campaignModal = document.getElementById("campaignModal");
+    const campaignForm = document.getElementById("campaignForm");
+    const campaignStatus = document.getElementById("campaignStatus");
+
+    function openCampaignModal() {
+      campaignModal.classList.add("show");
+      campaignModal.setAttribute("aria-hidden", "false");
+      campaignStatus.classList.remove("show");
+      campaignStatus.textContent = "";
+      document.getElementById("campaignName").focus();
+    }
+
+    function closeCampaignModal() {
+      campaignModal.classList.remove("show");
+      campaignModal.setAttribute("aria-hidden", "true");
+    }
+
+    campaignForm.addEventListener("submit", event => {
+      event.preventDefault();
+      campaignStatus.textContent = "تم التحقق من النموذج تجريبيًا. لم تُحفظ الحملة بعد لأن الربط بالخادم لم يُبنَ بعد.";
+      campaignStatus.classList.add("show");
+    });
+
+    campaignModal.addEventListener("click", event => {
+      if (event.target === campaignModal) closeCampaignModal();
+    });
+
     const modal = document.getElementById("authModal");
     const landing = document.getElementById("landing");
     const dashboard = document.getElementById("dashboard");
@@ -1571,7 +1742,10 @@
     });
 
     document.addEventListener("keydown", event => {
-      if (event.key === "Escape") closeMobileNav();
+      if (event.key === "Escape") {
+        closeMobileNav();
+        closeCampaignModal();
+      }
     });
 
     window.addEventListener("resize", () => {
