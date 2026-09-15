@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AD_FORMATS, RECENT_ITEMS, ROLE_CONFIG } from "./config";
 import PublisherWorkspace from "./PublisherWorkspace";
 import AdvertiserCreatives from "./AdvertiserCreatives";
+import AdvertiserWorkspace from "./AdvertiserWorkspace";
 
 function Icon({ name, size = 18 }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -96,12 +97,34 @@ function ComingSoon({ workspace, page, onNavigate }) {
   return <section className="coming-page"><div className="coming-orbit"><span /><span /><span /><Icon name={item.icon} size={32} /></div><span className="eyebrow">{config.label.toUpperCase()} WORKSPACE</span><h1>{item.arabic}</h1><p>هذه الشاشة موجودة في بنية المنتج وستُبنى في المرحلة التالية. لن تكون رابطًا ميتًا؛ سنضيف إليها حالات التحميل والفراغ والخطأ والنجاح مع منطقها الفعلي.</p><div className="coming-meta"><span><b>Section</b>{item.label}</span><span><b>Next phase</b>Functional workflow</span></div><button className="secondary-button" onClick={() => onNavigate("overview")}><Icon name="grid" size={16} />العودة إلى النظرة العامة</button></section>;
 }
 
+function AccountAccess({ onClose }) {
+  const [mode, setMode] = useState("login");
+  const [form, setForm] = useState({ email: "", password: "", name: "" });
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [loading, setLoading] = useState(false);
+  const submit = async (event) => {
+    event.preventDefault();
+    setError(""); setNotice("");
+    if (mode === "signup" && !form.name.trim()) { setError("Enter your name."); return; }
+    if (!form.email.includes("@")) { setError("Enter a valid email address."); return; }
+    if ((mode === "login" || mode === "signup") && form.password.length < 6) { setError("Use a password with at least 6 characters."); return; }
+    setLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 350));
+    setLoading(false);
+    setNotice(mode === "login" ? "Demo login successful." : mode === "signup" ? "Demo account created successfully." : "Password reset instructions are ready in this demo.");
+  };
+  return <div className="modal-backdrop" role="presentation" onMouseDown={event => event.target === event.currentTarget && onClose()}><section className="access-modal light-panel" role="dialog" aria-modal="true" aria-labelledby="access-title"><div className="panel-heading"><div><span className="eyebrow">ACCOUNT ACCESS</span><h2 id="access-title">{mode === "login" ? "Welcome back" : mode === "signup" ? "Create your account" : mode === "forgot" ? "Forgot password" : "Reset password"}</h2></div><button className="icon-button" type="button" onClick={onClose} aria-label="Close account dialog"><Icon name="close" /></button></div>{(mode === "login" || mode === "signup") && <div className="access-tabs"><button className={mode === "login" ? "access-tab active" : "access-tab"} type="button" onClick={() => { setMode("login"); setError(""); }}>Login</button><button className={mode === "signup" ? "access-tab active" : "access-tab"} type="button" onClick={() => { setMode("signup"); setError(""); }}>Sign up</button></div>}<form className="access-form" onSubmit={submit}>{mode === "signup" && <label className="field"><span>Name</span><input className="input" value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} placeholder="Your name" /></label>}{mode !== "reset" && <label className="field"><span>Email</span><input className="input" type="email" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} placeholder="you@example.com" autoComplete="email" /></label>}{(mode === "login" || mode === "signup" || mode === "reset") && <label className="field"><span>{mode === "reset" ? "New password" : "Password"}</span><input className="input" type="password" value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} placeholder="At least 6 characters" autoComplete={mode === "login" ? "current-password" : "new-password"} /></label>}{error && <small className="field-error access-error" role="alert">{error}</small>}{notice && <div className="notice" role="status">{notice}</div>}<button className="primary-button access-submit" type="submit" disabled={loading}>{loading ? "Please wait…" : mode === "login" ? "Login" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset instructions" : "Reset password"}</button></form>{mode === "login" && <button className="text-button access-link" type="button" onClick={() => { setMode("forgot"); setError(""); }}>Forgot password?</button>}{(mode === "forgot" || mode === "reset") && <button className="text-button access-link" type="button" onClick={() => { setMode("reset"); setError(""); }}>Continue to password reset</button>}<p className="demo-note">Frontend demo only. No authentication server or credentials are connected.</p></section></div>;
+}
+
 export default function App() {
   const [workspace, setWorkspace] = useState("publisher");
   const [activePage, setActivePage] = useState("overview");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [publisherData, setPublisherData] = useState({ websites: [], zones: [] });
   const [creativeData, setCreativeData] = useState([]);
+  const [campaignData, setCampaignData] = useState([]);
+  const [accountOpen, setAccountOpen] = useState(false);
   const config = useMemo(() => ROLE_CONFIG[workspace], [workspace]);
 
   useEffect(() => {
@@ -117,8 +140,9 @@ export default function App() {
   return <div className="app-shell">
     <Sidebar workspace={workspace} setWorkspace={(next) => { setWorkspace(next); setActivePage("overview"); }} activePage={activePage} onNavigate={navigate} drawerOpen={drawerOpen} closeDrawer={() => setDrawerOpen(false)} />
     <main className="main-content">
-      <header className="topbar"><button className="icon-button menu-button" onClick={() => setDrawerOpen(true)} aria-label="Open menu"><Icon name="menu" /></button><div className="breadcrumbs"><span>AdZora</span><Icon name="chevron" size={13} /><strong>{config.label}</strong><Icon name="chevron" size={13} /><span>{pageTitle}</span></div><div className="header-actions"><div className="header-balance"><span>{config.balanceLabel}</span><strong>$0.00</strong></div><button className="notification-button" aria-label="Notifications"><span className="notification-dot" /><Icon name="receipt" size={18} /></button><div className="avatar" aria-label="Demo account">M</div></div></header>
-      <div className="page-content">{activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : workspace === "publisher" && ["websites", "ad-zones", "ad-codes"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} onNavigate={navigate} /> : workspace === "advertiser" && activePage === "creatives" ? <AdvertiserCreatives data={creativeData} setData={setCreativeData} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
+      <header className="topbar"><button className="icon-button menu-button" onClick={() => setDrawerOpen(true)} aria-label="Open menu"><Icon name="menu" /></button><div className="breadcrumbs"><span>AdZora</span><Icon name="chevron" size={13} /><strong>{config.label}</strong><Icon name="chevron" size={13} /><span>{pageTitle}</span></div><div className="header-actions"><div className="header-balance"><span>{config.balanceLabel}</span><strong>$0.00</strong></div><button className="notification-button" aria-label="Notifications"><span className="notification-dot" /><Icon name="receipt" size={18} /></button><button className="avatar avatar-button" aria-label="Open account access" onClick={() => setAccountOpen(true)}>M</button></div></header>
+      <div className="page-content">{activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : workspace === "publisher" && ["websites", "ad-zones", "ad-codes"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} onNavigate={navigate} /> : workspace === "advertiser" && activePage === "creatives" ? <AdvertiserCreatives data={creativeData} setData={setCreativeData} /> : workspace === "advertiser" && ["campaigns", "create-campaign", "balance", "deposits", "transactions", "billing", "analytics", "reports"].includes(activePage) ? <AdvertiserWorkspace page={activePage} data={campaignData} setData={setCampaignData} onNavigate={navigate} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
     </main>
+    {accountOpen && <AccountAccess onClose={() => setAccountOpen(false)} />}
   </div>;
 }
