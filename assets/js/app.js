@@ -1,254 +1,717 @@
-const campaignModal = document.getElementById("campaignModal");
-    const campaignForm = document.getElementById("campaignForm");
-    const campaignStatus = document.getElementById("campaignStatus");
+(() => {
+  "use strict";
 
-    function openCampaignModal() {
-      campaignModal.classList.add("show");
-      campaignModal.setAttribute("aria-hidden", "false");
-      campaignStatus.classList.remove("show");
-      campaignStatus.textContent = "";
-      document.getElementById("campaignName").focus();
+  /*
+   * AdZora frontend business layer.
+   * All values in this file are demo state. Money is kept in integer cents so
+   * the UI can be replaced by a server-authoritative ledger later.
+   */
+  const CONFIG = Object.freeze({
+    currency: "USD",
+    demo: true,
+    minDepositCents: null,
+    minWithdrawalCents: null,
+    revenueShare: Object.freeze({
+      banner: 0.40,
+      native: 0.45,
+      social: 0.40,
+      popup: 0.35,
+      video: 0.50,
+      "direct-link": 0.50
+    }),
+    bannerSizes: ["320×50", "300×250", "728×90", "336×280", "970×250"],
+    adTypes: Object.freeze({
+      banner: "Banner",
+      native: "Native",
+      social: "Social",
+      popup: "Popup",
+      video: "Video",
+      "direct-link": "Direct Link"
+    }),
+    pricingModels: Object.freeze({
+      cpm: "CPM",
+      cpc: "CPC",
+      cpv: "CPV",
+      cpa: "CPA"
+    })
+  });
+
+  const demoState = {
+    role: "advertiser",
+    advertiser: {
+      totalDepositedCents: 50000,
+      reservedCents: 15350,
+      spentCents: 4650,
+      campaigns: [
+        {
+          id: "campaign-001",
+          name: "حملة متجر التقنية",
+          adType: "banner",
+          pricingModel: "cpm",
+          budgetCents: 12000,
+          spentCents: 3200,
+          impressions: 16200,
+          clicks: 420,
+          status: "active",
+          destinationUrl: "https://example.com"
+        },
+        {
+          id: "campaign-002",
+          name: "إطلاق التطبيق الجديد",
+          adType: "native",
+          pricingModel: "cpc",
+          budgetCents: 8000,
+          spentCents: 1450,
+          impressions: 7800,
+          clicks: 230,
+          status: "active",
+          destinationUrl: "https://example.com/app"
+        },
+        {
+          id: "campaign-003",
+          name: "مسودة حملة موسمية",
+          adType: "social",
+          pricingModel: "cpc",
+          budgetCents: 5000,
+          spentCents: 0,
+          impressions: 0,
+          clicks: 0,
+          status: "draft",
+          destinationUrl: ""
+        }
+      ],
+      transactions: [
+        { label: "إيداع تجريبي", type: "deposit", amountCents: 50000, status: "demo" },
+        { label: "إنفاق حملة متجر التقنية", type: "campaign-spend", amountCents: -3200, status: "demo" },
+        { label: "إنفاق إطلاق التطبيق", type: "campaign-spend", amountCents: -1450, status: "demo" }
+      ]
+    },
+    publisher: {
+      pendingCents: 1284,
+      availableCents: 4842,
+      totalEarnedCents: 7480,
+      withdrawnCents: 1400,
+      impressions: 28400,
+      clicks: 1280,
+      websites: [
+        {
+          name: "متجر تجريبي",
+          url: "https://demo-store.example",
+          category: "تجارة إلكترونية",
+          status: "pending",
+          zones: 2
+        }
+      ],
+      zones: [
+        { name: "Header Leaderboard", type: "banner", size: "728×90", status: "active" },
+        { name: "Sidebar Rectangle", type: "banner", size: "300×250", status: "active" }
+      ],
+      recentEarnings: [
+        { date: "اليوم", source: "حملة متجر التقنية", adType: "Banner", amountCents: 620, status: "pending" },
+        { date: "أمس", source: "إطلاق التطبيق الجديد", adType: "Native", amountCents: 840, status: "approved" },
+        { date: "12 سبتمبر", source: "حملة موسمية", adType: "Video", amountCents: 460, status: "available" }
+      ]
+    }
+  };
+
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+  const cents = value => Math.round(Number(value || 0) * 100);
+  const money = value => {
+    const amount = typeof value === "number" ? value / 100 : Number(value || 0);
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: CONFIG.currency,
+      minimumFractionDigits: 2
+    }).format(amount);
+  };
+  const integer = value => new Intl.NumberFormat("en-US").format(Number(value || 0));
+  const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  }[char]));
+
+  function getAdvertiserAvailableCents() {
+    return Math.max(
+      0,
+      demoState.advertiser.totalDepositedCents -
+      demoState.advertiser.reservedCents -
+      demoState.advertiser.spentCents
+    );
+  }
+
+  function getCurrentRole() {
+    return demoState.role === "publisher" ? "publisher" : "advertiser";
+  }
+
+  function statusLabel(status) {
+    return {
+      draft: "مسودة",
+      pending: "قيد المراجعة",
+      active: "نشطة",
+      paused: "متوقفة",
+      completed: "مكتملة",
+      rejected: "مرفوضة",
+      approved: "معتمدة",
+      available: "متاحة",
+      demo: "تجريبية"
+    }[status] || status;
+  }
+
+  function adTypeLabel(type) {
+    return CONFIG.adTypes[type] || type;
+  }
+
+  function calculateEventFinancials({ adType = "banner", pricingModel = "cpm", rate = 0, quantity = 0 }) {
+    const numericRate = Number(rate) || 0;
+    const numericQuantity = Number(quantity) || 0;
+    let advertiserCostCents = 0;
+
+    if (pricingModel === "cpm") advertiserCostCents = cents((numericQuantity / 1000) * numericRate);
+    if (pricingModel === "cpc" || pricingModel === "cpv" || pricingModel === "cpa") {
+      advertiserCostCents = cents(numericQuantity * numericRate);
     }
 
-    function closeCampaignModal() {
-      campaignModal.classList.remove("show");
-      campaignModal.setAttribute("aria-hidden", "true");
-    }
+    const publisherShare = CONFIG.revenueShare[adType] ?? 0;
+    const publisherRevenueCents = Math.round(advertiserCostCents * publisherShare);
+    return {
+      advertiserCostCents,
+      publisherRevenueCents,
+      platformRevenueCents: advertiserCostCents - publisherRevenueCents,
+      publisherShare
+    };
+  }
 
-    campaignForm.addEventListener("submit", event => {
-      event.preventDefault();
-      campaignStatus.textContent = "تم التحقق من النموذج تجريبيًا. لم تُحفظ الحملة بعد لأن الربط بالخادم لم يُبنَ بعد.";
-      campaignStatus.classList.add("show");
+  // This is intentionally an in-memory calculation. A future backend should
+  // validate the event before applying any balance or earnings mutation.
+  window.adzoraBusinessLogic = Object.freeze({
+    config: CONFIG,
+    calculateEventFinancials
+  });
+
+  const landing = $("#landing");
+  const dashboard = $("#dashboard");
+  const authModal = $("#authModal");
+  const authForm = $("#authForm");
+  const authRole = $("#authRole");
+  const campaignModal = $("#campaignModal");
+  const campaignForm = $("#campaignForm");
+  const websiteModal = $("#websiteModal");
+  const websiteForm = $("#websiteForm");
+  const zoneModal = $("#zoneModal");
+  const zoneForm = $("#zoneForm");
+  const walletDrawer = $("#walletDrawer");
+  const walletDrawerBackdrop = $("#walletDrawerBackdrop");
+  const sidebar = $(".dashboard .sidebar");
+  const sidebarBackdrop = $("#dashboardSidebarBackdrop");
+  const sidebarLayout = $(".dashboard-layout");
+  const sidebarToggle = $("#sidebarToggle");
+  const navLinks = $(".nav-links");
+  const mobileButton = $(".mobile-btn");
+  const navDrawerBackdrop = $("#navDrawerBackdrop");
+  let authMode = "login";
+
+  function renderTopBalance() {
+    const value = getCurrentRole() === "publisher"
+      ? demoState.publisher.availableCents
+      : getAdvertiserAvailableCents();
+    ["topBalance", "walletPageBalance", "drawerBalance"].forEach(id => {
+      const node = document.getElementById(id);
+      if (node) node.textContent = money(value);
     });
+  }
 
-    campaignModal.addEventListener("click", event => {
-      if (event.target === campaignModal) closeCampaignModal();
+  function renderAdvertiserOverview() {
+    const root = $("#advertiserOverviewView");
+    const stats = $("#advertiserStatsGrid") || $(".stats-grid", root);
+    const activeCampaigns = demoState.advertiser.campaigns.filter(campaign => campaign.status === "active").length;
+    if (stats) {
+      stats.innerHTML = `
+        <div class="stat-card"><small>الرصيد المتاح</small><strong>${money(getAdvertiserAvailableCents())}</strong><span>متاح للحملات</span></div>
+        <div class="stat-card"><small>الرصيد المحجوز</small><strong>${money(demoState.advertiser.reservedCents)}</strong><span>للحملات النشطة</span></div>
+        <div class="stat-card"><small>إجمالي الإنفاق</small><strong>${money(demoState.advertiser.spentCents)}</strong><span>من أحداث موثقة تجريبيًا</span></div>
+        <div class="stat-card"><small>الحملات النشطة</small><strong>${activeCampaigns}</strong><span>${demoState.advertiser.campaigns.length} حملات إجمالًا</span></div>
+      `;
+    }
+
+    const body = $("#campaignTableBody") || $("tbody", root);
+    if (!body) return;
+    body.innerHTML = demoState.advertiser.campaigns.map(campaign => {
+      const ctr = campaign.impressions ? ((campaign.clicks / campaign.impressions) * 100).toFixed(2) : "0.00";
+      return `
+        <tr>
+          <td data-label="اسم الحملة">${escapeHtml(campaign.name)}</td>
+          <td data-label="النوع">${escapeHtml(adTypeLabel(campaign.adType))}</td>
+          <td data-label="الميزانية">${money(campaign.budgetCents)}</td>
+          <td data-label="الإنفاق">${money(campaign.spentCents)}</td>
+          <td data-label="النقرات">${integer(campaign.clicks)}</td>
+          <td data-label="CTR">${ctr}%</td>
+          <td data-label="الحالة"><span class="badge-status">${escapeHtml(statusLabel(campaign.status))}</span></td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function renderPublisherOverview() {
+    const root = $("#publisherView");
+    const stats = $("#publisherStatsGrid") || $(".stats-grid", root);
+    const publisher = demoState.publisher;
+    if (stats) {
+      stats.innerHTML = `
+        <div class="stat-card"><small>قيد الاعتماد</small><strong>${money(publisher.pendingCents)}</strong><span>لم تصبح متاحة بعد</span></div>
+        <div class="stat-card"><small>الأرباح المتاحة</small><strong>${money(publisher.availableCents)}</strong><span>قابلة للسحب لاحقًا</span></div>
+        <div class="stat-card"><small>إجمالي الأرباح</small><strong>${money(publisher.totalEarnedCents)}</strong><span>قبل السحوبات</span></div>
+        <div class="stat-card"><small>المواقع</small><strong>${publisher.websites.length}</strong><span>${publisher.zones.length} Ad Zones</span></div>
+      `;
+    }
+
+    const publisherGrid = $(".publisher-grid", root);
+    if (publisherGrid && !$("#publisherEarningsCard")) {
+      publisherGrid.insertAdjacentHTML("afterend", `
+        <div class="table-card publisher-card" id="publisherEarningsCard" style="margin-top:18px">
+          <div class="table-title"><h2>الأرباح الأخيرة</h2><span class="badge-status">Demo</span></div>
+          <div class="zone-list" id="recentEarningsList"></div>
+          <p class="campaign-help">تمر الأرباح مستقبلًا بالمراحل: Ad Event → Validation → Pending → Approved → Available.</p>
+        </div>
+      `);
+    }
+    const earningsList = $("#recentEarningsList");
+    if (earningsList) {
+      earningsList.innerHTML = publisher.recentEarnings.map(earning => `
+        <div class="zone-row">
+          <div><strong>${escapeHtml(earning.source)}</strong><small>${escapeHtml(earning.date)} · ${escapeHtml(earning.adType)}</small></div>
+          <span class="badge-status">${money(earning.amountCents)} · ${escapeHtml(statusLabel(earning.status))}</span>
+        </div>
+      `).join("");
+    }
+  }
+
+  function renderWallet() {
+    const hero = $(".balance-hero");
+    if (hero) {
+      hero.innerHTML = `
+        <small>الرصيد المتاح للحملات</small>
+        <strong id="walletPageBalance">${money(getAdvertiserAvailableCents())}</strong>
+        <div class="traffic-row"><span>إجمالي الإيداع</span><strong>${money(demoState.advertiser.totalDepositedCents)}</strong></div>
+        <div class="traffic-row"><span>الرصيد المحجوز</span><strong>${money(demoState.advertiser.reservedCents)}</strong></div>
+        <div class="traffic-row"><span>إجمالي الإنفاق</span><strong>${money(demoState.advertiser.spentCents)}</strong></div>
+        <p>هذه أرقام Demo داخل الواجهة فقط، وليست Ledger أو مصدرًا ماليًا حقيقيًا.</p>
+      `;
+    }
+    const transactionsCard = $("#walletView .table-card");
+    if (transactionsCard) {
+      transactionsCard.innerHTML = `
+        <div class="table-title"><h2>آخر العمليات</h2><span class="badge-status">${demoState.advertiser.transactions.length} تجريبية</span></div>
+        <div class="zone-list">
+          ${demoState.advertiser.transactions.map(transaction => `
+            <div class="zone-row">
+              <div><strong>${escapeHtml(transaction.label)}</strong><small>${escapeHtml(transaction.type)}</small></div>
+              <span class="badge-status">${money(transaction.amountCents)} · ${escapeHtml(statusLabel(transaction.status))}</span>
+            </div>
+          `).join("")}
+        </div>
+        <p class="campaign-help">لن تُنشأ معاملات فعلية قبل ربط المصادقة وPayment Gateway وLedger على الخادم.</p>
+      `;
+    }
+  }
+
+  function renderAnalytics(period = "today") {
+    const advertiserData = {
+      today: [money(demoState.advertiser.spentCents), integer(24000), integer(650), "0"],
+      yesterday: [money(820), integer(4100), integer(130), "0"],
+      "7d": [money(3140), integer(19200), integer(480), "0"],
+      "30d": [money(demoState.advertiser.spentCents), integer(28400), integer(650), "0"],
+      custom: [money(0), "0", "0", "0"]
+    };
+    const publisherData = {
+      today: [money(demoState.publisher.totalEarnedCents), integer(demoState.publisher.impressions), integer(demoState.publisher.clicks), integer(demoState.publisher.websites.length)],
+      yesterday: [money(310), integer(4100), integer(170), "1"],
+      "7d": [money(2380), integer(19200), integer(840), "1"],
+      "30d": [money(demoState.publisher.totalEarnedCents), integer(demoState.publisher.impressions), integer(demoState.publisher.clicks), integer(demoState.publisher.websites.length)],
+      custom: [money(0), "0", "0", "0"]
+    };
+    const data = (getCurrentRole() === "publisher" ? publisherData : advertiserData)[period] || advertiserData.today;
+    ["metricOneValue", "metricTwoValue", "metricThreeValue", "metricFourValue"].forEach((id, index) => {
+      const node = document.getElementById(id);
+      if (node) node.textContent = data[index];
     });
+    $$("[data-period]").forEach(button => button.classList.toggle("active", button.dataset.period === period));
+  }
 
-    const publisherPanelReady = document.getElementById("publisherView");
-    const modal = document.getElementById("authModal");
-    const landing = document.getElementById("landing");
-    const dashboard = document.getElementById("dashboard");
-    const modalTitle = document.getElementById("modalTitle");
-    const nameField = document.getElementById("nameField");
-    const roleField = document.getElementById("roleField");
-    const switchText = document.getElementById("switchText");
-    const switchButton = document.querySelector(".switch button");
-    const authForm = document.getElementById("authForm");
+  function renderAll() {
+    renderAdvertiserOverview();
+    renderPublisherOverview();
+    renderWallet();
+    renderTopBalance();
+    renderAnalytics();
+    applyRoleToUi();
+  }
 
-    let mode = "login";
+  function applyRoleToUi() {
+    const role = getCurrentRole();
+    if (dashboard) dashboard.dataset.role = role;
+    const roleLabel = $("#dashboardRoleLabel");
+    if (roleLabel) roleLabel.textContent = role === "publisher" ? "ناشر" : "معلن";
+    $$("[data-role]").forEach(node => {
+      node.hidden = Boolean(node.dataset.role && node.dataset.role !== role);
+    });
+    const settingsRoleCopy = $("#settingsRoleCopy");
+    if (settingsRoleCopy) settingsRoleCopy.textContent = role === "publisher"
+      ? "إعدادات حساب الناشر وإدارة المواقع"
+      : "إعدادات حساب المعلن وإدارة الحملات";
+    const analyticsSubtitle = $("#analyticsSubtitle");
+    if (analyticsSubtitle) analyticsSubtitle.textContent = role === "publisher"
+      ? "تابع الظهور والنقرات والأرباح من مواقعك"
+      : "تابع الإنفاق والظهور والنقرات للحملات";
+    renderAnalytics();
+  }
 
-    function toggleTheme() {
-      document.body.classList.toggle("dark");
-      localStorage.setItem(
-        "adnova-theme",
-        document.body.classList.contains("dark") ? "dark" : "light"
-      );
+  function showDashboardView(view) {
+    const role = getCurrentRole();
+    let effectiveView = view;
+    if (role === "publisher" && ["overview", "campaigns", "wallet"].includes(view)) effectiveView = "publisher";
+    if (role === "advertiser" && ["publisher", "zones", "withdrawals"].includes(view)) effectiveView = "overview";
+    const targetId = {
+      overview: "advertiserOverviewView",
+      publisher: "publisherView",
+      analytics: "analyticsView",
+      wallet: "walletView",
+      settings: "settingsView"
+    }[effectiveView] || "dashboardPlaceholderView";
+    $$(".dashboard-view").forEach(panel => panel.classList.toggle("active", panel.id === targetId));
+    $$("[data-dashboard-view]").forEach(button => {
+      button.classList.toggle("active", button.dataset.dashboardView === effectiveView && !button.hidden);
+    });
+    if (effectiveView === "campaigns") openCampaignModal();
+    if (effectiveView === "zones") openZoneModal();
+    if (window.innerWidth <= 900) closeSidebar();
+    renderAnalytics();
+  }
+
+  function openAuth(type = "login", preferredRole) {
+    authMode = type;
+    const register = authMode === "register";
+    $("#modalTitle").textContent = register ? "إنشاء حساب جديد" : "تسجيل الدخول";
+    $("#nameField").style.display = register ? "block" : "none";
+    if ($("#roleField")) $("#roleField").style.display = "block";
+    $("#switchText").textContent = register ? "لديك حساب بالفعل؟" : "ليس لديك حساب؟";
+    $(".switch button").textContent = register ? "تسجيل الدخول" : "إنشاء حساب";
+    if (preferredRole && authRole) authRole.value = preferredRole;
+    authModal.classList.add("show");
+  }
+
+  function closeAuth() {
+    authModal.classList.remove("show");
+  }
+
+  function switchAuth() {
+    openAuth(authMode === "login" ? "register" : "login");
+  }
+
+  function openCampaignModal() {
+    campaignModal.classList.add("show");
+    campaignModal.setAttribute("aria-hidden", "false");
+    $("#campaignStatus").textContent = "";
+    $("#campaignStatus").className = "campaign-status field-full";
+    updateCreativeFields();
+    $("#campaignName").focus();
+  }
+
+  function closeCampaignModal() {
+    campaignModal.classList.remove("show");
+    campaignModal.setAttribute("aria-hidden", "true");
+  }
+
+  function fieldHtml(id, label, type = "text", placeholder = "", extra = "") {
+    return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}" placeholder="${placeholder}" ${extra}></div>`;
+  }
+
+  function updateCreativeFields() {
+    const type = $("#adFormat")?.value || "banner";
+    const container = $("#creativeFields");
+    if (!container) return;
+    const commonUrl = fieldHtml("destinationUrl", "Destination URL", "url", "https://example.com", "required");
+    const creativeUrl = fieldHtml("creativeUrl", "رابط الـCreative", "url", "https://cdn.example.com/creative", "");
+    let html = "";
+    if (type === "banner") {
+      html = `${creativeUrl}<div class="field"><label for="bannerSize">حجم الـAd Zone</label><select id="bannerSize">${CONFIG.bannerSizes.map(size => `<option>${size}</option>`).join("")}</select></div>${commonUrl}`;
+    } else if (type === "native") {
+      html = `${fieldHtml("creativeTitle", "عنوان الإعلان", "text", "عنوان Native")} ${fieldHtml("creativeDescription", "وصف الإعلان", "text", "وصف قصير")} ${fieldHtml("creativeImage", "رابط الصورة", "url", "https://.../image.jpg")} ${fieldHtml("creativeLogo", "رابط الشعار", "url", "https://.../logo.png")} ${fieldHtml("creativeCta", "نص CTA", "text", "اكتشف الآن")} ${commonUrl}`;
+    } else if (type === "social") {
+      html = `${creativeUrl}${fieldHtml("creativeTitle", "عنوان المنشور", "text", "عنوان الإعلان")}${fieldHtml("creativeCta", "نص CTA", "text", "اعرف المزيد")}${commonUrl}`;
+    } else if (type === "popup") {
+      html = `${creativeUrl}${commonUrl}<div class="field"><label for="frequency">Frequency</label><select id="frequency"><option>مرة كل جلسة</option><option>مرة كل 24 ساعة</option><option>بدون حد تجريبي</option></select></div>`;
+    } else if (type === "video") {
+      html = `${fieldHtml("creativeUrl", "رابط الفيديو", "url", "https://cdn.example.com/video.mp4", "required")}${commonUrl}<div class="field field-full"><label for="videoPreview">Preview</label><video id="videoPreview" controls muted style="width:100%;max-height:160px;background:#07111f"></video></div>`;
+    } else {
+      html = `${commonUrl}<p class="campaign-help field-full">Direct Link لا يعتمد على زيارة الواجهة وحدها كحدث مالي موثوق؛ سيأتي التحقق من الخادم.</p>`;
     }
-
-    if (localStorage.getItem("adnova-theme") === "dark") {
-      document.body.classList.add("dark");
+    container.innerHTML = html;
+    const preview = $("#creativePreview");
+    if (preview) {
+      preview.hidden = false;
+      preview.innerHTML = `<strong>معاينة ${escapeHtml(adTypeLabel(type))}</strong><br><span>ستظهر المعاينة بعد إدخال بيانات الـCreative. لا يتم تشغيل إعلان حقيقي في هذه المرحلة.</span>`;
     }
+    $("#creativeUrl")?.addEventListener("input", event => {
+      const video = $("#videoPreview");
+      if (video && type === "video") video.src = event.target.value;
+    });
+  }
 
-    function openAuth(type) {
-      mode = type;
-      updateAuth();
-      modal.classList.add("show");
+  function setCampaignStatus(message, isError = false) {
+    const status = $("#campaignStatus");
+    status.textContent = message;
+    status.className = `campaign-status field-full show${isError ? " error" : ""}`;
+  }
+
+  function createCampaign(event) {
+    event.preventDefault();
+    const form = new FormData(campaignForm);
+    const name = String(form.get("campaignName") || "").trim();
+    const budgetCents = cents(form.get("totalBudget"));
+    const dailyBudgetCents = cents(form.get("dailyBudget"));
+    const pricingModel = String(form.get("pricingModel") || "cpm");
+    const adType = String(form.get("adFormat") || "banner");
+    if (!name || budgetCents <= 0 || dailyBudgetCents <= 0) {
+      setCampaignStatus("أدخل اسم الحملة وميزانية صحيحة أكبر من صفر.", true);
+      return;
     }
-
-    function closeAuth() {
-      modal.classList.remove("show");
+    if (dailyBudgetCents > budgetCents) {
+      setCampaignStatus("الميزانية اليومية لا يمكن أن تتجاوز الميزانية الإجمالية.", true);
+      return;
     }
-
-    function switchAuth() {
-      mode = mode === "login" ? "register" : "login";
-      updateAuth();
+    const hasInsufficientBalance = budgetCents > getAdvertiserAvailableCents();
+    const isCpa = pricingModel === "cpa";
+    demoState.advertiser.campaigns.unshift({
+      id: `campaign-${Date.now()}`,
+      name,
+      adType,
+      pricingModel,
+      budgetCents,
+      spentCents: 0,
+      impressions: 0,
+      clicks: 0,
+      status: "draft",
+      destinationUrl: String(form.get("destinationUrl") || "").trim()
+    });
+    renderAll();
+    if (isCpa) {
+      setCampaignStatus("حُفظت كمسودة. CPA مدعوم معماريًا فقط ولم يُفعّل كنظام فعلي.", false);
+    } else if (hasInsufficientBalance) {
+      setCampaignStatus(`حُفظت كمسودة. Insufficient Balance — المتاح ${money(getAdvertiserAvailableCents())}.`, true);
+    } else {
+      setCampaignStatus("حُفظت كمسودة Demo. لم يُحجز رصيد ولم يبدأ إنفاق فعلي.", false);
     }
+    campaignForm.reset();
+    updateCreativeFields();
+  }
 
-    function updateAuth() {
-      const register = mode === "register";
+  function openWebsiteModal() {
+    websiteModal.classList.add("show");
+    websiteModal.setAttribute("aria-hidden", "false");
+    $("#websiteStatus").textContent = "";
+    $("#websiteStatus").className = "publisher-status field-full";
+    $("#websiteName").focus();
+  }
 
-      modalTitle.textContent = register
-        ? "إنشاء حساب جديد"
-        : "تسجيل الدخول";
+  function closeWebsiteModal() {
+    websiteModal.classList.remove("show");
+    websiteModal.setAttribute("aria-hidden", "true");
+  }
 
-      nameField.style.display = register ? "block" : "none";
-      roleField.style.display = register ? "block" : "none";
-
-      switchText.textContent = register
-        ? "لديك حساب بالفعل؟"
-        : "ليس لديك حساب؟";
-
-      switchButton.textContent = register
-        ? "تسجيل الدخول"
-        : "إنشاء حساب";
+  function createWebsite(event) {
+    event.preventDefault();
+    const rawUrl = $("#websiteUrl").value.trim();
+    let parsedUrl;
+    try { parsedUrl = new URL(rawUrl); } catch {
+      $("#websiteStatus").textContent = "أدخل رابطًا صحيحًا يبدأ بـ http:// أو https://.";
+      $("#websiteStatus").className = "publisher-status field-full show error";
+      return;
     }
+    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+      $("#websiteStatus").textContent = "يسمح فقط بروابط HTTP وHTTPS.";
+      $("#websiteStatus").className = "publisher-status field-full show error";
+      return;
+    }
+    demoState.publisher.websites.push({
+      name: $("#websiteName").value.trim(),
+      url: parsedUrl.toString(),
+      category: $("#websiteCategory").value,
+      status: "pending",
+      zones: 0
+    });
+    renderPublisherOverview();
+    $("#websiteStatus").textContent = "أُضيف الموقع إلى حالة مراجعة Demo. التحقق الحقيقي سيكون Server-Side.";
+    $("#websiteStatus").className = "publisher-status field-full show";
+    websiteForm.reset();
+  }
 
-    authForm.addEventListener("submit", function(event) {
+  function openZoneModal() {
+    if (getCurrentRole() !== "publisher") {
+      showDashboardView("overview");
+      return;
+    }
+    zoneModal.classList.add("show");
+    zoneModal.setAttribute("aria-hidden", "false");
+    $("#zoneStatus").textContent = "";
+    $("#zoneStatus").className = "publisher-status field-full";
+    $("#zoneName").focus();
+  }
+
+  function closeZoneModal() {
+    zoneModal.classList.remove("show");
+    zoneModal.setAttribute("aria-hidden", "true");
+  }
+
+  function createZone(event) {
+    event.preventDefault();
+    demoState.publisher.zones.push({
+      name: $("#zoneName").value.trim(),
+      type: $("#zoneFormat").value.toLowerCase(),
+      size: $("#zoneSize").value,
+      status: "active"
+    });
+    renderPublisherOverview();
+    $("#zoneStatus").textContent = "تم حفظ Ad Zone تجريبيًا. لن يتم توليد Ad Code حقيقي قبل ربط الخادم.";
+    $("#zoneStatus").className = "publisher-status field-full show";
+    zoneForm.reset();
+  }
+
+  function setDepositAmount(value) {
+    const input = $("#depositAmount");
+    if (input) input.value = value;
+  }
+
+  function applyDemoDeposit(rawAmount, statusElement) {
+    const amountCents = cents(rawAmount);
+    if (amountCents <= 0) {
+      statusElement.textContent = "أدخل قيمة أكبر من صفر.";
+      statusElement.className = "campaign-status show error";
+      return;
+    }
+    demoState.advertiser.totalDepositedCents += amountCents;
+    demoState.advertiser.transactions.unshift({
+      label: "إيداع تجريبي جديد",
+      type: "deposit",
+      amountCents,
+      status: "demo"
+    });
+    renderAll();
+    statusElement.textContent = `تمت إضافة ${money(amountCents)} تجريبيًا. لا توجد عملية مالية حقيقية.`;
+    statusElement.className = "campaign-status show";
+  }
+
+  function openWalletDrawer() {
+    if (getCurrentRole() === "publisher") {
+      showDashboardView("publisher");
+      return;
+    }
+    renderTopBalance();
+    walletDrawer.classList.add("open");
+    walletDrawerBackdrop.classList.add("show");
+    walletDrawer.setAttribute("aria-hidden", "false");
+    $("#drawerDepositAmount").focus();
+  }
+
+  function closeWalletDrawer() {
+    walletDrawer.classList.remove("open");
+    walletDrawerBackdrop.classList.remove("show");
+    walletDrawer.setAttribute("aria-hidden", "true");
+  }
+
+  function openSidebar() {
+    sidebar.classList.add("mobile-open");
+    sidebarBackdrop?.classList.add("show");
+    document.body.classList.add("drawer-open");
+    sidebarToggle?.setAttribute("aria-expanded", "true");
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove("mobile-open");
+    sidebarBackdrop?.classList.remove("show");
+    document.body.classList.remove("drawer-open");
+    sidebarToggle?.setAttribute("aria-expanded", "false");
+  }
+
+  function toggleSidebar() {
+    if (window.innerWidth <= 900) {
+      sidebar.classList.contains("mobile-open") ? closeSidebar() : openSidebar();
+    } else {
+      sidebarLayout.classList.toggle("nav-collapsed");
+    }
+  }
+
+  function closeMobileNav() {
+    navLinks?.classList.remove("open");
+    navDrawerBackdrop?.classList.remove("show");
+    document.body.classList.remove("landing-drawer-open");
+    mobileButton?.setAttribute("aria-expanded", "false");
+  }
+
+  function toggleTheme() {
+    document.body.classList.toggle("dark");
+    try { localStorage.setItem("adzora-theme", document.body.classList.contains("dark") ? "dark" : "light"); } catch {}
+  }
+
+  function logout() {
+    closeSidebar();
+    closeWalletDrawer();
+    closeCampaignModal();
+    closeWebsiteModal();
+    closeZoneModal();
+    dashboard.classList.remove("active");
+    landing.style.display = "block";
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+
+  function applyRolePreview() {
+    demoState.role = $("#rolePreview").value;
+    renderAll();
+    showDashboardView(demoState.role === "publisher" ? "publisher" : "overview");
+  }
+
+  function wireEvents() {
+    $("#adFormat")?.addEventListener("change", updateCreativeFields);
+    campaignForm?.addEventListener("submit", createCampaign);
+    websiteForm?.addEventListener("submit", createWebsite);
+    zoneForm?.addEventListener("submit", createZone);
+    authForm?.addEventListener("submit", event => {
       event.preventDefault();
-
+      demoState.role = authRole?.value === "publisher" ? "publisher" : "advertiser";
       closeAuth();
       landing.style.display = "none";
       dashboard.classList.add("active");
+      renderAll();
+      showDashboardView(demoState.role === "publisher" ? "publisher" : "overview");
       window.scrollTo({ top: 0, behavior: "instant" });
     });
-
-    function logout() {
-      showDashboardView("overview");
-      dashboard.classList.remove("active");
-      landing.style.display = "block";
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }
-
-    modal.addEventListener("click", function(event) {
-      if (event.target === modal) closeAuth();
-    });
-
-    const dashboardViews = document.querySelectorAll(".dashboard-view");
-    const dashboardNavButtons = document.querySelectorAll(".side-nav button[data-dashboard-view]");
-    const mobileDashboardNav = document.getElementById("dashboardMobileNav");
-    const placeholderTitle = document.getElementById("placeholderTitle");
-    const placeholderText = document.getElementById("placeholderText");
-    const publisherNotice = document.getElementById("publisherNotice");
-    const websiteModal = document.getElementById("websiteModal");
-    const websiteForm = document.getElementById("websiteForm");
-    const websiteStatus = document.getElementById("websiteStatus");
-
-    const pendingSections = {
-      analytics: {
-        title: "الإحصائيات",
-        text: "ستظهر هنا تقارير Impressions وClicks وCTR وRevenue مع فلاتر زمنية ورسوم مناسبة للهاتف."
-      },
-      payments: {
-        title: "المدفوعات",
-        text: "سيتم بناء الرصيد وعمليات الإيداع والسحب من خلال Ledger Server-Side، وليس من بيانات الواجهة."
-      },
-      settings: {
-        title: "الإعدادات",
-        text: "ستتضمن هذه الصفحة إعدادات الحساب والأمان والتفضيلات بعد إضافة المصادقة الحقيقية."
-      }
-    };
-
-    function showDashboardView(view) {
-      let targetId = "dashboardPlaceholderView";
-      if (view === "overview" || view === "campaigns") targetId = "advertiserOverviewView";
-      if (view === "publisher") targetId = "publisherView";
-
-      dashboardViews.forEach(panel => {
-        panel.classList.toggle("active", panel.id === targetId);
-      });
-
-      dashboardNavButtons.forEach(button => {
-        button.classList.toggle("active", button.dataset.dashboardView === view);
-      });
-
-      if (mobileDashboardNav) mobileDashboardNav.value = view;
-
-      if (targetId === "dashboardPlaceholderView") {
-        placeholderTitle.textContent = pendingSections[view]?.title || "القسم قيد البناء";
-        placeholderText.textContent = pendingSections[view]?.text || "هذا القسم سيُبنى في خطوة مستقلة مع ربطه بالـAPI.";
-      }
-
-      if (view === "campaigns") openCampaignModal();
-    }
-
-    dashboardNavButtons.forEach(button => {
-      button.addEventListener("click", () => showDashboardView(button.dataset.dashboardView));
-    });
-
-    mobileDashboardNav?.addEventListener("change", event => {
-      showDashboardView(event.target.value);
-    });
-
-    function showPublisherNotice(message) {
-      publisherNotice.textContent = message;
-      publisherNotice.classList.add("show");
-    }
-
-    function openWebsiteModal() {
-      websiteModal.classList.add("show");
-      websiteModal.setAttribute("aria-hidden", "false");
-      websiteStatus.className = "publisher-status field-full";
-      websiteStatus.textContent = "";
-      document.getElementById("websiteName").focus();
-    }
-
-    function closeWebsiteModal() {
-      websiteModal.classList.remove("show");
-      websiteModal.setAttribute("aria-hidden", "true");
-    }
-
-    websiteForm.addEventListener("submit", event => {
+    $("#depositForm")?.addEventListener("submit", event => {
       event.preventDefault();
-      const rawUrl = document.getElementById("websiteUrl").value.trim();
-      let parsedUrl;
-      try {
-        parsedUrl = new URL(rawUrl);
-      } catch (error) {
-        websiteStatus.textContent = "أدخل رابطًا صحيحًا يبدأ بـ http:// أو https://.";
-        websiteStatus.className = "publisher-status field-full show error";
-        return;
-      }
-
-      if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-        websiteStatus.textContent = "يسمح فقط بروابط HTTP وHTTPS، ولن يتم قبول javascript أو data.";
-        websiteStatus.className = "publisher-status field-full show error";
-        return;
-      }
-
-      websiteStatus.textContent = "تم التحقق من صيغة الرابط تجريبيًا. لم يُضف الموقع بعد لأن الحفظ والتحقق يحتاجان إلى Backend.";
-      websiteStatus.className = "publisher-status field-full show";
+      applyDemoDeposit($("#depositAmount").value, $("#depositStatus"));
     });
-
-    websiteModal.addEventListener("click", event => {
-      if (event.target === websiteModal) closeWebsiteModal();
+    $("#drawerDepositForm")?.addEventListener("submit", event => {
+      event.preventDefault();
+      applyDemoDeposit($("#drawerDepositAmount").value, $("#drawerDepositStatus"));
+      $("#drawerDepositAmount").value = "";
     });
-
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-        }
-      });
-    }, { threshold: .12 });
-
-    document.querySelectorAll(".reveal").forEach(element => {
-      observer.observe(element);
-    });
-
-    const mobileButton = document.querySelector(".mobile-btn");
-    const navLinks = document.querySelector(".nav-links");
-     const navDrawerBackdrop = document.getElementById("navDrawerBackdrop");
-
-    function closeMobileNav() {
-       navLinks.classList.remove("open");
-       navDrawerBackdrop?.classList.remove("show");
-       document.body.classList.remove("landing-drawer-open");
-       navLinks.setAttribute("aria-hidden", "true");
-       mobileButton.setAttribute("aria-expanded", "false");
-       mobileButton.setAttribute("aria-label", "فتح القائمة");
-     }
-
-    mobileButton.addEventListener("click", event => {
+    $("[data-period]") && $$("[data-period]").forEach(button => button.addEventListener("click", () => {
+      const customRange = $("#customRange");
+      if (customRange) customRange.hidden = button.dataset.period !== "custom";
+      if (button.dataset.period !== "custom") renderAnalytics(button.dataset.period);
+    }));
+    $("#applyCustomRange")?.addEventListener("click", () => renderAnalytics("custom"));
+    $$("[data-dashboard-view]").forEach(button => button.addEventListener("click", () => showDashboardView(button.dataset.dashboardView)));
+    $(".switch button")?.addEventListener("click", switchAuth);
+    authModal?.addEventListener("click", event => { if (event.target === authModal) closeAuth(); });
+    campaignModal?.addEventListener("click", event => { if (event.target === campaignModal) closeCampaignModal(); });
+    websiteModal?.addEventListener("click", event => { if (event.target === websiteModal) closeWebsiteModal(); });
+    zoneModal?.addEventListener("click", event => { if (event.target === zoneModal) closeZoneModal(); });
+    mobileButton?.addEventListener("click", event => {
       event.stopPropagation();
-      const isOpen = navLinks.classList.toggle("open");
-       navDrawerBackdrop?.classList.toggle("show", isOpen);
-       document.body.classList.toggle("landing-drawer-open", isOpen);
-       navLinks.setAttribute("aria-hidden", String(!isOpen));
-       mobileButton.setAttribute("aria-expanded", String(isOpen));
-       mobileButton.setAttribute("aria-label", isOpen ? "إغلاق القائمة" : "فتح القائمة");
+      const open = navLinks.classList.toggle("open");
+      navDrawerBackdrop?.classList.toggle("show", open);
+      mobileButton.setAttribute("aria-expanded", String(open));
     });
-
-    navLinks.querySelectorAll("a").forEach(link => {
-      link.addEventListener("click", closeMobileNav);
-    });
-
-    document.addEventListener("click", event => {
-      if (!navLinks.contains(event.target) && !mobileButton.contains(event.target)) {
-        closeMobileNav();
-      }
-    });
-
+    navLinks?.querySelectorAll("a").forEach(link => link.addEventListener("click", closeMobileNav));
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") {
         closeMobileNav();
@@ -256,85 +719,46 @@ const campaignModal = document.getElementById("campaignModal");
         closeWalletDrawer();
         closeCampaignModal();
         closeWebsiteModal();
+        closeZoneModal();
       }
     });
-
     window.addEventListener("resize", () => {
-      if (window.innerWidth > 900) closeMobileNav();
+      if (window.innerWidth > 900) {
+        closeMobileNav();
+        closeSidebar();
+      }
     });
+    $$(".toggle").forEach(toggle => toggle.addEventListener("click", () => toggle.classList.toggle("off")));
+    $("#rolePreview")?.addEventListener("change", applyRolePreview);
+  }
 
-    // Role-based dashboard, wallet drawer, and publisher zone UX.
-    const roleAwareNavButtons = document.querySelectorAll("[data-dashboard-view]");
-     const roleAwareGroups = document.querySelectorAll(".side-nav-group[data-role]");
-    const roleAwareOptions = document.querySelectorAll("#dashboardMobileNav option[data-role]");
-    const authRole = document.getElementById("authRole");
-    const dashboardRoleLabel = document.getElementById("dashboardRoleLabel");
-    const walletDrawer = document.getElementById("walletDrawer");
-    const walletDrawerBackdrop = document.getElementById("walletDrawerBackdrop");
-    const zoneModal = document.getElementById("zoneModal");
-    const zoneForm = document.getElementById("zoneForm");
-    const zoneStatus = document.getElementById("zoneStatus");
-    let demoBalance = Number(localStorage.getItem("adzora-demo-balance") || 0);
-    function formatDemoBalance() { return "$" + demoBalance.toFixed(2); }
-    function renderDemoBalance() { const formatted = formatDemoBalance(); ["topBalance","walletPageBalance","drawerBalance"].forEach(id => { const element = document.getElementById(id); if (element) element.textContent = formatted; }); }
-    function setDashboardRole(role) {
-      const safeRole = role === "publisher" ? "publisher" : "advertiser"; dashboard.dataset.role = safeRole; localStorage.setItem("adzora-role", safeRole); dashboardRoleLabel.textContent = safeRole === "publisher" ? "ناشر" : "معلن";
-      roleAwareNavButtons.forEach(button => { button.hidden = Boolean(button.dataset.role && button.dataset.role !== safeRole); }); roleAwareGroups.forEach(group => { group.hidden = group.dataset.role !== safeRole; }); roleAwareOptions.forEach(option => { option.hidden = option.dataset.role !== safeRole; });
-      const rolePreview = document.getElementById("rolePreview"); if (rolePreview) rolePreview.value = safeRole; const settingsRoleCopy = document.getElementById("settingsRoleCopy"); if (settingsRoleCopy) settingsRoleCopy.textContent = safeRole === "publisher" ? "إعدادات حساب الناشر وإدارة المواقع" : "إعدادات حساب المعلن وإدارة الحملات"; const analyticsSubtitle = document.getElementById("analyticsSubtitle"); if (analyticsSubtitle) analyticsSubtitle.textContent = safeRole === "publisher" ? "تابع الظهور والنقرات والأرباح من مواقعك" : "تابع الإنفاق والظهور والنقرات والتحويلات لحملاتك";
-      const metricOneLabel = document.getElementById("metricOneLabel"), metricOneValue = document.getElementById("metricOneValue"), metricFourLabel = document.getElementById("metricFourLabel"); if (safeRole === "publisher") { metricOneLabel.textContent="إجمالي الأرباح"; metricOneValue.textContent="$1,284"; document.getElementById("metricTwoLabel").textContent="الظهور"; document.getElementById("metricTwoValue").textContent="284K"; document.getElementById("metricThreeValue").textContent="12,840"; metricFourLabel.textContent="المواقع النشطة"; document.getElementById("metricFourValue").textContent="2"; } else { metricOneLabel.textContent="إجمالي الإنفاق"; metricOneValue.textContent="$48,290"; document.getElementById("metricTwoLabel").textContent="إجمالي الظهور"; document.getElementById("metricTwoValue").textContent="2.84M"; document.getElementById("metricThreeValue").textContent="128,400"; metricFourLabel.textContent="التحويلات"; document.getElementById("metricFourValue").textContent="18,492"; } renderDemoBalance();
-    }
-    function openAuth(type, preferredRole) { mode=type; updateAuth(); if (preferredRole && authRole) authRole.value=preferredRole; modal.classList.add("show"); if (authRole) authRole.focus(); }
-    function updateAuth() { const register=mode === "register"; modalTitle.textContent=register ? "إنشاء حساب جديد" : "تسجيل الدخول"; nameField.style.display=register ? "block" : "none"; roleField.style.display="block"; switchText.textContent=register ? "لديك حساب بالفعل؟" : "ليس لديك حساب؟"; switchButton.textContent=register ? "تسجيل الدخول" : "إنشاء حساب"; if (authRole && !authRole.value) authRole.value=localStorage.getItem("adzora-role") || "advertiser"; }
-    authForm.addEventListener("submit", event => { event.preventDefault(); const selectedRole=authRole?.value || "advertiser"; setDashboardRole(selectedRole); closeAuth(); landing.style.display="none"; dashboard.classList.add("active"); showDashboardView(selectedRole === "publisher" ? "publisher" : "overview"); window.scrollTo({top:0,behavior:"instant"}); });
-    function showDashboardView(view) { const role=dashboard.dataset.role || localStorage.getItem("adzora-role") || "advertiser"; let effectiveView=view; if (role === "publisher" && ["overview","campaigns"].includes(view)) effectiveView="publisher"; if (role === "advertiser" && ["publisher","zones"].includes(view)) effectiveView="overview"; let targetId="dashboardPlaceholderView"; if (effectiveView === "overview") targetId="advertiserOverviewView"; if (effectiveView === "publisher") targetId="publisherView"; if (effectiveView === "analytics") targetId="analyticsView"; if (effectiveView === "wallet") targetId="walletView"; if (effectiveView === "settings") targetId="settingsView"; dashboardViews.forEach(panel => panel.classList.toggle("active", panel.id === targetId)); roleAwareNavButtons.forEach(button => button.classList.toggle("active", button.dataset.dashboardView === effectiveView && !button.hidden)); if (mobileDashboardNav) mobileDashboardNav.value=effectiveView; if (effectiveView === "campaigns") openCampaignModal(); if (effectiveView === "zones") openZoneModal(); }
-    function logout() { closeSidebar(); closeWalletDrawer(); closeCampaignModal(); closeWebsiteModal(); closeZoneModal(); dashboard.classList.remove("active"); landing.style.display="block"; window.scrollTo({top:0,behavior:"instant"}); }
-    function openWalletDrawer() { renderDemoBalance(); walletDrawer.classList.add("open"); walletDrawerBackdrop.classList.add("show"); walletDrawer.setAttribute("aria-hidden","false"); document.getElementById("drawerDepositAmount").focus(); }
-    function closeWalletDrawer() { walletDrawer.classList.remove("open"); walletDrawerBackdrop.classList.remove("show"); walletDrawer.setAttribute("aria-hidden","true"); }
-    function setDepositAmount(value) { document.getElementById("depositAmount").value=value; }
-    function applyDemoDeposit(rawAmount, statusElement) { const amount=Number(rawAmount); if (!Number.isFinite(amount) || amount <= 0) { statusElement.textContent="أدخل قيمة أكبر من صفر."; statusElement.className="campaign-status show"; return false; } demoBalance += amount; localStorage.setItem("adzora-demo-balance",demoBalance.toFixed(2)); renderDemoBalance(); statusElement.textContent="تمت إضافة " + amount.toFixed(2) + "$ تجريبيًا. لا توجد عملية مالية حقيقية."; statusElement.className="campaign-status show"; return true; }
-    document.getElementById("depositForm").addEventListener("submit", event => { event.preventDefault(); applyDemoDeposit(document.getElementById("depositAmount").value, document.getElementById("depositStatus")); }); document.getElementById("drawerDepositForm").addEventListener("submit", event => { event.preventDefault(); if (applyDemoDeposit(document.getElementById("drawerDepositAmount").value, document.getElementById("drawerDepositStatus"))) document.getElementById("drawerDepositAmount").value=""; });
-    function openZoneModal() { if ((dashboard.dataset.role || localStorage.getItem("adzora-role")) !== "publisher") { showDashboardView("overview"); return; } zoneModal.classList.add("show"); zoneModal.setAttribute("aria-hidden","false"); zoneStatus.className="publisher-status field-full"; zoneStatus.textContent=""; document.getElementById("zoneName").focus(); }
-    function closeZoneModal() { zoneModal.classList.remove("show"); zoneModal.setAttribute("aria-hidden","true"); } zoneModal.addEventListener("click", event => { if (event.target === zoneModal) closeZoneModal(); }); zoneForm.addEventListener("submit", event => { event.preventDefault(); zoneStatus.textContent="تم التحقق من Ad Zone تجريبيًا. سيُنشأ الكود الحقيقي بعد ربط الموقع والـAPI."; zoneStatus.className="publisher-status field-full show"; });
-    document.querySelectorAll(".toggle").forEach(toggle => { toggle.addEventListener("click", () => toggle.classList.toggle("off")); }); function applyRolePreview() { const selectedRole=document.getElementById("rolePreview").value; setDashboardRole(selectedRole); showDashboardView(selectedRole === "publisher" ? "publisher" : "overview"); }
-    roleAwareNavButtons.forEach(button => { button.addEventListener("click", () => showDashboardView(button.dataset.dashboardView)); }); renderDemoBalance(); setDashboardRole(localStorage.getItem("adzora-role") || "advertiser");
+  Object.assign(window, {
+    openAuth,
+    closeAuth,
+    switchAuth,
+    toggleTheme,
+    logout,
+    openCampaignModal,
+    closeCampaignModal,
+    openWebsiteModal,
+    closeWebsiteModal,
+    openZoneModal,
+    closeZoneModal,
+    openWalletDrawer,
+    closeWalletDrawer,
+    setDepositAmount,
+    toggleSidebar,
+    closeSidebar,
+    closeMobileNav,
+    showDashboardView,
+    applyRolePreview
+  });
 
-
-    // Final role rules for the current frontend milestone.
-    const sidebarLayout = document.querySelector(".dashboard-layout");
-    const sidebarToggleButton = document.getElementById("sidebarToggle");
-    const mobileSidebar = document.querySelector(".dashboard .sidebar");
-     const dashboardSidebarBackdrop = document.getElementById("dashboardSidebarBackdrop");
-    const publisherEarningsBalance = 1284;
-    function getCurrentRole() { return dashboard.dataset.role || localStorage.getItem("adzora-role") || "advertiser"; }
-    function renderDemoBalance() { const role=getCurrentRole(); const formatted=role === "publisher" ? "$" + publisherEarningsBalance.toFixed(2) : formatDemoBalance(); ["topBalance","walletPageBalance","drawerBalance"].forEach(id => { const element=document.getElementById(id); if (element) element.textContent=formatted; }); }
-    function openSidebar() {
-       mobileSidebar.classList.add("mobile-open");
-       dashboardSidebarBackdrop?.classList.add("show");
-       document.body.classList.add("drawer-open");
-       sidebarToggleButton.setAttribute("aria-expanded", "true");
-       sidebarToggleButton.setAttribute("aria-label", "إغلاق القائمة الجانبية");
-     }
-     function closeSidebar() {
-       mobileSidebar.classList.remove("mobile-open");
-       dashboardSidebarBackdrop?.classList.remove("show");
-       document.body.classList.remove("drawer-open");
-       sidebarToggleButton.setAttribute("aria-expanded", "false");
-       sidebarToggleButton.setAttribute("aria-label", "فتح القائمة الجانبية");
-     }
-     function toggleSidebar() {
-       if (window.innerWidth <= 900) {
-         mobileSidebar.classList.contains("mobile-open") ? closeSidebar() : openSidebar();
-       } else {
-         sidebarLayout.classList.toggle("nav-collapsed");
-         const open = !sidebarLayout.classList.contains("nav-collapsed");
-         sidebarToggleButton.setAttribute("aria-expanded", String(open));
-         sidebarToggleButton.setAttribute("aria-label", open ? "إغلاق القائمة الجانبية" : "فتح القائمة الجانبية");
-       }
-     }
-    function openWalletDrawer() { if (getCurrentRole() === "publisher") { showDashboardView("publisher"); return; } renderDemoBalance(); walletDrawer.classList.add("open"); walletDrawerBackdrop.classList.add("show"); walletDrawer.setAttribute("aria-hidden","false"); document.getElementById("drawerDepositAmount").focus(); }
-    function showDashboardView(view) { const role=getCurrentRole(); let effectiveView=view; if (role === "publisher" && ["overview","campaigns","wallet"].includes(view)) effectiveView="publisher"; if (role === "advertiser" && ["publisher","zones"].includes(view)) effectiveView="overview"; let targetId="dashboardPlaceholderView"; if (effectiveView === "overview") targetId="advertiserOverviewView"; if (effectiveView === "publisher") targetId="publisherView"; if (effectiveView === "analytics") targetId="analyticsView"; if (effectiveView === "wallet") targetId="walletView"; if (effectiveView === "settings") targetId="settingsView"; dashboardViews.forEach(panel => panel.classList.toggle("active", panel.id === targetId)); roleAwareNavButtons.forEach(button => button.classList.toggle("active", button.dataset.dashboardView === effectiveView && !button.hidden)); if (mobileDashboardNav && !mobileDashboardNav.value) mobileDashboardNav.value=effectiveView; if (effectiveView === "campaigns") openCampaignModal(); if (effectiveView === "zones") openZoneModal(); if (window.innerWidth <= 900) closeSidebar(); }
-    function applyAnalyticsPeriod(period) { const data={today:["$48,290","2.84M","128,400","18,492"],yesterday:["$7,820","410K","19,320","2,840"],"7d":["$31,460","1.92M","84,210","12,190"],"30d":["$48,290","2.84M","128,400","18,492"],custom:["$0.00","0","0","0"]}[period] || ["$0.00","0","0","0"]; ["metricOneValue","metricTwoValue","metricThreeValue","metricFourValue"].forEach((id,index)=>{const element=document.getElementById(id); if(element) element.textContent=data[index];}); document.querySelectorAll("[data-period]").forEach(button=>button.classList.toggle("active",button.dataset.period===period)); }
-    function applyCustomRange() { const from=document.getElementById("rangeFrom").value; const to=document.getElementById("rangeTo").value; if(from && to) applyAnalyticsPeriod("custom"); }
-    document.querySelectorAll("[data-period]").forEach(button=>button.addEventListener("click",()=>{ const customRange=document.getElementById("customRange"); customRange.hidden=button.dataset.period !== "custom"; if(button.dataset.period !== "custom") applyAnalyticsPeriod(button.dataset.period); }));
-    window.addEventListener("resize", () => { if (window.innerWidth > 900) closeSidebar(); });
-    if (window.innerWidth <= 900) closeMobileNav(); renderDemoBalance(); showDashboardView(getCurrentRole() === "publisher" ? "publisher" : "overview");
+  try {
+    if (localStorage.getItem("adzora-theme") === "dark") document.body.classList.add("dark");
+  } catch {}
+  wireEvents();
+  renderAll();
+  updateCreativeFields();
+  showDashboardView("overview");
+})();
