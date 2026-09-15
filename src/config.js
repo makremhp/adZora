@@ -5,7 +5,6 @@ export const AD_FORMATS = [
   { id: "popup", name: "Popup", description: "A controlled popup placement shown through preview states.", pricing: ["CPM", "CPC"], share: { publisher: 35, platform: 65 } },
   { id: "popunder", name: "Popunder", description: "A browser-safe triggered destination with frequency controls.", pricing: ["CPC"], share: { publisher: 45, platform: 55 } },
   { id: "video", name: "Video", description: "Video placements with poster, playback, and CTA states.", pricing: ["CPM", "CPV"], share: { publisher: 50, platform: 50 } },
-  { id: "direct-link", name: "Direct Link", description: "A direct destination for advertiser campaigns.", pricing: ["CPC"], share: { publisher: 50, platform: 50 } },
 ];
 
 export const PRICING_MODELS = [
@@ -32,7 +31,6 @@ export const AD_ZONE_REQUIREMENTS = {
   social: { title: "Social requirements", summary: "Add an image and a social-style headline.", fields: ["image", "title"] },
   popup: { title: "Popup requirements", summary: "Add the message and destination visitors will see.", fields: ["title", "destination"] },
   video: { title: "Video requirements", summary: "Upload an MP4 or WebM video up to 20 MB and 5–60 seconds.", fields: ["video"] },
-  "direct-link": { title: "Direct Link requirements", summary: "Add the HTTPS destination for the promotional link.", fields: ["destination"] },
 };
 
 export const ROLE_CONFIG = {
