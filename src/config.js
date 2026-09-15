@@ -14,6 +14,8 @@ export const PRICING_MODELS = [
   { id: "CPA", label: "CPA", description: "Future architecture — not active yet", future: true },
 ];
 
+export const BANNER_SIZES = ["320×50", "300×250", "336×280", "728×90", "970×250"];
+
 export const ROLE_CONFIG = {
   publisher: {
     label: "Publisher",
