@@ -7,7 +7,7 @@
 - Repository: https://github.com/makremhp/adZora
 - Owner: makremhp
 - Default branch: main
-- Latest functional source commit: 61206f94ba6de40aae37874e53f322f2b04b6f32
+- Latest functional source commit: 52a6e55d68d835b11ba6b0700c0fd0eb3297c5d7
 - Blueprint: AdZora_Master_Frontend_Blueprint
 
 ## Current objective
@@ -73,3 +73,14 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Fixed responsive overlap and overflow risks, with special handling for Ad Codes and copy actions.
 - Verified the production build after the changes.
 - Current next action: connect the Blob/FormData boundary to a real backend storage endpoint, then start campaign creation.
+
+### 2026-09-15 — Step 01 delta frontend slice
+
+- Preserved the existing Blob/FormData frontend boundary in `AdvertiserCreatives.jsx`; no upload method or production URL behavior was replaced.
+- Added the missing publisher website fields, dynamic Ad Zone builder, format-specific settings, visual previews, validation, review/confirmation, details, and Ad Code handoff.
+- Added advertiser campaign creation with format-specific creative requirements and preview, plus demo-only balance, deposit, billing, and transaction views.
+- Added frontend account access states for login, signup, forgot password, and reset password without adding an authentication server.
+- Added responsive styling for the new flows while preserving the existing mobile drawer and workspace separation.
+- Verified with `npm run build` and `git diff --check`.
+- Source commit: `52a6e55d68d835b11ba6b0700c0fd0eb3297c5d7`.
+- Remaining frontend gaps: publisher earnings/withdrawal screens are still placeholders; no backend, database, API, payment processing, ad serving, or real authentication was added.
