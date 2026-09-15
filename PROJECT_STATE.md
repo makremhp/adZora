@@ -7,7 +7,7 @@
 - Repository: https://github.com/makremhp/adZora
 - Owner: makremhp
 - Default branch: main
-- Latest functional source commit: c69fd306a8dd0b26cd91224454c68ba3712f6fc7
+- Latest functional source commit: 2a0f4884469d0acd99c580fd77a4210bac65497f
 - Blueprint: AdZora_Master_Frontend_Blueprint
 
 ## Current objective
@@ -50,7 +50,17 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Rebuilt campaign creation around format-specific Creative fields and separate Behavior, Campaign, Targeting, Budget, eligibility, preview, and tracking sections.
 - Added live previews for Banner, Native, Social, Popup, Video, Direct Link, and Popunder.
 
+### Phase 5 — Publisher analytics and professional ad format previews
+
+- Restored Universal Code as a distinct publisher action with the same visual weight as Create Direct Link.
+- Added per-website Publisher Analytics with Website and Direct Link scope selection, event metrics, SVG chart state, and explicit Frontend-only tracking boundaries.
+- Added clearer inline SVG format visuals for every advertiser format.
+- Improved Banner preview sizing so the creative frame follows the selected dimensions such as 320×50, 300×250, 728×90, and 970×250.
+- Added responsive analytics layout and distinct format-card presentation for easier campaign creation.
+
 ## Verification
+
+- Latest verification: npm install --no-audit --no-fund succeeded; npm run build succeeded with Vite 5.4.21 and 36 modules transformed after Phase 5.
 
 - Latest verification: npm install --no-audit --no-fund succeeded; npm run build succeeded with Vite 5.4.21 and 36 modules transformed.
 
