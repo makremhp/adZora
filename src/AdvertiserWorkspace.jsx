@@ -41,7 +41,7 @@ function ContentFields({ form, update, errors }) {
 const FIXED_BEHAVIOR_NOTES = {
   native: ["Sponsored label, image sizing, and CTA styling are fixed by AdZora — not advertiser-editable."],
   social: ["Like, Comment, Share, Save, the like count, views, and the ADZORA badge are fixed AdZora elements.", "Clicking the ad opens the destination URL, then the ad hides automatically after 5 seconds."],
-  video: ["Autoplay, mute, loop, and the close button are always on and controlled by AdZora.", "Sound follows the browser's autoplay policy — the advertiser cannot force sound on."],
+  video: ["Autoplay, sound request, loop, and the close button are controlled by AdZora.", "Sound follows the browser's autoplay policy — the advertiser cannot force sound on."],
 };
 function BehaviorFields({ format }) {
   return <div className="behavior-grid">{(FIXED_BEHAVIOR_NOTES[format] || []).map(note => <div className="behavior-note" key={note}>{note}</div>)}</div>;
@@ -103,11 +103,19 @@ function SocialAd({ profileImage, postImage, brandName, username, text, destinat
   </div>;
 }
 
-function VideoAd({ videoUrl, videoType }) {
+function VideoAd({ videoUrl, videoType, title }) {
   const videoRef = useRef(null);
   const [closed, setClosed] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
-  useEffect(() => { setClosed(false); setAutoplayBlocked(false); }, [videoUrl]);
+  const [showClose, setShowClose] = useState(false);
+  useEffect(() => {
+    setClosed(false);
+    setAutoplayBlocked(false);
+    setShowClose(false);
+    if (!videoUrl) return undefined;
+    const timer = window.setTimeout(() => setShowClose(true), 6000);
+    return () => window.clearTimeout(timer);
+  }, [videoUrl]);
   useEffect(() => {
     if (closed || !videoUrl || !videoRef.current) return undefined;
     const video = videoRef.current;
@@ -134,15 +142,14 @@ function VideoAd({ videoUrl, videoType }) {
   };
   if (closed) return <div className="ad-preview-closed-note"><span>Closed — the close button always pauses and hides the AdZora video ad.</span><button className="ghost-button" type="button" onClick={() => setClosed(false)}>Reset preview</button></div>;
   return <div className="adzora-autoplay">
-    {videoUrl ? <><video ref={videoRef} autoPlay loop playsInline preload="auto"><source src={videoUrl} type={videoType || "video/mp4"} /></video>{autoplayBlocked && <button type="button" className="adzora-autoplay-sound" onClick={event => { event.stopPropagation(); playWithSound(); }}>تشغيل الصوت</button>}</> : <div className="adzora-video-placeholder"><Icon name="video" size={30} /><span>Video preview</span></div>}
-    <button type="button" className="adzora-autoplay-close" aria-label="Close advertisement" onClick={close}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+    {videoUrl ? <><video ref={videoRef} autoPlay loop playsInline preload="auto"><source src={videoUrl} type={videoType || "video/mp4"} /></video><span className="adzora-video-brand">AdZora</span><span className="adzora-video-title" style={{ fontFamily: detectAdFont(title) }}>{title || "Video campaign"}</span>{autoplayBlocked && <button type="button" className="adzora-autoplay-sound" onClick={event => { event.stopPropagation(); playWithSound(); }}>تشغيل الصوت</button>}{showClose && <button type="button" className="adzora-autoplay-close" aria-label="Close advertisement" onClick={close}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>}</> : <div className="adzora-video-placeholder"><Icon name="video" size={30} /><span>Video preview</span></div>}
   </div>;
 }
 
 function Preview({ form }) {
   if (form.format === "native") return <div className="ad-preview live-preview-shell"><NativeAd image={form.previewUrl} title={form.title} description={form.description} cta={form.cta} destinationUrl={form.destination} /></div>;
   if (form.format === "social") return <div className="ad-preview live-preview-shell"><SocialAd profileImage={form.profileUrl} postImage={form.postUrl} brandName={form.brandName} username={form.username} text={form.text} destinationUrl={form.destination} /></div>;
-  return <div className="ad-preview live-preview-shell"><VideoAd videoUrl={form.previewUrl && form.fileType.startsWith("video") ? form.previewUrl : ""} videoType={form.fileType} /></div>;
+  return <div className="ad-preview live-preview-shell"><VideoAd videoUrl={form.previewUrl && form.fileType.startsWith("video") ? form.previewUrl : ""} videoType={form.fileType} title={form.title} /></div>;
 }
 
 function CreateCampaign({ data, setData, onNavigate }) {

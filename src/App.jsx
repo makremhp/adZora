@@ -67,20 +67,21 @@ function LandingPage({ onLogin, onStart }) {
   return <div className="landing-page" dir="rtl">
     <header className="landing-header">
        <a className="landing-brand" href="#home" onClick={(event) => navigate("#home", event)}><Brand /></a>
-      <nav className={menuOpen ? "landing-nav is-open" : "landing-nav"} aria-label="Public navigation">
+       <nav className={menuOpen ? "landing-nav is-open" : "landing-nav"} aria-label="Public navigation">
          <a href="#home" onClick={(event) => navigate("#home", event)}>الرئيسية</a>
          <a href="#formats" onClick={(event) => navigate("#formats", event)}>صيغ الإعلانات</a>
          <a href="#advertisers" onClick={(event) => navigate("#advertisers", event)}>للمعلنين</a>
          <a href="#publishers" onClick={(event) => navigate("#publishers", event)}>للناشرين</a>
          <a href="#how-it-works" onClick={(event) => navigate("#how-it-works", event)}>كيف تعمل المنصة</a>
-        <button className="landing-nav-close" type="button" onClick={() => setMenuOpen(false)} aria-label="إغلاق القائمة"><Icon name="close" /></button>
-      </nav>
+         <button className="landing-nav-close" type="button" onClick={() => setMenuOpen(false)} aria-label="إغلاق القائمة"><Icon name="close" /></button>
+       </nav>
       <div className="landing-actions">
         <button className="landing-login" type="button" onClick={onLogin}>تسجيل الدخول</button>
         <button className="landing-cta small" type="button" onClick={() => onStart("publisher")}>ابدأ الآن <Icon name="chevron" size={15} /></button>
       </div>
       <button className="landing-menu-button" type="button" onClick={() => setMenuOpen(true)} aria-label="فتح القائمة"><Icon name="menu" /></button>
     </header>
+     <div className={menuOpen ? "landing-menu-backdrop is-open" : "landing-menu-backdrop"} onClick={() => setMenuOpen(false)} aria-hidden="true" />
 
     <main>
       <section className="landing-hero" id="home">
