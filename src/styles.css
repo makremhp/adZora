@@ -392,3 +392,7 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
 @media (max-width: 900px) {
   .landing-logo-image img { width: 74px; height: 58px; }
 }
+
+/* The landing header now uses the image mark only; no public navigation remains. */
+.landing-header { justify-content: space-between; }
+.landing-header .landing-nav, .landing-header .landing-menu-button, .landing-menu-backdrop { display: none !important; }
