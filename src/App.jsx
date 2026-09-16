@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AD_FORMATS, RECENT_ITEMS, ROLE_CONFIG, WITHDRAWAL_CONFIG } from "./config";
 import PublisherWorkspace from "./PublisherWorkspace";
-import AdvertiserCreatives from "./AdvertiserCreatives";
 import AdvertiserWorkspace from "./AdvertiserWorkspace";
 import adzoraLogo from "../images/adzora-logo.png";
 import ProfilePage from "./ProfilePage";
@@ -292,7 +291,6 @@ function AppContent() {
   const [publisherFinance, setPublisherFinance] = useState({ available: 125, pending: 32.5, earned: 642.5, withdrawn: 485, minimum: WITHDRAWAL_CONFIG.minimumAmount });
   const [publisherWithdrawals, setPublisherWithdrawals] = useState([]);
   const [advertiserDeposits, setAdvertiserDeposits] = useState([]);
-  const [creativeData, setCreativeData] = useState([]);
   const [campaignData, setCampaignData] = useState([]);
   const [accountOpen, setAccountOpen] = useState(false);
   const config = useMemo(() => ROLE_CONFIG[workspace], [workspace]);
@@ -331,7 +329,7 @@ function AppContent() {
      <Sidebar workspace={workspace} setWorkspace={(next) => { setWorkspace(next); setActivePage("overview"); setSelectedWebsiteId(""); }} activePage={activePage} onNavigate={navigate} drawerOpen={drawerOpen} closeDrawer={() => setDrawerOpen(false)} />
        <main className="main-content">
         <header className="topbar"><button className="icon-button menu-button" onClick={() => setDrawerOpen(true)} aria-label="Open menu"><Icon name="menu" /></button><div className="breadcrumbs"><span>AdZora</span><Icon name="chevron" size={13} /><strong>{config.label}</strong><Icon name="chevron" size={13} /><span>{pageTitle}</span></div><div className="header-actions"><div className="header-balance" aria-label={config.balanceLabel}><span>{config.balanceLabel}</span><strong>$0.00</strong></div><button className="notification-button" type="button" aria-label="Notifications" onClick={() => notify("You are up to date.", "info")}><span className="notification-dot" /><Icon name="receipt" size={18} /></button></div></header>
-         <div className="page-content">{activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : activePage === "profile" ? <ProfilePage workspace={workspace} /> : activePage === "settings" ? <SettingsPage workspace={workspace} publisherData={publisherData} setPublisherData={setPublisherData} onNavigate={navigate} onLogout={logout} /> : workspace === "publisher" && ["websites", "website-details", "ad-codes", "earnings", "transactions", "withdrawals", "analytics"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} selectedWebsiteId={selectedWebsiteId} finance={publisherFinance} setFinance={setPublisherFinance} withdrawals={publisherWithdrawals} setWithdrawals={setPublisherWithdrawals} onNavigate={navigate} /> : workspace === "advertiser" && activePage === "creatives" ? <AdvertiserCreatives data={creativeData} setData={setCreativeData} /> : workspace === "advertiser" && ["campaigns", "create-campaign", "balance", "deposits", "transactions", "billing", "analytics", "reports"].includes(activePage) ? <AdvertiserWorkspace page={activePage} data={campaignData} setData={setCampaignData} creatives={creativeData} deposits={advertiserDeposits} setDeposits={setAdvertiserDeposits} onNavigate={navigate} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
+         <div className="page-content">{activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : activePage === "profile" ? <ProfilePage workspace={workspace} /> : activePage === "settings" ? <SettingsPage workspace={workspace} publisherData={publisherData} setPublisherData={setPublisherData} onNavigate={navigate} onLogout={logout} /> : workspace === "publisher" && ["websites", "website-details", "ad-codes", "earnings", "transactions", "withdrawals", "analytics"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} selectedWebsiteId={selectedWebsiteId} finance={publisherFinance} setFinance={setPublisherFinance} withdrawals={publisherWithdrawals} setWithdrawals={setPublisherWithdrawals} onNavigate={navigate} /> : workspace === "advertiser" && ["campaigns", "create-campaign", "balance", "deposits", "transactions", "billing", "analytics", "reports"].includes(activePage) ? <AdvertiserWorkspace page={activePage} data={campaignData} setData={setCampaignData} deposits={advertiserDeposits} setDeposits={setAdvertiserDeposits} onNavigate={navigate} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
     </main>
     {accountOpen && <AccountAccess onClose={() => setAccountOpen(false)} onSuccess={() => { setAccountOpen(false); setView("workspace"); }} />}
   </div>;
