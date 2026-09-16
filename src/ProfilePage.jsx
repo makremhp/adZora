@@ -24,6 +24,9 @@ export default function ProfilePage({ workspace }) {
   const [editing, setEditing] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [password, setPassword] = useState("");
+  const accountIdentifier = "demo-account";
+  const avatarNumber = Array.from(accountIdentifier).reduce((total, character) => total + character.charCodeAt(0), 0) % 70 + 1;
+  const [avatarFailed, setAvatarFailed] = useState(false);
 
   const updateProfile = (key, value) => setProfile(previous => ({ ...previous, [key]: value }));
   const saveProfile = () => {
@@ -38,8 +41,8 @@ export default function ProfilePage({ workspace }) {
     </div>
 
     <section className="profile-hero light-panel">
-      <div className="profile-avatar" aria-label="Profile initials">{profile.displayName.split(/\s+/).map(part => part[0]).join("").slice(0, 2).toUpperCase()}</div>
-      <div className="profile-hero-copy"><span className="eyebrow">ACCOUNT HOLDER</span><h2 data-testid="text-profile-display-name">{profile.displayName}</h2><p>{profile.email}</p></div>
+       <div className="profile-avatar" aria-label="Profile avatar">{avatarFailed ? profile.displayName.split(/\s+/).map(part => part[0]).join("").slice(0, 2).toUpperCase() : <img src={`https://i.pravatar.cc/176?img=${avatarNumber}`} alt="" onError={() => setAvatarFailed(true)} />}</div>
+       <div className="profile-hero-copy"><span className="eyebrow">ACCOUNT HOLDER</span><h2 data-testid="text-profile-display-name">{profile.displayName}</h2><p>{profile.email}</p><div className="profile-hero-meta"><span>{role}</span><span className="status-text-active">Active</span></div></div>
       <span className="status-badge active">Active</span>
     </section>
 
