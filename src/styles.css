@@ -471,6 +471,27 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
 .wallet-request-row .row-main > div { min-width: 0; }
 .wallet-request-row .row-main strong, .wallet-request-row .row-main small { overflow-wrap: anywhere; }
 .wallet-request-row .row-main small { direction: ltr; text-align: right; }
+.deposit-invoice { margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--line-strong); }
+.invoice-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.invoice-head-id { display: block; margin-top: 4px; color: var(--text); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 13px; direction: ltr; text-align: left; }
+.invoice-rows { display: grid; gap: 12px; }
+.invoice-row { display: grid; grid-template-columns: minmax(90px, .4fr) minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-elevated); }
+.invoice-row b { color: var(--muted-2); font-size: 10px; font-weight: 500; }
+.invoice-row span { min-width: 0; color: var(--text); font-size: 13px; overflow-wrap: anywhere; direction: ltr; text-align: left; }
+.invoice-copy-button { display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto; padding: 6px 10px; border: 1px solid #9cb9ef; border-radius: 7px; color: var(--blue-dark); background: #fff; font-size: 11px; cursor: pointer; transition: .18s ease; }
+.invoice-copy-button:hover { border-color: var(--blue); background: var(--blue-soft); }
+.invoice-copy-button.copied { border-color: #1c9a5b; color: #1c9a5b; }
+.invoice-instructions { display: grid; gap: 10px; margin: 18px 0; padding: 14px 30px 14px 14px; border-right: 3px solid var(--blue); background: var(--blue-soft); color: var(--muted); font-size: 12px; line-height: 1.7; }
+.invoice-unavailable { display: block; margin: 4px 0 2px; padding: 12px 14px; border: 1px solid #e4a8ad; border-radius: 8px; color: #7a1f26; background: #fff5f5; font-size: 12px; line-height: 1.7; }
+.proof-upload-box { position: relative; display: grid; width: min(250px, 100%); height: 300px; overflow: hidden; border: 1px dashed #9cb9ef; border-radius: 12px; background: var(--blue-soft); }
+.proof-upload-box.has-error { border-color: #d97a82; background: #fff5f5; }
+.proof-upload-placeholder { display: grid; place-items: center; gap: 8px; width: 100%; height: 100%; padding: 16px; color: var(--muted); text-align: center; cursor: pointer; }
+.proof-upload-placeholder svg { color: var(--blue); }
+.proof-upload-placeholder strong { color: var(--text); font-size: 12px; font-weight: 700; }
+.proof-upload-placeholder small { color: var(--muted-2); font-size: 10px; direction: ltr; }
+.proof-upload-preview { display: block; width: 100%; height: 100%; object-fit: contain; background: #10254b; }
+.proof-upload-remove { position: absolute; top: 8px; left: 8px; display: inline-flex; align-items: center; gap: 5px; padding: 6px 9px; border: 0; border-radius: 7px; color: #fff; background: rgba(16,23,34,.72); font-size: 10px; cursor: pointer; }
+.proof-upload-remove:hover { background: rgba(16,23,34,.9); }
 .landing-logo-image { display: inline-flex; align-items: center; flex: 0 0 auto; }
 .landing-logo-image img { display: block; width: 86px; height: 68px; object-fit: contain; }
 
@@ -480,6 +501,8 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
   .wallet-field-span { grid-column: auto; }
   .wallet-sdk-note { align-items: stretch; flex-direction: column; }
   .wallet-sdk-note .secondary-button { width: 100%; }
+  .invoice-row { grid-template-columns: 1fr; }
+  .invoice-row .invoice-copy-button { justify-self: start; }
 }
 
 @media (max-width: 420px) {
@@ -487,6 +510,7 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
   .wallet-method small { white-space: normal; }
   .wallet-request-row { grid-template-columns: 1fr; gap: 10px; }
   .wallet-request-row .status-badge { justify-self: start; }
+  .proof-upload-box { width: min(250px, 100%); margin: 0 auto; }
 }
 
 @media (max-width: 900px) {

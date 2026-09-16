@@ -39,6 +39,31 @@ export const DEPOSIT_CONFIG = {
   methods: PAYMENT_METHODS.map(method => method.id),
   networks: ["BSC", "Ethereum", "TRON", "TON"],
   fees: { cwallet: 0, ton: 0, binance: 0 },
+  minimumAmount: 1,
+  // A method only shows its Transaction ID field / requires a screenshot when listed here.
+  requireTxid: { binance: true },
+  requireScreenshot: { cwallet: true, binance: true },
+};
+
+// Platform-owned deposit destinations. These identify where the USER sends funds TO the
+// platform (the opposite direction from WITHDRAWAL_CONFIG, which sends funds to the user).
+// Values are intentionally left empty until a real Admin Configuration / backend endpoint
+// supplies them — the Wallet UI must show a "currently unavailable" state instead of a
+// placeholder address when a value is missing here.
+export const DEPOSIT_DESTINATIONS = {
+  cwallet: {
+    // Platform Cwallet account ID / identifier that users transfer deposits to.
+    accountId: "",
+  },
+  binance: {
+    // Platform deposit address per network. Populate once the real addresses are available.
+    networks: {
+      BSC: "",
+      Ethereum: "",
+      TRON: "",
+      TON: "",
+    },
+  },
 };
 
 export const WITHDRAWAL_CONFIG = {
