@@ -152,3 +152,12 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Website entry now accepts `example.com`, `www.example.com`, or a full URL, normalizes protocol-less values to HTTPS, and validates the hostname.
 - Verification: `npm run build` passes with Vite 5.4.21.
 - Source commit: `63a96fedf44aab32b940f97c5f5ba4e51cb612d9`.
+
+### 2026-09-16 — Simplified ad formats and workspace polish
+
+- Removed Direct Link, Popup, and Popunder from the active advertiser format configuration, campaign builder, landing format list, and tracking event preview.
+- Removed the publisher website-card icon and the Inventory / Impressions / Clicks row so the site card focuses on the website identity and actions.
+- Reworked campaign media upload into a clearer styled image/video chooser and made Banner previews use the full available width while preserving the selected aspect ratio with cover-fit media.
+- Added compact advertiser and publisher `$0.00` balances to the workspace top bar.
+- Verification: `npm run build` and `git diff --check` pass with Vite 5.4.21.
+- Next step: review the pushed UI in the browser at desktop and mobile widths.
