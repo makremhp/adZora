@@ -110,7 +110,7 @@ function VideoAd({ videoUrl, videoType }) {
   if (closed) return <div className="ad-preview-closed-note"><span>Closed — the close button always pauses and hides the AdZora video ad.</span><button className="ghost-button" type="button" onClick={() => setClosed(false)}>Reset preview</button></div>;
   return <div className="adzora-autoplay">
     {videoUrl ? <video ref={videoRef} autoPlay muted loop playsInline preload="auto"><source src={videoUrl} type={videoType || "video/mp4"} /></video> : <div className="adzora-video-placeholder"><Icon name="video" size={30} /><span>Video preview</span></div>}
-    <button type="button" className="adzora-autoplay-close" aria-label="Close advertisement" onClick={close}>×</button>
+    <button type="button" className="adzora-autoplay-close" aria-label="Close advertisement" onClick={close}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
   </div>;
 }
 
