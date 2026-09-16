@@ -400,19 +400,23 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
 /* Publisher Analytics: demo-only reporting surface, ready for a future API. */
 .brand-logo { display: block; width: 116px; height: 58px; object-fit: contain; }
 .publisher-analytics .workspace-page-header { align-items: center; }
+.analytics-header-controls { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
 .analytics-period-control { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: #f8faff; }
 .analytics-period-control button { min-height: 32px; padding: 0 11px; border: 0; border-radius: 7px; color: var(--muted); background: transparent; font-size: 11px; cursor: pointer; }
 .analytics-period-control button:hover, .analytics-period-control button.is-active { color: var(--blue); background: #fff; box-shadow: 0 2px 7px rgba(17,52,112,.1); }
 .publisher-analytics-metrics { margin-bottom: 18px; }
-.publisher-analytics-metrics .metric-card { min-height: 158px; }
+.publisher-analytics-metrics .metric-card { min-height: 145px; }
 .publisher-analytics-metrics .metric-hint { color: var(--blue-dark); }
+.analytics-metric-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.analytics-metric-grid .metric-card { min-width: 0; }
 .demo-label { display: block; margin-top: 9px; color: var(--muted-2); font-size: 10px; font-weight: 600; }
-.earnings-summary-panel, .publisher-performance-panel, .website-performance-panel, .activity-panel { min-width: 0; }
+.earnings-summary-panel, .publisher-performance-panel, .website-performance-panel, .activity-panel, .ad-format-panel { min-width: 0; }
 .earnings-summary-panel { margin-bottom: 18px; }
 .earnings-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
 .earnings-summary-grid > div { display: grid; gap: 7px; min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: #fbfcff; }
 .earnings-summary-grid span { color: var(--muted); font-size: 11px; }
 .earnings-summary-grid strong { color: var(--text); font-size: 20px; direction: ltr; text-align: right; }
+.analytics-demo-note { margin: 0; color: var(--muted); font-size: 11px; }
 .phase-chip { display: inline-flex; align-items: center; min-height: 25px; padding: 0 9px; border: 1px solid #c8d8f3; border-radius: 999px; color: var(--blue-dark); background: var(--blue-soft); font-size: 10px; white-space: nowrap; }
 .publisher-performance-panel { margin-bottom: 18px; }
 .chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 18px 0 10px; color: var(--muted); font-size: 11px; }
@@ -428,15 +432,36 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
 .clicks-line { stroke: #21a179; stroke-dasharray: 4 4; }
 .earnings-line { stroke: #d28a18; stroke-dasharray: 1 5; }
 .chart-axis { display: flex; justify-content: space-between; padding: 8px 10px 11px; color: var(--muted-2); direction: ltr; font-size: 10px; }
-.analytics-lower-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(290px, .75fr); gap: 18px; }
-.website-performance-panel .empty-state { min-height: 248px; }
-.publisher-performance-table { display: grid; margin-top: 17px; min-width: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-.publisher-performance-row { display: grid; grid-template-columns: minmax(150px, 1.8fr) repeat(4, minmax(70px, 1fr)); align-items: center; gap: 10px; min-width: 0; padding: 14px 13px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; }
-.publisher-performance-row:last-child { border-bottom: 0; }
-.publisher-performance-row strong { min-width: 0; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.publisher-performance-row span { direction: ltr; text-align: right; }
-.publisher-performance-row.table-head { color: var(--muted-2); background: #f8faff; font-size: 10px; }
-.publisher-performance-row.table-head span { direction: rtl; }
+.website-analytics-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+.website-analytics-card { display: grid; align-content: start; gap: 16px; min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 11px; background: #fff; }
+.website-analytics-card-header, .website-analytics-identity, .format-card-heading, .detail-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.website-analytics-identity { align-items: flex-start; flex-direction: column; gap: 4px; }
+.website-analytics-identity strong { min-width: 0; max-width: 100%; overflow: hidden; color: var(--text); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.website-analytics-identity span { max-width: 100%; overflow: hidden; color: var(--muted); direction: ltr; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.website-analytics-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.website-analytics-metrics > div { display: grid; gap: 5px; min-width: 0; padding: 9px; border: 1px solid var(--line); border-radius: 8px; background: #fbfcff; }
+.website-analytics-metrics span, .format-performance-card span { color: var(--muted-2); font-size: 10px; }
+.website-analytics-metrics strong, .format-performance-card strong { color: var(--text); direction: ltr; font-size: 12px; text-align: right; }
+.website-details-button { justify-content: center; width: 100%; }
+.website-analytics-detail { display: grid; gap: 18px; }
+.detail-header { justify-content: space-between; }
+.detail-header .link-button { display: inline-flex; align-items: center; gap: 6px; }
+.analytics-select { width: min(260px, 100%); }
+.analytics-select .input { min-height: 38px; }
+.selected-website-summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.selected-website-summary h2 { margin: 6px 0 4px; }
+.selected-website-summary p { margin: 0; color: var(--muted); direction: ltr; font-size: 11px; text-align: right; }
+.status-text-active { color: #16835f; }
+.detail-metrics { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.detail-metrics .metric-card { min-height: 125px; }
+.website-detail-chart { margin-top: 12px; }
+.format-performance-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+.format-performance-card { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: #fbfcff; }
+.format-card-heading { grid-column: 1 / -1; padding-bottom: 9px; border-bottom: 1px solid var(--line); }
+.format-card-heading strong { font-size: 13px; }
+.format-card-heading span { color: var(--muted-2); font-size: 10px; }
+.format-performance-card > div:not(.format-card-heading) { display: grid; gap: 4px; min-width: 0; }
+.format-performance-card > div:not(.format-card-heading) strong { text-align: left; }
 .activity-list { display: grid; gap: 0; margin-top: 8px; }
 .activity-list > div { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 14px 0; border-bottom: 1px solid var(--line); }
 .activity-list > div:last-child { border-bottom: 0; }
@@ -445,33 +470,33 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
 .activity-list strong { color: var(--text); font-size: 11px; }
 .activity-list small { color: var(--muted-2); font-size: 10px; }
 .activity-list b { color: var(--text); direction: ltr; font-size: 11px; white-space: nowrap; }
-@media (max-width: 1000px) {
-  .analytics-lower-grid { grid-template-columns: 1fr; }
+@media (max-width: 1100px) {
+  .analytics-metric-grid, .detail-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .website-analytics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
   .brand-logo { width: 102px; height: 52px; }
   .publisher-analytics .workspace-page-header { align-items: stretch; flex-direction: column; gap: 16px; }
+  .analytics-header-controls { align-items: stretch; justify-content: flex-start; flex-direction: column; }
   .analytics-period-control { align-self: flex-start; }
   .earnings-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .website-analytics-grid, .format-performance-grid { grid-template-columns: 1fr; }
+  .detail-header, .selected-website-summary { align-items: stretch; flex-direction: column; }
+  .analytics-select { width: 100%; }
 }
 @media (max-width: 520px) {
-  .publisher-analytics-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .publisher-analytics-metrics .metric-card { padding: 13px; min-height: 145px; }
+  .analytics-metric-grid, .detail-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .publisher-analytics-metrics .metric-card { padding: 13px; min-height: 135px; }
   .publisher-analytics-metrics .metric-value { font-size: 20px; }
   .earnings-summary-grid strong { font-size: 17px; }
   .publisher-chart svg { height: 190px; }
-  .publisher-performance-row { grid-template-columns: minmax(0, 1fr) auto; gap: 7px 12px; }
-  .publisher-performance-row.table-head { display: none; }
-  .publisher-performance-row span { display: flex; justify-content: space-between; gap: 10px; width: 100%; color: var(--muted); }
-  .publisher-performance-row span::before { color: var(--muted-2); font-size: 10px; }
-  .publisher-performance-row span:nth-child(2)::before { content: "Impressions"; }
-  .publisher-performance-row span:nth-child(3)::before { content: "Clicks"; }
-  .publisher-performance-row span:nth-child(4)::before { content: "CTR"; }
-  .publisher-performance-row span:nth-child(5)::before { content: "Earnings"; }
+  .website-analytics-card { padding: 13px; }
 }
 @media (max-width: 380px) {
   .analytics-period-control { width: 100%; }
   .analytics-period-control button { flex: 1 1 40%; padding: 0 7px; }
+  .analytics-metric-grid, .detail-metrics { grid-template-columns: 1fr; }
   .publisher-analytics-metrics .metric-top { align-items: flex-start; }
   .publisher-analytics-metrics .metric-label { font-size: 10px; }
+  .website-analytics-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
