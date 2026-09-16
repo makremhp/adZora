@@ -456,7 +456,7 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
 .detail-metrics .metric-card { min-height: 125px; }
 .website-detail-chart { margin-top: 12px; }
 .format-performance-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
-.format-performance-card { display: grid; gap: 18px; min-width: 0; padding: 17px; border: 1px solid var(--line); border-top: 3px solid #175cff; border-radius: 11px; background: #fff; box-shadow: 0 5px 16px rgba(17,52,112,.04); }
+.format-performance-card { display: grid; gap: 18px; min-width: 0; padding: 17px; border: 1px solid var(--line); border-top: 3px solid #175cff; border-radius: 11px; background: #fff; box-shadow: 0 7px 12px -9px rgba(0,0,0,.52); }
 .format-performance-card.format-social { border-top-color: #21a179; }
 .format-performance-card.format-video { border-top-color: #d28a18; }
 .format-card-heading { display: flex; align-items: center; gap: 10px; min-width: 0; }
