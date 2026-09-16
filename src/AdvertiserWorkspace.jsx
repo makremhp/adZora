@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PRICING_MODELS, formatMoney } from "./config";
-function Icon({ name, size = 17 }) { const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" }; const paths = { plus: <><path d="M12 5v14M5 12h14" /></>, megaphone: <><path d="m3 11 18-5v12L3 14z" /><path d="M11 15v5M6 16l1.5 4" /></>, image: <><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9" r="1.5" /><path d="m21 15-5-5L5 20" /></>, video: <><rect x="3" y="5" width="14" height="14" rx="2" /><path d="m17 10 4-2v8l-4-2z" /></>, link: <><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" /><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 7 20l1.1-1.1" /></>, check: <path d="m5 12 4 4L19 6" />, close: <><path d="m6 6 12 12M18 6 6 18" /></>, upload: <><path d="M12 16V4M7 9l5-5 5 5" /><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5" /></>, shield: <><path d="M12 3 4 6v5c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z" /><path d="m8 12 2.5 2.5L16 9" /></> }; return <svg {...props}>{paths[name] || paths.megaphone}</svg>; }
+function Icon({ name, size = 17 }) { const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" }; const paths = { plus: <><path d="M12 5v14M5 12h14" /></>, megaphone: <><path d="m3 11 18-5v12L3 14z" /><path d="M11 15v5M6 16l1.5 4" /></>, image: <><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9" r="1.5" /><path d="m21 15-5-5L5 20" /></>, video: <><rect x="3" y="5" width="14" height="14" rx="2" /><path d="m17 10 4-2v8l-4-2z" /></>, check: <path d="m5 12 4 4L19 6" />, upload: <><path d="M12 16V4M7 9l5-5 5 5" /><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5" /></>, shield: <><path d="M12 3 4 6v5c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z" /><path d="m8 12 2.5 2.5L16 9" /></> }; return <svg {...props}>{paths[name] || paths.megaphone}</svg>; }
 function Field({ label, error, hint, children }) { return <label className="field"><span>{label}</span>{children}{hint && !error && <small>{hint}</small>}{error && <small className="field-error">{error}</small>}</label>; }
 function PageHeader({ title, description, action, onAction }) { return <div className="workspace-page-header"><div><span className="eyebrow">ADVERTISER WORKSPACE</span><h1>{title}</h1><p>{description}</p></div>{action && <button className="primary-button" type="button" onClick={onAction}><Icon name="plus" size={16} />{action}</button>}</div>; }
 const TYPES = [{ id: "native", name: "Native", description: "صورة وعنوان ووصف داخل المحتوى", icon: "image" }, { id: "social", name: "Social", description: "منشور اجتماعي كامل بعناصر ثابتة", icon: "megaphone" }, { id: "video", name: "Video", description: "فيديو مع تشغيل تلقائي وزر إغلاق", icon: "video" }];
 const INITIAL = { name: "", format: "native", budget: "", pricingModel: "CPM", duration: "30", targeting: "", title: "", description: "", cta: "Learn more", brandName: "", username: "", text: "", destination: "", file: null, fileName: "", fileType: "", previewUrl: "", profileFile: null, profileFileName: "", profileFileType: "", profileUrl: "", postFile: null, postFileName: "", postFileType: "", postUrl: "" };
 function hasRequiredMedia(form) { return form.format === "social" ? Boolean(form.profileFile && form.postFile) : Boolean(form.file); }
+export function detectAdFont(text = "") { return /[\u0600-\u06FF]/.test(String(text)) ? "\"Tajawal\", sans-serif" : "\"Inter\", Arial, sans-serif"; }
 
 function FormatVisual({ type }) {
   const visuals = {
@@ -65,9 +66,9 @@ function NativeAd({ image, title, description, cta, destinationUrl }) {
     {image ? <img src={image} alt="Native Advertisement" /> : <div className="adzora-native-media-placeholder"><Icon name="image" size={27} /><span>Ad image</span></div>}
     <div className="adzora-native-info">
       <div className="adzora-native-sponsored">Sponsored</div>
-      <h3>{title || "Your advertisement title"}</h3>
-      <p>{description || "Advertisement description will appear here."}</p>
-      <a href={destinationUrl || "#"} className="adzora-native-cta" target="_blank" rel="noopener noreferrer" onClick={event => event.stopPropagation()}>{cta || "Learn More"}</a>
+      <h3 style={{ fontFamily: detectAdFont(title) }}>{title || "Your advertisement title"}</h3>
+      <p style={{ fontFamily: detectAdFont(description) }}>{description || "Advertisement description will appear here."}</p>
+      <a href={destinationUrl || "#"} className="adzora-native-cta" style={{ fontFamily: detectAdFont(cta) }} target="_blank" rel="noopener noreferrer" onClick={event => event.stopPropagation()}>{cta || "Learn More"}</a>
     </div>
   </div>;
 }
@@ -86,7 +87,7 @@ function SocialAd({ profileImage, postImage, brandName, username, text, destinat
   return <div className="adzora-social" data-url={destinationUrl || undefined} role="link" tabIndex={0} onClick={open} onKeyDown={event => (event.key === "Enter" || event.key === " ") && open()}>
     <div className="adzora-social-header">
       {profileImage ? <img className="adzora-social-avatar" src={profileImage} alt="Profile" /> : <span className="adzora-social-avatar-placeholder">A</span>}
-      <div className="adzora-social-account"><strong>{brandName || "Your Brand"}</strong><span>{username || "@yourbrand"}</span></div>
+      <div className="adzora-social-account"><strong style={{ fontFamily: detectAdFont(brandName) }}>{brandName || "Your Brand"}</strong><span style={{ fontFamily: detectAdFont(username) }}>{username || "@yourbrand"}</span></div>
       <div className="adzora-social-brand">ADZORA</div>
     </div>
     {postImage ? <img className="adzora-social-media" src={postImage} alt="Social Post" /> : <div className="adzora-social-media-placeholder"><Icon name="image" size={27} /><span>Post image</span></div>}
@@ -98,18 +99,42 @@ function SocialAd({ profileImage, postImage, brandName, username, text, destinat
     </div>
     <div className="adzora-social-stats">1,248 likes</div>
     <div className="adzora-social-views"><SocialActionIcon name="views" /><span>8,421 views</span></div>
-    <div className="adzora-social-caption"><b>{brandName || "Your Brand"}</b><span>{text || "Your sponsored post text will appear here."}</span><span className="adzora-social-sponsored">Sponsored · Learn more</span></div>
+    <div className="adzora-social-caption"><b style={{ fontFamily: detectAdFont(brandName) }}>{brandName || "Your Brand"}</b><span style={{ fontFamily: detectAdFont(text) }}>{text || "Your sponsored post text will appear here."}</span><span className="adzora-social-sponsored">Sponsored · Learn more</span></div>
   </div>;
 }
 
 function VideoAd({ videoUrl, videoType }) {
   const videoRef = useRef(null);
   const [closed, setClosed] = useState(false);
-  useEffect(() => { setClosed(false); }, [videoUrl]);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  useEffect(() => { setClosed(false); setAutoplayBlocked(false); }, [videoUrl]);
+  useEffect(() => {
+    if (closed || !videoUrl || !videoRef.current) return undefined;
+    const video = videoRef.current;
+    let cancelled = false;
+    const attemptPlay = () => {
+      const playPromise = video.play();
+      if (playPromise?.catch) playPromise.catch(error => {
+        if (!cancelled && error?.name === "NotAllowedError") setAutoplayBlocked(true);
+      });
+    };
+    attemptPlay();
+    video.addEventListener("loadeddata", attemptPlay);
+    return () => { cancelled = true; video.removeEventListener("loadeddata", attemptPlay); };
+  }, [closed, videoUrl]);
   const close = () => { videoRef.current?.pause(); setClosed(true); };
+  const playWithSound = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = false;
+    const playPromise = video.play();
+    if (playPromise?.then) playPromise.then(() => setAutoplayBlocked(false)).catch(error => {
+      if (error?.name === "NotAllowedError") setAutoplayBlocked(true);
+    });
+  };
   if (closed) return <div className="ad-preview-closed-note"><span>Closed — the close button always pauses and hides the AdZora video ad.</span><button className="ghost-button" type="button" onClick={() => setClosed(false)}>Reset preview</button></div>;
   return <div className="adzora-autoplay">
-    {videoUrl ? <video ref={videoRef} autoPlay muted loop playsInline preload="auto"><source src={videoUrl} type={videoType || "video/mp4"} /></video> : <div className="adzora-video-placeholder"><Icon name="video" size={30} /><span>Video preview</span></div>}
+    {videoUrl ? <><video ref={videoRef} autoPlay loop playsInline preload="auto"><source src={videoUrl} type={videoType || "video/mp4"} /></video>{autoplayBlocked && <button type="button" className="adzora-autoplay-sound" onClick={event => { event.stopPropagation(); playWithSound(); }}>تشغيل الصوت</button>}</> : <div className="adzora-video-placeholder"><Icon name="video" size={30} /><span>Video preview</span></div>}
     <button type="button" className="adzora-autoplay-close" aria-label="Close advertisement" onClick={close}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
   </div>;
 }
@@ -119,8 +144,6 @@ function Preview({ form }) {
   if (form.format === "social") return <div className="ad-preview live-preview-shell"><SocialAd profileImage={form.profileUrl} postImage={form.postUrl} brandName={form.brandName} username={form.username} text={form.text} destinationUrl={form.destination} /></div>;
   return <div className="ad-preview live-preview-shell"><VideoAd videoUrl={form.previewUrl && form.fileType.startsWith("video") ? form.previewUrl : ""} videoType={form.fileType} /></div>;
 }
-
-function Eligibility({ form }) { const creativeReady = hasRequiredMedia(form); const checks = [["Campaign status", form.name.trim() ? "Draft / ready for review" : "Name required", Boolean(form.name.trim())], ["Budget available", Number(form.budget) > 0 ? formatMoney(Number(form.budget)) : "Add campaign budget", Number(form.budget) > 0], ["Creative available", creativeReady ? "Available" : form.format === "social" ? "Profile and post images required" : "Upload required", creativeReady], ["Campaign date", form.duration ? form.duration + " days" : "Set duration", Boolean(form.duration)], ["Targeting", form.targeting.trim() || "All eligible publishers", true]]; return <section className="light-panel eligibility-panel"><div className="panel-heading"><div><span className="eyebrow">AD SERVER ELIGIBILITY</span><h2>Pre-delivery checks</h2></div><span className="phase-chip">Frontend demo</span></div><p className="muted-copy">لا يختار Ad Server الإعلان عشوائيًا: يتحقق من الحالة والميزانية والـCreative والتاريخ والاستهداف أولًا.</p><div className="eligibility-list">{checks.map(([label, value, ok]) => <div key={label}><span className={ok ? "check-state ok" : "check-state"}><Icon name={ok ? "check" : "close"} size={13} /></span><span><strong>{label}</strong><small>{value}</small></span></div>)}</div></section>; }
 
 function CreateCampaign({ data, setData, onNavigate }) {
   const [form, setForm] = useState(INITIAL);
@@ -147,8 +170,8 @@ function CreateCampaign({ data, setData, onNavigate }) {
     <section className="light-panel form-section"><div className="panel-heading"><div><span className="eyebrow">1 / AD FORMAT</span><h2>What are you promoting?</h2></div><span className="phase-chip">3 formats only</span></div><TypeSelector value={form.format} onChange={changeFormat} /></section>
     <section className="light-panel form-section"><div className="panel-heading"><div><span className="eyebrow">2 / CAMPAIGN</span><h2>Campaign settings</h2></div></div><div className="form-grid"><Field label="Campaign Name" error={errors.name}><input className="input" value={form.name} onChange={event => update({ name: event.target.value })} placeholder="Summer launch" /></Field><Field label="Campaign Budget" error={errors.budget}><input className="input" type="number" min="1" value={form.budget} onChange={event => update({ budget: event.target.value })} placeholder="500" /></Field><Field label="Pricing Model"><select className="input select" value={form.pricingModel} onChange={event => update({ pricingModel: event.target.value })}>{PRICING_MODELS.filter(item => !item.future).map(item => <option key={item.id}>{item.id}</option>)}</select></Field><Field label="Campaign Duration (days)"><input className="input" type="number" min="1" value={form.duration} onChange={event => update({ duration: event.target.value })} /></Field><Field label="Targeting" hint="Optional: country, device, audience, or publisher rules"><input className="input" value={form.targeting} onChange={event => update({ targeting: event.target.value })} placeholder="All eligible publishers" /></Field></div></section>
     <section className="light-panel form-section"><div className="panel-heading"><div><span className="eyebrow">3 / CREATIVE</span><h2>{TYPES.find(item => item.id === form.format)?.name} content</h2></div><span className="phase-chip">Format-specific</span></div><ContentFields form={form} update={update} errors={errors} /></section>
-    <section className="light-panel form-section"><div className="panel-heading"><div><span className="eyebrow">4 / AD BEHAVIOR</span><h2>Fixed by AdZora</h2></div></div><BehaviorFields format={form.format} /></section>
-    <div className="campaign-builder-grid"><Eligibility form={form} /><section className="light-panel preview-panel"><div className="panel-heading"><div><span className="eyebrow">LIVE PREVIEW</span><h2>Creative preview</h2></div><span className="phase-chip">Responsive</span></div><Preview form={form} /></section></div>
+     <section className="light-panel form-section"><div className="panel-heading"><div><span className="eyebrow">4 / AD BEHAVIOR</span><h2>Fixed by AdZora</h2></div></div><BehaviorFields format={form.format} /></section>
+     <section className="light-panel preview-panel"><div className="panel-heading"><div><span className="eyebrow">LIVE PREVIEW</span><h2>Creative preview</h2></div><span className="phase-chip">Responsive</span></div><Preview form={form} /></section>
     <section className="light-panel form-section tracking-roadmap"><div className="panel-heading"><div><span className="eyebrow">5 / TRACKING</span><h2>Events prepared for the Ad Server</h2></div></div><div className="event-chip-list"><span>Impression</span><span>Click</span><span>Video View</span><span>Video Completion</span></div><p className="muted-copy">هذه أسماء الأحداث في نموذج الواجهة فقط. لا تعتمد الأرباح أو الإحصائيات على localStorage، ولا يوجد endpoint حقيقي حتى الآن.</p><div className="form-actions"><button className="primary-button" type="button" onClick={submit}><Icon name="check" size={16} />Save Campaign Draft</button><button className="ghost-button" type="button" onClick={() => onNavigate("campaigns")}>Cancel</button></div></section>
   </div>;
 }
