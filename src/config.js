@@ -1,5 +1,4 @@
 export const AD_FORMATS = [
-  { id: "banner", name: "Image / Banner", description: "Standard display placements for high-visibility inventory.", pricing: ["CPM", "CPC"], share: { publisher: 40, platform: 60 } },
   { id: "native", name: "Native", description: "Content-integrated ads with a clear sponsored label.", pricing: ["CPM", "CPC"], share: { publisher: 45, platform: 55 } },
   { id: "social", name: "Social", description: "Social-style creative with brand, title, and call to action.", pricing: ["CPM", "CPC"], share: { publisher: 40, platform: 60 } },
   { id: "video", name: "Video", description: "Video placements with poster, playback, and CTA states.", pricing: ["CPM", "CPV"], share: { publisher: 50, platform: 50 } },
@@ -12,8 +11,6 @@ export const PRICING_MODELS = [
   { id: "CPA", label: "CPA", description: "Future architecture — not active yet", future: true },
 ];
 
-export const BANNER_SIZES = ["320×50", "300×250", "336×280", "728×90", "970×250"];
-
 export const WEBSITE_TYPES = [
   { id: "news", label: "News & Media", arabic: "أخبار وإعلام", description: "مواقع الأخبار والمقالات والمجلات." },
   { id: "technology", label: "Technology", arabic: "تقنية", description: "منتجات وأدوات ومحتوى تقني." },
@@ -24,7 +21,6 @@ export const WEBSITE_TYPES = [
 ];
 
 export const AD_ZONE_REQUIREMENTS = {
-  banner: { title: "Banner requirements", summary: "Choose one supported banner size.", fields: ["size"] },
   native: { title: "Native requirements", summary: "Add an image and a short content title.", fields: ["image", "title"] },
   social: { title: "Social requirements", summary: "Add an image and a social-style headline.", fields: ["image", "title"] },
   video: { title: "Video requirements", summary: "Upload an MP4 or WebM video up to 20 MB and 5–60 seconds.", fields: ["video"] },
@@ -37,7 +33,7 @@ export const ROLE_CONFIG = {
     identity: "Inventory → Traffic → Earnings → Withdrawals",
     overviewTitle: "Publisher Overview",
     overviewDescription: "أضف موقعك، احصل على Universal AdZora Code، وتابع أرباحك من مكان واحد.",
-    balanceLabel: "Available earnings",
+    balanceLabel: "أرباح الناشر",
     balanceValue: 0,
     nav: [
       { id: "overview", label: "Overview", arabic: "نظرة عامة", icon: "grid" },
@@ -75,7 +71,7 @@ export const ROLE_CONFIG = {
     identity: "Budget → Campaigns → Delivery → Performance → Billing",
     overviewTitle: "Advertiser Overview",
     overviewDescription: "أدر الميزانية والحملات والإبداع الإعلاني وراقب الأداء من مكان واحد.",
-    balanceLabel: "Available balance",
+    balanceLabel: "رصيد المعلن",
     balanceValue: 0,
     nav: [
       { id: "overview", label: "Overview", arabic: "نظرة عامة", icon: "grid" },
