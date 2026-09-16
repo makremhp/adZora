@@ -227,6 +227,32 @@
   letter-spacing: 0.01em;
 }
 
+.code-install-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #dbe6f5;
+  border-radius: 10px;
+  background: #f7faff;
+  color: #5f6b7d;
+  font-size: 11px;
+  line-height: 1.75;
+}
+
+.code-install-note strong {
+  flex: 0 0 auto;
+  color: #175cff;
+}
+
+.code-install-note code {
+  direction: ltr;
+  font-family: 'Manrope', monospace;
+  color: #243b64;
+  font-size: 0.95em;
+}
+
 @media (max-width: 760px) {
   .modal-backdrop .access-modal,
   .modal-backdrop .access-modal.signup-modal {
