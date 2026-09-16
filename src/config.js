@@ -102,7 +102,6 @@ export const ROLE_CONFIG = {
       { id: "overview", label: "Overview", arabic: "نظرة عامة", icon: "grid" },
       { id: "campaigns", label: "Campaigns", arabic: "الحملات", icon: "megaphone" },
       { id: "create-campaign", label: "Create Campaign", arabic: "إنشاء حملة", icon: "plus" },
-      { id: "creatives", label: "Creatives", arabic: "الإبداعات", icon: "image" },
       { id: "analytics", label: "Analytics", arabic: "التحليلات", icon: "chart" },
       { id: "reports", label: "Reports", arabic: "التقارير", icon: "file" },
       { id: "balance", label: "Balance", arabic: "الرصيد", icon: "wallet" },
@@ -127,7 +126,6 @@ export const ROLE_CONFIG = {
     quickActions: [
       { id: "deposits", label: "Add Funds", arabic: "أضف رصيدًا", icon: "plus" },
       { id: "create-campaign", label: "Create Campaign", arabic: "أنشئ حملة", icon: "megaphone" },
-      { id: "creatives", label: "Add Creative", arabic: "أضف مادة إعلانية", icon: "image" },
       { id: "analytics", label: "View Analytics", arabic: "اعرض التحليلات", icon: "chart" },
     ],
   },
