@@ -26,6 +26,31 @@ export const AD_ZONE_REQUIREMENTS = {
   video: { title: "Video requirements", summary: "Upload an MP4 or WebM video up to 20 MB and 5–60 seconds.", fields: ["video"] },
 };
 
+export const PAYMENT_METHODS = [
+  { id: "cwallet", label: "Cwallet", description: "Account identifier · manual review", icon: "wallet" },
+  { id: "ton", label: "TON Network", description: "Wallet SDK connection prepared", icon: "arrow-down" },
+  { id: "binance", label: "Binance", description: "Network and account details", icon: "card" },
+];
+
+export const DEPOSIT_CONFIG = {
+  currency: "USD",
+  status: "Pending",
+  statuses: ["Pending", "Processing", "Completed", "Rejected"],
+  methods: PAYMENT_METHODS.map(method => method.id),
+  networks: ["BSC", "Ethereum", "TRON", "TON"],
+  fees: { cwallet: 0, ton: 0, binance: 0 },
+};
+
+export const WITHDRAWAL_CONFIG = {
+  currency: "USD",
+  minimumAmount: 50,
+  status: "Pending",
+  statuses: ["Pending", "Processing", "Completed", "Rejected"],
+  methods: PAYMENT_METHODS.map(method => method.id),
+  networks: ["TON"],
+  fees: { cwallet: 0, ton: 0, binance: 0 },
+};
+
 export const ROLE_CONFIG = {
   publisher: {
     label: "Publisher",
