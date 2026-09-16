@@ -204,9 +204,6 @@ function getPasswordStrength(password) {
   return Math.min(strength, 100);
 }
 
-function GoogleMark() {
-  return <span className="google-mark" aria-hidden="true">G</span>;
-}
 
 function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
   const { notify } = useNotifications();
@@ -221,9 +218,6 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
     setError("");
   };
 
-  const handleGoogle = () => {
-    notify("سيتم تفعيل الدخول عبر Google بعد ربط مزود المصادقة.", "info", 4200);
-  };
 
   const submit = async (event) => {
     event.preventDefault();
@@ -265,11 +259,6 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
           <button className="icon-button" type="button" onClick={onClose} aria-label="إغلاق نافذة التسجيل"><Icon name="close" /></button>
         </div>
 
-        <button className="google-auth-button" type="button" onClick={handleGoogle}>
-          <GoogleMark />
-          <span>{isSignup ? "المتابعة باستخدام Google" : "تسجيل الدخول باستخدام Google"}</span>
-        </button>
-        <div className="auth-divider"><span>أو باستخدام البريد الإلكتروني</span></div>
 
         {(mode === "login" || mode === "signup") && (
           <div className="access-tabs" role="tablist" aria-label="نوع الحساب">
