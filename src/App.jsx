@@ -4,6 +4,7 @@ import PublisherWorkspace from "./PublisherWorkspace";
 import AdvertiserCreatives from "./AdvertiserCreatives";
 import AdvertiserWorkspace from "./AdvertiserWorkspace";
 import WalletWorkspace from "./WalletWorkspace";
+import adzoraLogo from "../images/adzora-logo.png";
 
 function Icon({ name, size = 18 }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -47,18 +48,8 @@ const landingFormatIcons = {
 };
 
 function LandingPage({ onLogin, onStart }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const onKeyDown = (event) => { if (event.key === "Escape") setMenuOpen(false); };
-    document.addEventListener("keydown", onKeyDown);
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.removeEventListener("keydown", onKeyDown); document.body.style.overflow = ""; };
-  }, [menuOpen]);
-
    const navigate = (target, event) => {
      event?.preventDefault();
-    setMenuOpen(false);
      const section = document.getElementById(target.replace(/^#/, ""));
      if (!section) return;
      window.history.replaceState(null, "", target);
@@ -67,22 +58,12 @@ function LandingPage({ onLogin, onStart }) {
 
   return <div className="landing-page" dir="rtl">
     <header className="landing-header">
-       <a className="landing-brand" href="#home" onClick={(event) => navigate("#home", event)}><Brand /></a>
-       <nav className={menuOpen ? "landing-nav is-open" : "landing-nav"} aria-label="Public navigation">
-         <a href="#home" onClick={(event) => navigate("#home", event)}>الرئيسية</a>
-         <a href="#formats" onClick={(event) => navigate("#formats", event)}>صيغ الإعلانات</a>
-         <a href="#advertisers" onClick={(event) => navigate("#advertisers", event)}>للمعلنين</a>
-         <a href="#publishers" onClick={(event) => navigate("#publishers", event)}>للناشرين</a>
-         <a href="#how-it-works" onClick={(event) => navigate("#how-it-works", event)}>كيف تعمل المنصة</a>
-         <button className="landing-nav-close" type="button" onClick={() => setMenuOpen(false)} aria-label="إغلاق القائمة"><Icon name="close" /></button>
-       </nav>
+       <a className="landing-brand landing-logo-image" href="#home" onClick={(event) => navigate("#home", event)} aria-label="AdZora home"><img src={adzoraLogo} alt="AdZora Advertising Platform" /></a>
       <div className="landing-actions">
         <button className="landing-login" type="button" onClick={onLogin}>تسجيل الدخول</button>
         <button className="landing-cta small" type="button" onClick={() => onStart("publisher")}>ابدأ الآن <Icon name="chevron" size={15} /></button>
       </div>
-      <button className="landing-menu-button" type="button" onClick={() => setMenuOpen(true)} aria-label="فتح القائمة"><Icon name="menu" /></button>
     </header>
-     <div className={menuOpen ? "landing-menu-backdrop is-open" : "landing-menu-backdrop"} onClick={() => setMenuOpen(false)} aria-hidden="true" />
 
     <main>
       <section className="landing-hero" id="home">
