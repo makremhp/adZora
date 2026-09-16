@@ -3,8 +3,9 @@ import { AD_FORMATS, RECENT_ITEMS, ROLE_CONFIG, WITHDRAWAL_CONFIG } from "./conf
 import PublisherWorkspace from "./PublisherWorkspace";
 import AdvertiserCreatives from "./AdvertiserCreatives";
 import AdvertiserWorkspace from "./AdvertiserWorkspace";
-import WalletWorkspace from "./WalletWorkspace";
 import adzoraLogo from "../images/adzora-logo.png";
+import ProfilePage from "./ProfilePage";
+import { NotificationProvider, useNotifications } from "./NotificationSystem";
 
 function Icon({ name, size = 18 }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -173,30 +174,31 @@ function ComingSoon({ workspace, page, onNavigate }) {
 }
 
 function AccountAccess({ onClose, onSuccess }) {
+  const { notify } = useNotifications();
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ email: "", password: "", name: "" });
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
   const submit = async (event) => {
     event.preventDefault();
-    setError(""); setNotice("");
+    setError("");
     if (mode === "signup" && !form.name.trim()) { setError("Enter your name."); return; }
     if (!form.email.includes("@")) { setError("Enter a valid email address."); return; }
     if ((mode === "login" || mode === "signup") && form.password.length < 6) { setError("Use a password with at least 6 characters."); return; }
     setLoading(true);
     await new Promise(resolve => setTimeout(resolve, 350));
     setLoading(false);
-    setNotice(mode === "login" ? "Demo login successful." : mode === "signup" ? "Demo account created successfully." : "Password reset instructions are ready in this demo.");
+    notify(mode === "login" ? "Demo login successful." : mode === "signup" ? "Demo account created successfully." : "Password reset instructions are ready in this demo.", mode === "forgot" || mode === "reset" ? "info" : "success");
     if (mode === "login" || mode === "signup") onSuccess();
   };
-  return <div className="modal-backdrop" role="presentation" onMouseDown={event => event.target === event.currentTarget && onClose()}><section className="access-modal light-panel" role="dialog" aria-modal="true" aria-labelledby="access-title"><div className="panel-heading"><div><span className="eyebrow">ACCOUNT ACCESS</span><h2 id="access-title">{mode === "login" ? "Welcome back" : mode === "signup" ? "Create your account" : mode === "forgot" ? "Forgot password" : "Reset password"}</h2></div><button className="icon-button" type="button" onClick={onClose} aria-label="Close account dialog"><Icon name="close" /></button></div>{(mode === "login" || mode === "signup") && <div className="access-tabs"><button className={mode === "login" ? "access-tab active" : "access-tab"} type="button" onClick={() => { setMode("login"); setError(""); }}>Login</button><button className={mode === "signup" ? "access-tab active" : "access-tab"} type="button" onClick={() => { setMode("signup"); setError(""); }}>Sign up</button></div>}<form className="access-form" onSubmit={submit}>{mode === "signup" && <label className="field"><span>Name</span><input className="input" value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} placeholder="Your name" /></label>}{mode !== "reset" && <label className="field"><span>Email</span><input className="input" type="email" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} placeholder="you@example.com" autoComplete="email" /></label>}{(mode === "login" || mode === "signup" || mode === "reset") && <label className="field"><span>{mode === "reset" ? "New password" : "Password"}</span><input className="input" type="password" value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} placeholder="At least 6 characters" autoComplete={mode === "login" ? "current-password" : "new-password"} /></label>}{error && <small className="field-error access-error" role="alert">{error}</small>}{notice && <div className="notice" role="status">{notice}</div>}<button className="primary-button access-submit" type="submit" disabled={loading}>{loading ? "Please wait…" : mode === "login" ? "Login" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset instructions" : "Reset password"}</button></form>{mode === "login" && <button className="text-button access-link" type="button" onClick={() => { setMode("forgot"); setError(""); }}>Forgot password?</button>}{(mode === "forgot" || mode === "reset") && <button className="text-button access-link" type="button" onClick={() => { setMode("reset"); setError(""); }}>Continue to password reset</button>}<p className="demo-note">Frontend demo only. No authentication server or credentials are connected.</p></section></div>;
+  return <div className="modal-backdrop" role="presentation" onMouseDown={event => event.target === event.currentTarget && onClose()}><section className="access-modal light-panel" role="dialog" aria-modal="true" aria-labelledby="access-title"><div className="panel-heading"><div><span className="eyebrow">ACCOUNT ACCESS</span><h2 id="access-title">{mode === "login" ? "Welcome back" : mode === "signup" ? "Create your account" : mode === "forgot" ? "Forgot password" : "Reset password"}</h2></div><button className="icon-button" type="button" onClick={onClose} aria-label="Close account dialog"><Icon name="close" /></button></div>{(mode === "login" || mode === "signup") && <div className="access-tabs"><button className={mode === "login" ? "access-tab active" : "access-tab"} type="button" onClick={() => { setMode("login"); setError(""); }}>Login</button><button className={mode === "signup" ? "access-tab active" : "access-tab"} type="button" onClick={() => { setMode("signup"); setError(""); }}>Sign up</button></div>}<form className="access-form" onSubmit={submit}>{mode === "signup" && <label className="field"><span>Name</span><input className="input" value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} placeholder="Your name" /></label>}{mode !== "reset" && <label className="field"><span>Email</span><input className="input" type="email" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} placeholder="you@example.com" autoComplete="email" /></label>}{(mode === "login" || mode === "signup" || mode === "reset") && <label className="field"><span>{mode === "reset" ? "New password" : "Password"}</span><input className="input" type="password" value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} placeholder="At least 6 characters" autoComplete={mode === "login" ? "current-password" : "new-password"} /></label>}{error && <small className="field-error access-error" role="alert">{error}</small>}<button className="primary-button access-submit" type="submit" disabled={loading}>{loading ? "Please wait…" : mode === "login" ? "Login" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset instructions" : "Reset password"}</button></form>{mode === "login" && <button className="text-button access-link" type="button" onClick={() => { setMode("forgot"); setError(""); }}>Forgot password?</button>}{(mode === "forgot" || mode === "reset") && <button className="text-button access-link" type="button" onClick={() => { setMode("reset"); setError(""); }}>Continue to password reset</button>}<p className="demo-note">Frontend demo only. No authentication server or credentials are connected.</p></section></div>;
 }
 
-export default function App() {
+function AppContent() {
   const [view, setView] = useState("landing");
   const [workspace, setWorkspace] = useState("publisher");
   const [activePage, setActivePage] = useState("overview");
+  const [selectedWebsiteId, setSelectedWebsiteId] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [publisherData, setPublisherData] = useState({ websites: [], zones: [] });
   const [publisherFinance, setPublisherFinance] = useState({ available: 125, pending: 32.5, earned: 642.5, withdrawn: 485, minimum: WITHDRAWAL_CONFIG.minimumAmount });
@@ -206,6 +208,7 @@ export default function App() {
   const [campaignData, setCampaignData] = useState([]);
   const [accountOpen, setAccountOpen] = useState(false);
   const config = useMemo(() => ROLE_CONFIG[workspace], [workspace]);
+  const { notify } = useNotifications();
 
   useEffect(() => {
     const onKeyDown = (event) => { if (event.key === "Escape") setDrawerOpen(false); };
@@ -214,18 +217,22 @@ export default function App() {
     return () => { document.removeEventListener("keydown", onKeyDown); document.body.style.overflow = ""; };
   }, [drawerOpen]);
 
-  const navigate = (page) => { setActivePage(page); setDrawerOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  const openWorkspace = (role, page = "overview") => { setWorkspace(role); setActivePage(page); setView("workspace"); };
-  const pageTitle = config.nav.find(item => item.id === activePage)?.arabic || "نظرة عامة";
+  const navigate = (page, websiteId = "") => { setActivePage(page); if (websiteId) setSelectedWebsiteId(websiteId); setDrawerOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const openWorkspace = (role, page = "overview") => { setWorkspace(role); setActivePage(page); setSelectedWebsiteId(""); setView("workspace"); };
+  const pageTitle = config.nav.find(item => item.id === activePage)?.arabic || (activePage === "website-details" ? "تفاصيل الموقع" : "نظرة عامة");
 
   if (view === "landing") return <><LandingPage onLogin={() => setAccountOpen(true)} onStart={(role) => openWorkspace(role, role === "publisher" ? "websites" : "create-campaign")} />{accountOpen && <AccountAccess onClose={() => setAccountOpen(false)} onSuccess={() => { setAccountOpen(false); setView("workspace"); }} />}</>;
 
   return <div className="app-shell">
-    <Sidebar workspace={workspace} setWorkspace={(next) => { setWorkspace(next); setActivePage("overview"); }} activePage={activePage} onNavigate={navigate} drawerOpen={drawerOpen} closeDrawer={() => setDrawerOpen(false)} />
+     <Sidebar workspace={workspace} setWorkspace={(next) => { setWorkspace(next); setActivePage("overview"); setSelectedWebsiteId(""); }} activePage={activePage} onNavigate={navigate} drawerOpen={drawerOpen} closeDrawer={() => setDrawerOpen(false)} />
        <main className="main-content">
-        <header className="topbar"><button className="icon-button menu-button" onClick={() => setDrawerOpen(true)} aria-label="Open menu"><Icon name="menu" /></button><div className="breadcrumbs"><span>AdZora</span><Icon name="chevron" size={13} /><strong>{config.label}</strong><Icon name="chevron" size={13} /><span>{pageTitle}</span></div><div className="header-actions"><div className="header-balance" aria-label={config.balanceLabel}><span>{config.balanceLabel}</span><strong>$0.00</strong></div><button className="notification-button" aria-label="Notifications"><span className="notification-dot" /><Icon name="receipt" size={18} /></button></div></header>
-       <div className="page-content">{activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : workspace === "publisher" && ["websites", "ad-codes", "earnings", "transactions", "withdrawals", "analytics"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} finance={publisherFinance} setFinance={setPublisherFinance} withdrawals={publisherWithdrawals} setWithdrawals={setPublisherWithdrawals} onNavigate={navigate} /> : workspace === "advertiser" && activePage === "creatives" ? <AdvertiserCreatives data={creativeData} setData={setCreativeData} /> : workspace === "advertiser" && ["campaigns", "create-campaign", "balance", "deposits", "transactions", "billing", "analytics", "reports"].includes(activePage) ? <AdvertiserWorkspace page={activePage} data={campaignData} setData={setCampaignData} creatives={creativeData} deposits={advertiserDeposits} setDeposits={setAdvertiserDeposits} onNavigate={navigate} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
+        <header className="topbar"><button className="icon-button menu-button" onClick={() => setDrawerOpen(true)} aria-label="Open menu"><Icon name="menu" /></button><div className="breadcrumbs"><span>AdZora</span><Icon name="chevron" size={13} /><strong>{config.label}</strong><Icon name="chevron" size={13} /><span>{pageTitle}</span></div><div className="header-actions"><div className="header-balance" aria-label={config.balanceLabel}><span>{config.balanceLabel}</span><strong>$0.00</strong></div><button className="notification-button" type="button" aria-label="Notifications" onClick={() => notify("You are up to date.", "info")}><span className="notification-dot" /><Icon name="receipt" size={18} /></button></div></header>
+        <div className="page-content">{activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : activePage === "profile" ? <ProfilePage workspace={workspace} /> : workspace === "publisher" && ["websites", "website-details", "ad-codes", "earnings", "transactions", "withdrawals", "analytics"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} selectedWebsiteId={selectedWebsiteId} finance={publisherFinance} setFinance={setPublisherFinance} withdrawals={publisherWithdrawals} setWithdrawals={setPublisherWithdrawals} onNavigate={navigate} /> : workspace === "advertiser" && activePage === "creatives" ? <AdvertiserCreatives data={creativeData} setData={setCreativeData} /> : workspace === "advertiser" && ["campaigns", "create-campaign", "balance", "deposits", "transactions", "billing", "analytics", "reports"].includes(activePage) ? <AdvertiserWorkspace page={activePage} data={campaignData} setData={setCampaignData} creatives={creativeData} deposits={advertiserDeposits} setDeposits={setAdvertiserDeposits} onNavigate={navigate} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
     </main>
     {accountOpen && <AccountAccess onClose={() => setAccountOpen(false)} onSuccess={() => { setAccountOpen(false); setView("workspace"); }} />}
   </div>;
+}
+
+export default function App() {
+  return <NotificationProvider><AppContent /></NotificationProvider>;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNotifications } from "./NotificationSystem";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/webm"];
@@ -30,17 +31,17 @@ function CreativeCard({ creative, onRemove }) {
 }
 
 export default function AdvertiserCreatives({ data, setData }) {
+  const { notify } = useNotifications();
   const inputRef = useRef(null);
   const [selected, setSelected] = useState(null);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => () => { if (selected?.previewUrl) URL.revokeObjectURL(selected.previewUrl); }, [selected]);
 
   const selectFile = (file) => {
-    setError(""); setNotice("");
+    setError("");
     if (!file) return;
     if (!ACCEPTED_TYPES.includes(file.type)) { setError("Supported files: JPG, PNG, WEBP, GIF, MP4, or WEBM."); return; }
     if (file.size > MAX_FILE_SIZE) { setError("The creative must be 10 MB or smaller."); return; }
@@ -51,16 +52,16 @@ export default function AdvertiserCreatives({ data, setData }) {
 
   const uploadBlob = async () => {
     if (!selected) { setError("Choose a creative file first."); return; }
-    setError(""); setNotice(""); setIsUploading(true);
+    setError(""); setIsUploading(true);
     const payload = new FormData();
     payload.append("creative", selected.blob, selected.name);
     await new Promise(resolve => setTimeout(resolve, 450));
     setData(previous => [...previous, { id: "creative-" + Date.now(), name: selected.name, type: selected.type, size: selected.size, previewUrl: selected.previewUrl, createdAt: new Date().toLocaleDateString("en-US") }]);
-    setSelected(null); setIsUploading(false); setNotice("Blob prepared and added to the creative library. Storage API connection is the next backend step.");
+    setSelected(null); setIsUploading(false); notify("Blob prepared and added to the creative library. Storage API connection is the next backend step.", "success");
   };
 
   const removeCreative = (id) => setData(previous => { const item = previous.find(creative => creative.id === id); if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl); return previous.filter(creative => creative.id !== id); });
   const handleDrop = (event) => { event.preventDefault(); setIsDragging(false); selectFile(event.dataTransfer.files?.[0]); };
 
-  return <div className="workspace-page creatives-page"><div className="workspace-page-header"><div><span className="eyebrow">ADVERTISER / CREATIVE LIBRARY</span><h1>Creatives</h1><p>ارفع صورة أو فيديو كـBlob، راجعه قبل ربطه بحملة، ولا نعتبره جاهزًا للإنتاج قبل توصيل التخزين الحقيقي.</p></div><span className="phase-chip">Phase 3 · Blob-ready UI</span></div>{notice && <div className="notice" role="status"><span>{notice}</span><button type="button" onClick={() => setNotice("")}>×</button></div>}<section className="creative-upload-grid"><div className={isDragging ? "upload-dropzone is-dragging" : "upload-dropzone"} onDragOver={event => { event.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop}><span className="upload-icon"><UploadIcon name="upload" size={27} /></span><h2>Upload creative</h2><p>اسحب الملف هنا أو اختره من جهازك. الحد الأقصى 10 MB.</p><button className="secondary-button" type="button" onClick={() => inputRef.current?.click()}><UploadIcon name="upload" size={16} />Choose file</button><input ref={inputRef} className="sr-only" type="file" accept={ACCEPTED_TYPES.join(",")} onChange={event => selectFile(event.target.files?.[0])} /><small>JPG · PNG · WEBP · GIF · MP4 · WEBM</small></div><div className="blob-contract light-panel"><span className="eyebrow">BLOB UPLOAD CONTRACT</span><h2>Safe frontend boundary</h2><ol><li>Validate type and size in the browser.</li><li>Create a Blob preview without exposing secrets.</li><li>Keep the creative as Draft/Ready until storage API responds.</li></ol><span className="contract-note">No fake production URL is generated.</span></div></section>{error && <div className="field-error upload-error" role="alert">{error}</div>}{selected && <section className="selected-creative light-panel"><div className="selected-preview"><CreativePreview creative={selected} /></div><div className="selected-info"><span className="eyebrow">READY TO UPLOAD</span><h2>{selected.name}</h2><p>{selected.type} · {formatSize(selected.size)}</p><div className="form-actions"><button className="primary-button" type="button" disabled={isUploading} onClick={uploadBlob}><UploadIcon name={isUploading ? "upload" : "check"} size={16} />{isUploading ? "Preparing blob…" : "Add to library"}</button><button className="ghost-button" type="button" disabled={isUploading} onClick={() => setSelected(null)}>Cancel</button></div></div></section>}{!data.length ? <section className="light-panel"><div className="empty-state"><span className="empty-state-icon"><UploadIcon name="image" size={25} /></span><h2>No creatives yet</h2><p>أضف أول مادة إعلانية لتصبح جاهزة لخطوة إنشاء الحملة.</p></div></section> : <section className="creative-library"><div className="panel-heading"><div><span className="eyebrow">LIBRARY</span><h2>{data.length} creative{data.length === 1 ? "" : "s"}</h2></div><span className="result-count">Browser session demo</span></div><div className="creative-grid">{data.map(creative => <CreativeCard key={creative.id} creative={creative} onRemove={removeCreative} />)}</div></section>}</div>;
+  return <div className="workspace-page creatives-page"><div className="workspace-page-header"><div><span className="eyebrow">ADVERTISER / CREATIVE LIBRARY</span><h1>Creatives</h1><p>ارفع صورة أو فيديو كـBlob، راجعه قبل ربطه بحملة، ولا نعتبره جاهزًا للإنتاج قبل توصيل التخزين الحقيقي.</p></div><span className="phase-chip">Phase 3 · Blob-ready UI</span></div><section className="creative-upload-grid"><div className={isDragging ? "upload-dropzone is-dragging" : "upload-dropzone"} onDragOver={event => { event.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop}><span className="upload-icon"><UploadIcon name="upload" size={27} /></span><h2>Upload creative</h2><p>اسحب الملف هنا أو اختره من جهازك. الحد الأقصى 10 MB.</p><button className="secondary-button" type="button" onClick={() => inputRef.current?.click()}><UploadIcon name="upload" size={16} />Choose file</button><input ref={inputRef} className="sr-only" type="file" accept={ACCEPTED_TYPES.join(",")} onChange={event => selectFile(event.target.files?.[0])} /><small>JPG · PNG · WEBP · GIF · MP4 · WEBM</small></div><div className="blob-contract light-panel"><span className="eyebrow">BLOB UPLOAD CONTRACT</span><h2>Safe frontend boundary</h2><ol><li>Validate type and size in the browser.</li><li>Create a Blob preview without exposing secrets.</li><li>Keep the creative as Draft/Ready until storage API responds.</li></ol><span className="contract-note">No fake production URL is generated.</span></div></section>{error && <div className="field-error upload-error" role="alert">{error}</div>}{selected && <section className="selected-creative light-panel"><div className="selected-preview"><CreativePreview creative={selected} /></div><div className="selected-info"><span className="eyebrow">READY TO UPLOAD</span><h2>{selected.name}</h2><p>{selected.type} · {formatSize(selected.size)}</p><div className="form-actions"><button className="primary-button" type="button" disabled={isUploading} onClick={uploadBlob}><UploadIcon name={isUploading ? "upload" : "check"} size={16} />{isUploading ? "Preparing blob…" : "Add to library"}</button><button className="ghost-button" type="button" disabled={isUploading} onClick={() => setSelected(null)}>Cancel</button></div></div></section>}{!data.length ? <section className="light-panel"><div className="empty-state"><span className="empty-state-icon"><UploadIcon name="image" size={25} /></span><h2>No creatives yet</h2><p>أضف أول مادة إعلانية لتصبح جاهزة لخطوة إنشاء الحملة.</p></div></section> : <section className="creative-library"><div className="panel-heading"><div><span className="eyebrow">LIBRARY</span><h2>{data.length} creative{data.length === 1 ? "" : "s"}</h2></div><span className="result-count">Browser session demo</span></div><div className="creative-grid">{data.map(creative => <CreativeCard key={creative.id} creative={creative} onRemove={removeCreative} />)}</div></section>}</div>;
 }

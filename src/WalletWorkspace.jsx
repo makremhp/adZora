@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { DEPOSIT_CONFIG, PAYMENT_METHODS, WITHDRAWAL_CONFIG, formatMoney } from "./config";
+import { useNotifications } from "./NotificationSystem";
 
 function Icon({ name, size = 17 }) {
   const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -80,17 +81,17 @@ function RequestList({ mode, requests }) {
 }
 
 export default function WalletWorkspace({ mode = "deposit", requests = [], setRequests = () => {}, available = 0 }) {
+  const { notify } = useNotifications();
   const deposit = mode === "deposit";
   const [method, setMethod] = useState(deposit ? DEPOSIT_CONFIG.methods[0] : WITHDRAWAL_CONFIG.methods[0]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
-  const [notice, setNotice] = useState("");
   const [tonAttempted, setTonAttempted] = useState(false);
   const config = deposit ? DEPOSIT_CONFIG : WITHDRAWAL_CONFIG;
   const heading = useMemo(() => deposit ? "Deposit" : "Withdrawal", [deposit]);
 
-  const changeMethod = nextMethod => { setMethod(nextMethod); setForm(previous => ({ ...EMPTY_FORM, amount: previous.amount })); setErrors({}); setNotice(""); setTonAttempted(false); };
-  const connectTon = () => { setTonAttempted(true); setNotice("TON wallet connection will be available after SDK integration."); };
+  const changeMethod = nextMethod => { setMethod(nextMethod); setForm(previous => ({ ...EMPTY_FORM, amount: previous.amount })); setErrors({}); setTonAttempted(false); };
+  const connectTon = () => { setTonAttempted(true); notify("TON wallet connection will be available after SDK integration.", "info"); };
   const submit = () => {
     const next = {};
     const amount = Number(form.amount);
@@ -119,8 +120,8 @@ export default function WalletWorkspace({ mode = "deposit", requests = [], setRe
     setRequests(previous => [request, ...previous]);
     setForm(EMPTY_FORM);
     setErrors({});
-    setNotice(`${heading} request created as Pending. No balance was changed.`);
+    notify(`${heading} request created as Pending. No balance was changed.`, "success");
   };
 
-  return <div className="workspace-page wallet-workspace"><PageHeader mode={mode} /><section className="wallet-method-panel light-panel"><div className="panel-heading"><div><span className="eyebrow">{deposit ? "DEPOSIT METHODS" : "WITHDRAWAL METHODS"}</span><h2>Choose a method</h2></div><span className="phase-chip">Demo state only</span></div><MethodSelector mode={mode} value={method} onChange={changeMethod} />{!deposit && <div className="withdrawal-availability"><span>Available demo earnings</span><strong>{formatMoney(available)}</strong><small>Minimum withdrawal: {formatMoney(WITHDRAWAL_CONFIG.minimumAmount)}</small></div>}</section>{notice && <div className="notice wallet-notice" role="status"><span>{notice}</span><button type="button" onClick={() => setNotice("")} aria-label="Dismiss notice">×</button></div>}<RequestForm mode={mode} method={method} form={form} setForm={setForm} onSubmit={submit} error={errors} onTonConnect={connectTon} tonAttempted={tonAttempted} /><RequestList mode={mode} requests={requests} /></div>;
+  return <div className="workspace-page wallet-workspace"><PageHeader mode={mode} /><section className="wallet-method-panel light-panel"><div className="panel-heading"><div><span className="eyebrow">{deposit ? "DEPOSIT METHODS" : "WITHDRAWAL METHODS"}</span><h2>Choose a method</h2></div><span className="phase-chip">Demo state only</span></div><MethodSelector mode={mode} value={method} onChange={changeMethod} />{!deposit && <div className="withdrawal-availability"><span>Available demo earnings</span><strong>{formatMoney(available)}</strong><small>Minimum withdrawal: {formatMoney(WITHDRAWAL_CONFIG.minimumAmount)}</small></div>}</section><RequestForm mode={mode} method={method} form={form} setForm={setForm} onSubmit={submit} error={errors} onTonConnect={connectTon} tonAttempted={tonAttempted} /><RequestList mode={mode} requests={requests} /></div>;
 }
