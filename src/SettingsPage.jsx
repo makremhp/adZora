@@ -2,29 +2,17 @@ import { useState } from "react";
 import { useNotifications } from "./NotificationSystem";
 
 function SettingsIcon({ name, size = 18 }) {
-  const common = {
-    width: size,
-    height: size,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.8,
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-    "aria-hidden": "true",
-  };
+  const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
   const paths = {
-    user: <><circle cx="12" cy="8" r="3" /><path d="M5 20a7 7 0 0 1 14 0" /></>,
     globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18" /></>,
     bell: <><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" /></>,
-    lock: <><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></>,
+    monitor: <><rect x="3" y="4" width="18" height="13" rx="2" /><path d="M8 21h8M12 17v4" /></>,
     alert: <><path d="M10.3 4.8 2.8 18a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3l-7.5-13.2a2 2 0 0 0-3.4 0Z" /><path d="M12 9v4M12 16.5h.01" /></>,
     trash: <><path d="M4 7h16M10 11v6M14 11v6" /><path d="m6 7 1 13h10l1-13M9 7V4h6v3" /></>,
     logout: <><path d="M10 17l5-5-5-5M15 12H3" /><path d="M14 4h5v16h-5" /></>,
-    close: <><path d="m6 6 12 12M18 6 6 18" /></>,
     arrow: <path d="m9 18 6-6-6-6" />,
   };
-  return <svg {...common}>{paths[name] || paths.user}</svg>;
+  return <svg {...common}>{paths[name] || paths.monitor}</svg>;
 }
 
 function ConfirmDialog({ title, description, confirmLabel, danger = false, onCancel, onConfirm }) {
@@ -34,8 +22,8 @@ function ConfirmDialog({ title, description, confirmLabel, danger = false, onCan
       <h2 id="confirm-dialog-title">{title}</h2>
       <p>{description}</p>
       <div className="confirm-dialog-actions">
-        <button className="ghost-button" type="button" onClick={onCancel}>Cancel</button>
-        <button className={danger ? "danger-button" : "primary-button"} type="button" onClick={onConfirm}>{confirmLabel}</button>
+        <button className="ghost-button" type="button" onClick={onCancel} data-testid="button-cancel-settings-dialog">Cancel</button>
+        <button className={danger ? "danger-button" : "primary-button"} type="button" onClick={onConfirm} data-testid="button-confirm-settings-dialog">{confirmLabel}</button>
       </div>
     </section>
   </div>;
@@ -76,19 +64,15 @@ export default function SettingsPage({ workspace, publisherData, setPublisherDat
 
   return <div className="workspace-page settings-page">
     <div className="workspace-page-header">
-      <div><span className="eyebrow">ACCOUNT / SETTINGS</span><h1>Settings</h1><p>Manage your AdZora account, websites, preferences, and security boundaries.</p></div>
+      <div><span className="eyebrow">ACCOUNT / SETTINGS</span><h1>Settings</h1><p>Control app preferences, connected websites, and this browser session.</p></div>
       <span className="phase-chip">Frontend demo</span>
     </div>
 
     <div className="settings-layout">
-      <SettingsSection icon="user" eyebrow="ACCOUNT" title="Profile" description="Edit your personal information.">
+      <SettingsSection icon="bell" eyebrow="PREFERENCES" title="Notifications" description="Choose whether this demo workspace shows action notifications.">
         <div className="settings-row">
-          <div className="settings-row-copy"><strong>Profile information</strong><span>Display name, email, role, and account status.</span></div>
-          <button className="secondary-button" type="button" onClick={() => onNavigate("profile")}><SettingsIcon name="user" size={15} />Edit Profile</button>
-        </div>
-        <div className="settings-row">
-          <div className="settings-row-copy"><strong>Log Out</strong><span>Sign out from your current AdZora session.</span></div>
-          <button className="ghost-button" type="button" onClick={() => setLogoutOpen(true)}><SettingsIcon name="logout" size={15} />Log Out</button>
+          <div className="settings-row-copy"><strong>Enable Notifications</strong><span>This preference is kept in frontend state and is not saved to a server.</span></div>
+          <button className={notificationsEnabled ? "toggle-button is-on" : "toggle-button"} type="button" role="switch" aria-checked={notificationsEnabled} onClick={() => setNotificationsEnabled(previous => !previous)} data-testid="button-toggle-notifications"><span /></button>
         </div>
       </SettingsSection>
 
@@ -99,32 +83,25 @@ export default function SettingsPage({ workspace, publisherData, setPublisherDat
         </article>)}</div>}
       </SettingsSection>
 
-      <SettingsSection icon="bell" eyebrow="PREFERENCES" title="Notifications" description="Choose whether this demo workspace shows action notifications.">
+      <SettingsSection icon="monitor" eyebrow="SESSION" title="Current Session" description="Review the active browser session and leave the demo workspace when needed.">
         <div className="settings-row">
-          <div className="settings-row-copy"><strong>Enable Notifications</strong><span>This preference is kept in frontend state and is not saved to a server.</span></div>
-          <button className={notificationsEnabled ? "toggle-button is-on" : "toggle-button"} type="button" role="switch" aria-checked={notificationsEnabled} onClick={() => setNotificationsEnabled(previous => !previous)}><span /></button>
-        </div>
-      </SettingsSection>
-
-      <SettingsSection icon="lock" eyebrow="SECURITY" title="Security" description="Authentication-dependent controls stay clearly marked until a server is connected.">
-        <div className="settings-row">
-          <div className="settings-row-copy"><strong>Change Password</strong><span>Password management will be available when authentication is connected.</span></div>
-          <button className="ghost-button" type="button" onClick={() => notify("Password management is not connected", "info", 3500, "This frontend demo does not claim to change credentials.")}>Change Password</button>
-        </div>
-        <div className="settings-row">
-          <div className="settings-row-copy"><strong>Active Session</strong><span>Session management will be available when authentication is connected.</span></div>
+          <div className="settings-row-copy"><strong>Active Session</strong><span>This is a local demo session. Authentication and session revocation are not connected.</span></div>
           <span className="settings-status">Demo session</span>
         </div>
+        <div className="settings-row settings-row-last">
+          <div className="settings-row-copy"><strong>Log Out</strong><span>Return to the AdZora landing screen.</span></div>
+          <button className="ghost-button" type="button" onClick={() => setLogoutOpen(true)}><SettingsIcon name="logout" size={15} />Log Out</button>
+        </div>
       </SettingsSection>
 
-      <SettingsSection icon="alert" eyebrow="DANGER ZONE" title="Danger Zone" description="These actions require server-side authentication and are not simulated." className="settings-danger">
+      <SettingsSection icon="alert" eyebrow="ACCOUNT ACTIONS" title="Account Actions" description="These controls are intentionally not simulated in the frontend demo." className="settings-danger">
         <div className="settings-row">
           <div className="settings-row-copy"><strong>Deactivate Account</strong><span>Account actions require server-side authentication.</span></div>
-          <button className="danger-button" type="button" onClick={() => notify("Account action is not available", "warning", 3500, "Server-side authentication is required.")}>Deactivate Account</button>
+          <button className="danger-button" type="button" onClick={() => notify("Account action is not available", "warning", 3500, "Server-side authentication is required.")} data-testid="button-deactivate-account"><SettingsIcon name="alert" size={15} />Deactivate Account</button>
         </div>
-        <div className="settings-row">
+        <div className="settings-row settings-row-last">
           <div className="settings-row-copy"><strong>Delete Account</strong><span>The demo will not hide or delete the account from frontend state.</span></div>
-          <button className="danger-button" type="button" onClick={() => notify("Account action is not available", "warning", 3500, "Server-side authentication is required.")}><SettingsIcon name="trash" size={15} />Delete Account</button>
+          <button className="danger-button" type="button" onClick={() => notify("Account action is not available", "warning", 3500, "Server-side authentication is required.")} data-testid="button-delete-account"><SettingsIcon name="trash" size={15} />Delete Account</button>
         </div>
       </SettingsSection>
     </div>
