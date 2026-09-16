@@ -455,13 +455,14 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
 .detail-metrics { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .detail-metrics .metric-card { min-height: 125px; }
 .website-detail-chart { margin-top: 12px; }
-.format-performance-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
-.format-performance-card { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: #fbfcff; }
-.format-card-heading { grid-column: 1 / -1; padding-bottom: 9px; border-bottom: 1px solid var(--line); }
-.format-card-heading strong { font-size: 13px; }
-.format-card-heading span { color: var(--muted-2); font-size: 10px; }
-.format-performance-card > div:not(.format-card-heading) { display: grid; gap: 4px; min-width: 0; }
-.format-performance-card > div:not(.format-card-heading) strong { text-align: left; }
+.format-performance-table { display: grid; margin-top: 18px; min-width: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.format-performance-row { display: grid; grid-template-columns: minmax(130px, 1.5fr) repeat(4, minmax(90px, 1fr)); align-items: center; gap: 12px; min-width: 0; padding: 15px 16px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+.format-performance-row:last-child { border-bottom: 0; }
+.format-performance-row > * { min-width: 0; }
+.format-performance-row strong { color: var(--text); font-size: 12px; }
+.format-performance-row span:not(:first-child), .format-performance-row strong:not(:first-child) { direction: ltr; text-align: right; }
+.format-performance-header { color: var(--muted-2); background: #f8faff; font-size: 10px; }
+.format-performance-header span { direction: rtl; text-align: right; }
 .activity-list { display: grid; gap: 0; margin-top: 8px; }
 .activity-list > div { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 14px 0; border-bottom: 1px solid var(--line); }
 .activity-list > div:last-child { border-bottom: 0; }
@@ -480,7 +481,7 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
   .analytics-header-controls { align-items: stretch; justify-content: flex-start; flex-direction: column; }
   .analytics-period-control { align-self: flex-start; }
   .earnings-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .website-analytics-grid, .format-performance-grid { grid-template-columns: 1fr; }
+  .website-analytics-grid { grid-template-columns: 1fr; }
   .detail-header, .selected-website-summary { align-items: stretch; flex-direction: column; }
   .analytics-select { width: 100%; }
 }
@@ -491,6 +492,15 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
   .earnings-summary-grid strong { font-size: 17px; }
   .publisher-chart svg { height: 190px; }
   .website-analytics-card { padding: 13px; }
+  .format-performance-row { grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 1fr)); gap: 10px; padding: 13px; }
+  .format-performance-row span:nth-child(2)::before { content: "Impressions"; }
+  .format-performance-row span:nth-child(3)::before { content: "Clicks"; }
+  .format-performance-row span:nth-child(4)::before { content: "CTR"; }
+  .format-performance-row span:nth-child(5)::before { content: "Earnings"; }
+  .format-performance-row span:not(:first-child) { display: flex; justify-content: space-between; gap: 8px; }
+  .format-performance-row span:not(:first-child)::before { color: var(--muted-2); font-size: 9px; }
+  .format-performance-header { display: none; }
+  .format-performance-row strong { grid-column: 1 / -1; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
 }
 @media (max-width: 380px) {
   .analytics-period-control { width: 100%; }
