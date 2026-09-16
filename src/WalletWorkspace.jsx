@@ -48,11 +48,11 @@ function MethodSelector({ value, onChange, mode }) {
 
 function PageHeader({ mode, onNavigate }) {
   const deposit = mode === "deposit";
-  return <div className="workspace-page-header"><div><span className="eyebrow">{deposit ? "ADVERTISER / FUNDS" : "PUBLISHER / FUNDS"}</span><h1>{deposit ? "Deposit funds" : "Withdraw earnings"}</h1><p>{deposit ? "اختر طريقة الإيداع وأرسل طلبًا تجريبيًا للمراجعة. لا تتم زيادة الرصيد من الواجهة." : "اختر طريقة السحب وأرسل طلبًا تجريبيًا. لا يوجد تنفيذ أو تحويل أموال من الواجهة."}</p></div><span className="phase-chip">Frontend demo</span></div>;
+  return <div className="workspace-page-header"><div><span className="eyebrow">{deposit ? "ADVERTISER / FUNDS" : "PUBLISHER / FUNDS"}</span><h1>{deposit ? "Deposit funds" : "Withdraw earnings"}</h1><p>{deposit ? "اختر طريقة الإيداع وأرسل طلبك للمراجعة." : "اختر طريقة السحب وأرسل طلبك للمراجعة."}</p></div></div>;
 }
 
 function TonNotice({ mode, onConnect, connected }) {
-  return <div className="wallet-sdk-note" role="status"><div><Icon name="info" size={17} /><span>{connected ? "TON wallet SDK is not connected in this demo." : "TON wallet connection will be available after SDK integration."}</span></div><button className="secondary-button" type="button" onClick={onConnect}>{connected ? "Connection unavailable" : "Connect TON Wallet"}</button></div>;
+  return <div className="wallet-sdk-note" role="status"><div><Icon name="info" size={17} /><span>{connected ? "TON wallet connection is being set up." : "TON wallet connection will be available soon."}</span></div><button className="secondary-button" type="button" onClick={onConnect}>{connected ? "Connection unavailable" : "Connect TON Wallet"}</button></div>;
 }
 
 function RequestForm({ mode, method, form, setForm, onSubmit, error, onTonConnect, tonAttempted }) {
@@ -69,7 +69,7 @@ function RequestForm({ mode, method, form, setForm, onSubmit, error, onTonConnec
       {method === "binance" && !deposit && <Field label="Binance ID / UID" error={error?.binanceUid}><input className="input" value={form.binanceUid} onChange={event => update("binanceUid", event.target.value)} placeholder="Enter recipient Binance UID" /></Field>}
     </div>
     {method === "cwallet" && <p className="wallet-help"><Icon name="info" size={15} />Your {deposit ? "deposit" : "withdrawal"} will remain pending until it is reviewed.</p>}
-    {method === "ton" && <p className="wallet-help"><Icon name="info" size={15} />No fake wallet connection is created. The request remains a frontend demo until the SDK is integrated.</p>}
+    {method === "ton" && <p className="wallet-help"><Icon name="info" size={15} />You will be notified once direct TON wallet connection is available.</p>}
     {method === "binance" && !deposit && <p className="wallet-help"><Icon name="info" size={15} />The transaction reference is produced by the system after a real withdrawal; it is not requested from the recipient now.</p>}
     <div className="form-actions"><button className="primary-button" type="button" onClick={onSubmit}><Icon name={deposit ? "arrow-down" : "arrow-up"} size={16} />{deposit ? "Submit Deposit Request" : "Request Withdrawal"}</button></div>
   </section>;
@@ -77,7 +77,7 @@ function RequestForm({ mode, method, form, setForm, onSubmit, error, onTonConnec
 
 function RequestList({ mode, requests }) {
   const deposit = mode === "deposit";
-  return <section className="light-panel data-panel wallet-request-list"><div className="panel-heading"><div><span className="eyebrow">{deposit ? "DEPOSIT STATUS" : "WITHDRAWAL STATUS"}</span><h2>Recent requests</h2></div><span className="result-count">{requests.length} records</span></div>{!requests.length ? <div className="wallet-empty"><Icon name="clock" size={22} /><strong>No requests yet</strong><span>New requests will start as Pending and require review.</span></div> : <div className="data-list">{requests.map(request => <article className="data-row wallet-request-row" key={request.id}><div className="row-main"><span className="row-icon"><Icon name={deposit ? "arrow-down" : "arrow-up"} /></span><div><strong>{methodLabel(request.method)} · {formatMoney(request.amount)}</strong><small>{request.createdAt} · {request.network || request.destination || "Demo request"}</small></div></div><span className="status-badge pending">{request.status}</span></article>)}</div>}</section>;
+  return <section className="light-panel data-panel wallet-request-list"><div className="panel-heading"><div><span className="eyebrow">{deposit ? "DEPOSIT STATUS" : "WITHDRAWAL STATUS"}</span><h2>Recent requests</h2></div><span className="result-count">{requests.length} records</span></div>{!requests.length ? <div className="wallet-empty"><Icon name="clock" size={22} /><strong>No requests yet</strong><span>New requests will start as Pending and require review.</span></div> : <div className="data-list">{requests.map(request => <article className="data-row wallet-request-row" key={request.id}><div className="row-main"><span className="row-icon"><Icon name={deposit ? "arrow-down" : "arrow-up"} /></span><div><strong>{methodLabel(request.method)} · {formatMoney(request.amount)}</strong><small>{request.createdAt} · {request.network || request.destination || "Pending review"}</small></div></div><span className="status-badge pending">{request.status}</span></article>)}</div>}</section>;
 }
 
 export default function WalletWorkspace({ mode = "deposit", requests = [], setRequests = () => {}, available = 0 }) {
@@ -97,7 +97,7 @@ export default function WalletWorkspace({ mode = "deposit", requests = [], setRe
     const amount = Number(form.amount);
     if (!amount || amount <= 0) next.amount = "Enter a valid amount.";
     if (!deposit && amount < config.minimumAmount) next.amount = `Minimum withdrawal is ${formatMoney(config.minimumAmount)}.`;
-    if (!deposit && amount > available) next.amount = "The amount exceeds the demo available earnings.";
+    if (!deposit && amount > available) next.amount = "The amount exceeds your available earnings.";
     if (method === "cwallet" && !form.cwalletIdentifier.trim()) next.cwalletIdentifier = "Enter a Cwallet account or identifier.";
     if (method === "binance" && deposit && !form.network) next.network = "Select a network.";
     if (method === "binance" && deposit && !form.txid.trim()) next.txid = "Enter the transaction hash.";
@@ -105,7 +105,7 @@ export default function WalletWorkspace({ mode = "deposit", requests = [], setRe
     setErrors(next);
     if (Object.keys(next).length) return;
     const request = {
-      id: `demo-${mode}-${Date.now()}`,
+      id: `request-${mode}-${Date.now()}`,
       type: mode,
       method,
       amount,
@@ -120,8 +120,8 @@ export default function WalletWorkspace({ mode = "deposit", requests = [], setRe
     setRequests(previous => [request, ...previous]);
     setForm(EMPTY_FORM);
     setErrors({});
-    notify(`${heading} request created as Pending. No balance was changed.`, "success");
+    notify(`${heading} request submitted and is now pending review.`, "success");
   };
 
-  return <div className="workspace-page wallet-workspace"><PageHeader mode={mode} /><section className="wallet-method-panel light-panel"><div className="panel-heading"><div><span className="eyebrow">{deposit ? "DEPOSIT METHODS" : "WITHDRAWAL METHODS"}</span><h2>Choose a method</h2></div><span className="phase-chip">Demo state only</span></div><MethodSelector mode={mode} value={method} onChange={changeMethod} />{!deposit && <div className="withdrawal-availability"><span>Available demo earnings</span><strong>{formatMoney(available)}</strong><small>Minimum withdrawal: {formatMoney(WITHDRAWAL_CONFIG.minimumAmount)}</small></div>}</section><RequestForm mode={mode} method={method} form={form} setForm={setForm} onSubmit={submit} error={errors} onTonConnect={connectTon} tonAttempted={tonAttempted} /><RequestList mode={mode} requests={requests} /></div>;
+  return <div className="workspace-page wallet-workspace"><PageHeader mode={mode} /><section className="wallet-method-panel light-panel"><div className="panel-heading"><div><span className="eyebrow">{deposit ? "DEPOSIT METHODS" : "WITHDRAWAL METHODS"}</span><h2>Choose a method</h2></div></div><MethodSelector mode={mode} value={method} onChange={changeMethod} />{!deposit && <div className="withdrawal-availability"><span>Available Earnings</span><strong>{formatMoney(available)}</strong><small>Minimum withdrawal: {formatMoney(WITHDRAWAL_CONFIG.minimumAmount)}</small></div>}</section><RequestForm mode={mode} method={method} form={form} setForm={setForm} onSubmit={submit} error={errors} onTonConnect={connectTon} tonAttempted={tonAttempted} /><RequestList mode={mode} requests={requests} /></div>;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AD_FORMATS, RECENT_ITEMS, ROLE_CONFIG, WITHDRAWAL_CONFIG } from "./config";
+import { AD_FORMATS, ROLE_CONFIG, WITHDRAWAL_CONFIG } from "./config";
 import PublisherWorkspace from "./PublisherWorkspace";
 import AdvertiserWorkspace from "./AdvertiserWorkspace";
 import adzoraLogo from "../images/adzora-logo.png";
@@ -115,6 +115,7 @@ function LandingPage({ onLogin, onStart }) {
 
 function Sidebar({ workspace, setWorkspace, activePage, onNavigate, drawerOpen, closeDrawer }) {
   const config = ROLE_CONFIG[workspace];
+  let lastGroup = undefined;
   return <>
     <div className={drawerOpen ? "drawer-overlay is-open" : "drawer-overlay"} onClick={closeDrawer} />
     <aside className={drawerOpen ? "sidebar is-open" : "sidebar"} aria-label="Workspace navigation">
@@ -126,13 +127,18 @@ function Sidebar({ workspace, setWorkspace, activePage, onNavigate, drawerOpen, 
           {workspace === id && <span className="active-check">✓</span>}
         </button>)}
       </div>
-      <div className="nav-caption">المساحة الحالية · {config.arabicLabel}</div>
       <nav className="side-nav">
-        {config.nav.map(item => <button key={item.id} className={activePage === item.id ? "nav-item active" : "nav-item"} onClick={() => onNavigate(item.id)}>
-          <Icon name={item.icon} /><span>{item.arabic}</span><small>{item.label}</small>{activePage === item.id && <span className="nav-active-line" />}
-        </button>)}
+        {config.nav.map(item => {
+          const showGroupLabel = item.group !== lastGroup;
+          lastGroup = item.group;
+          return <div className="nav-item-wrap" key={item.id}>
+            {showGroupLabel && item.group && <span className="nav-group-label">{item.group}</span>}
+            <button className={activePage === item.id ? "nav-item active" : "nav-item"} onClick={() => onNavigate(item.id)}>
+              <Icon name={item.icon} /><span>{item.arabic}</span><small>{item.label}</small>{activePage === item.id && <span className="nav-active-line" />}
+            </button>
+          </div>;
+        })}
       </nav>
-      <div className="sidebar-footer"><div className="footer-status"><span className="status-dot" />Demo workspace</div><span>Phase 3</span></div>
     </aside>
   </>;
 }
@@ -153,24 +159,41 @@ function EmptyPanel({ workspace, onNavigate }) {
   </section>;
 }
 
+function MetricHero({ metric, action, onNavigate }) {
+  return <article className="metric-hero">
+    <div className="metric-hero-top"><span className="metric-icon"><Icon name={metric.icon} size={18} /></span><span className="metric-label">{metric.label}</span></div>
+    <strong className="metric-hero-value">{metric.value}</strong>
+    <span className="metric-hero-hint">{metric.hint}</span>
+    {action && <button className="primary-button metric-hero-action" onClick={() => onNavigate(action.id)}><Icon name="arrow-up" size={16} />{action.label}</button>}
+  </article>;
+}
+
+const PERIODS = ["24H", "7D", "30D"];
+
 function Overview({ workspace, onNavigate }) {
   const config = ROLE_CONFIG[workspace];
-  const recent = RECENT_ITEMS[workspace][0];
+  const [period, setPeriod] = useState("30D");
+  const [hero, ...secondaryMetrics] = config.metrics;
   return <>
-    <section className="welcome-row"><div><span className="eyebrow">{config.label.toUpperCase()} WORKSPACE</span><h1>{config.overviewTitle}</h1><p>{config.overviewDescription}</p></div><div className="welcome-actions"><button className="primary-button" onClick={() => onNavigate(config.quickActions[0].id)}><Icon name={config.quickActions[0].icon} size={17} />{config.quickActions[0].arabic}</button><button className="ghost-button" onClick={() => onNavigate("analytics")}><Icon name="chart" size={17} />التحليلات</button></div></section>
-    <section className="identity-strip"><span className="identity-mark">{workspace === "publisher" ? "P" : "A"}</span><span><strong>{config.label} workflow</strong><small>{config.identity}</small></span><span className="identity-pill">Demo data · Ready for API</span></section>
-    <section className="metric-grid">{config.metrics.map(metric => <MetricCard key={metric.label} metric={metric} />)}</section>
-    <section className="section-heading"><div><span className="eyebrow">AT A GLANCE</span><h2>Performance overview</h2></div><button className="filter-button">Last 30 days <Icon name="chevron" size={14} /></button></section>
-    <section className="performance-grid">{config.performance.map(item => <div className="performance-item" key={item.label}><span>{item.label}</span><strong>{item.value}</strong><small>{item.value === "--" ? "Not enough data" : "Demo snapshot"}</small></div>)}</section>
+    <section className="welcome-row compact">
+      <div><span className="eyebrow">{config.label.toUpperCase()} WORKSPACE</span><h1>{config.overviewTitle}</h1><p>{config.identity}</p></div>
+      <div className="welcome-actions"><button className="primary-button" onClick={() => onNavigate(config.quickActions[0].id)}><Icon name={config.quickActions[0].icon} size={17} />{config.quickActions[0].arabic}</button><button className="ghost-button" onClick={() => onNavigate("analytics")}><Icon name="chart" size={17} />التحليلات</button></div>
+    </section>
+    <section className="hero-metric-row">
+      <MetricHero metric={hero} action={config.heroAction} onNavigate={onNavigate} />
+      <div className="metric-secondary-grid">{secondaryMetrics.map(metric => <MetricCard key={metric.label} metric={metric} />)}</div>
+    </section>
+    <section className="section-heading"><div><span className="eyebrow">AT A GLANCE</span><h2>Performance overview</h2></div><div className="analytics-period-control" aria-label="Performance period">{PERIODS.map(option => <button type="button" key={option} className={period === option ? "is-active" : ""} onClick={() => setPeriod(option)}>{option}</button>)}</div></section>
+    <section className="performance-grid">{config.performance.map(item => <div className="performance-item" key={item.label}><span>{item.label}</span><strong>{item.value}</strong>{item.value === "--" && <small>Not enough data</small>}</div>)}</section>
     <section className="dashboard-grid"><section className="panel quick-panel"><div className="panel-heading"><div><span className="eyebrow">NEXT STEPS</span><h2>Quick actions</h2></div></div><div className="quick-list">{config.quickActions.map((action, index) => <button className={index === 0 ? "quick-action primary" : "quick-action"} key={action.id} onClick={() => onNavigate(action.id)}><span className="quick-action-icon"><Icon name={action.icon} size={18} /></span><span><strong>{action.arabic}</strong><small>{action.label}</small></span><Icon name="chevron" size={16} /></button>)}</div></section><EmptyPanel workspace={workspace} onNavigate={onNavigate} /></section>
-    {workspace === "advertiser" && <section className="formats-panel panel"><div className="panel-heading"><div><span className="eyebrow">AD FORMAT SYSTEM</span><h2>Built for a real advertising network</h2></div><button className="text-button" onClick={() => onNavigate("create-campaign")}>Explore workflow <Icon name="chevron" size={14} /></button></div><div className="format-list">{AD_FORMATS.map(format => <span className="format-chip" key={format.id}>{format.name}<small>{format.pricing.join(" · ")}</small></span>)}</div></section>}
+    {workspace === "advertiser" && <section className="formats-panel panel subtle-panel"><div className="panel-heading"><div><span className="eyebrow">AD FORMATS</span><h2>Available formats</h2></div><button className="text-button" onClick={() => onNavigate("create-campaign")}>Create campaign <Icon name="chevron" size={14} /></button></div><div className="format-list">{AD_FORMATS.map(format => <span className="format-chip" key={format.id}>{format.name}<small>{format.pricing.join(" · ")}</small></span>)}</div></section>}
   </>;
 }
 
 function ComingSoon({ workspace, page, onNavigate }) {
   const config = ROLE_CONFIG[workspace];
   const item = config.nav.find(navItem => navItem.id === page) || config.nav[0];
-  return <section className="coming-page"><div className="coming-orbit"><span /><span /><span /><Icon name={item.icon} size={32} /></div><span className="eyebrow">{config.label.toUpperCase()} WORKSPACE</span><h1>{item.arabic}</h1><p>هذه الشاشة موجودة في بنية المنتج وستُبنى في المرحلة التالية. لن تكون رابطًا ميتًا؛ سنضيف إليها حالات التحميل والفراغ والخطأ والنجاح مع منطقها الفعلي.</p><div className="coming-meta"><span><b>Section</b>{item.label}</span><span><b>Next phase</b>Functional workflow</span></div><button className="secondary-button" onClick={() => onNavigate("overview")}><Icon name="grid" size={16} />العودة إلى النظرة العامة</button></section>;
+  return <section className="coming-page"><div className="coming-orbit"><span /><span /><span /><Icon name={item.icon} size={32} /></div><span className="eyebrow">{config.label.toUpperCase()} WORKSPACE</span><h1>{item.arabic}</h1><p>هذا القسم قيد الإعداد حاليًا وسيتوفر قريبًا بكامل إمكانياته.</p><div className="coming-meta"><span><b>Section</b>{item.label}</span><span><b>Status</b>Coming soon</span></div><button className="secondary-button" onClick={() => onNavigate("overview")}><Icon name="grid" size={16} />العودة إلى النظرة العامة</button></section>;
 }
 
 function getPasswordStrength(password) {
@@ -275,7 +298,6 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
           </button>
         </form>
 
-        <p className="demo-note">واجهة التسجيل الحالية تجريبية، وسيتم ربط الحسابات الفعلية بعد إعداد المصادقة.</p>
       </section>
     </div>
   );

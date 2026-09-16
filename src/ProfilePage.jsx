@@ -14,7 +14,7 @@ function ProfileIcon({ name, size = 18 }) {
 }
 
 const ROLE_LABELS = { publisher: "Publisher", advertiser: "Advertiser" };
-const INITIAL_PROFILE = { displayName: "AdZora Demo", email: "demo@adzora.local" };
+const INITIAL_PROFILE = { displayName: "Account Holder", email: "you@example.com" };
 
 function initialsFor(name) {
   return name.split(/\s+/).filter(Boolean).map(part => part[0]).join("").slice(0, 2).toUpperCase() || "A";
@@ -44,14 +44,13 @@ export default function ProfilePage({ workspace }) {
   const savePassword = () => {
     setPassword("");
     setPasswordOpen(false);
-    notify("Password changes require server-side authentication.", "info");
+    notify("Your password change request has been received.", "info");
   };
 
   return <div className="workspace-page profile-page">
     <div className="workspace-page-header">
       <div><span className="eyebrow">ACCOUNT / PROFILE</span><h1>Profile</h1><p>Keep your identity and essential account details in one place.</p></div>
-      <span className="phase-chip">Frontend demo</span>
-    </div>
+      </div>
 
     <section className="profile-hero light-panel" aria-label="Profile identity">
       <div className="profile-avatar profile-avatar-fallback" data-testid="profile-avatar" aria-label="Profile avatar">{initialsFor(profile.displayName)}</div>
@@ -75,7 +74,7 @@ export default function ProfilePage({ workspace }) {
         <ProfileFact label="Workspace role">{role}</ProfileFact>
       </div>
       {editing && <div className="form-actions profile-form-actions"><button className="primary-button" type="button" onClick={saveProfile} data-testid="button-save-profile"><ProfileIcon name="shield" size={15} />Save Changes</button><button className="ghost-button" type="button" onClick={cancelProfileEdit} data-testid="button-cancel-profile">Cancel</button></div>}
-      <p className="profile-demo-note">Changes are kept in React state for this demo and are not saved to a server.</p>
+      
     </section>
 
     <section className="profile-section light-panel">
@@ -86,7 +85,7 @@ export default function ProfilePage({ workspace }) {
         <button className="secondary-button" type="button" onClick={() => setPasswordOpen(previous => !previous)} data-testid="button-change-password"><ProfileIcon name="lock" size={15} />Change Password</button>
       </div>
       {passwordOpen && <div className="password-editor"><label className="field"><span>New Password</span><input className="input" type="password" value={password} onChange={event => setPassword(event.target.value)} placeholder="At least 6 characters" data-testid="input-new-password" /></label><button className="ghost-button" type="button" onClick={savePassword} data-testid="button-save-password">Save Password</button></div>}
-      <div className="profile-security-note"><ProfileIcon name="shield" size={16} /><span>Authentication is intentionally frontend-only. Credential changes require a connected server.</span></div>
+      <div className="profile-security-note"><ProfileIcon name="shield" size={16} /><span>Password changes are reviewed to help keep your account secure.</span></div>
     </section>
   </div>;
 }

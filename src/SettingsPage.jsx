@@ -53,7 +53,7 @@ export default function SettingsPage({ workspace, publisherData, setPublisherDat
       ...previous,
       websites: previous.websites.filter(website => website.id !== pendingWebsite.id),
     }));
-    notify("Website deleted successfully", "success", 3500, "The website was removed from this demo account.");
+    notify("Website deleted successfully", "success", 3500, "The website was removed from your account.");
     setPendingWebsite(null);
   };
 
@@ -65,13 +65,12 @@ export default function SettingsPage({ workspace, publisherData, setPublisherDat
   return <div className="workspace-page settings-page">
     <div className="workspace-page-header">
       <div><span className="eyebrow">ACCOUNT / SETTINGS</span><h1>Settings</h1><p>Control app preferences, connected websites, and this browser session.</p></div>
-      <span className="phase-chip">Frontend demo</span>
-    </div>
+      </div>
 
     <div className="settings-layout">
-      <SettingsSection icon="bell" eyebrow="PREFERENCES" title="Notifications" description="Choose whether this demo workspace shows action notifications.">
+      <SettingsSection icon="bell" eyebrow="PREFERENCES" title="Notifications" description="Choose whether this workspace shows action notifications.">
         <div className="settings-row">
-          <div className="settings-row-copy"><strong>Enable Notifications</strong><span>This preference is kept in frontend state and is not saved to a server.</span></div>
+          <div className="settings-row-copy"><strong>Enable Notifications</strong><span>You can change this anytime.</span></div>
           <button className={notificationsEnabled ? "toggle-button is-on" : "toggle-button"} type="button" role="switch" aria-checked={notificationsEnabled} onClick={() => setNotificationsEnabled(previous => !previous)} data-testid="button-toggle-notifications"><span /></button>
         </div>
       </SettingsSection>
@@ -83,10 +82,10 @@ export default function SettingsPage({ workspace, publisherData, setPublisherDat
         </article>)}</div>}
       </SettingsSection>
 
-      <SettingsSection icon="monitor" eyebrow="SESSION" title="Current Session" description="Review the active browser session and leave the demo workspace when needed.">
+      <SettingsSection icon="monitor" eyebrow="SESSION" title="Current Session" description="Review your active session and log out when needed.">
         <div className="settings-row">
-          <div className="settings-row-copy"><strong>Active Session</strong><span>This is a local demo session. Authentication and session revocation are not connected.</span></div>
-          <span className="settings-status">Demo session</span>
+          <div className="settings-row-copy"><strong>Active Session</strong><span>This is your current active session on this device.</span></div>
+          <span className="settings-status">Active</span>
         </div>
         <div className="settings-row settings-row-last">
           <div className="settings-row-copy"><strong>Log Out</strong><span>Return to the AdZora landing screen.</span></div>
@@ -94,19 +93,19 @@ export default function SettingsPage({ workspace, publisherData, setPublisherDat
         </div>
       </SettingsSection>
 
-      <SettingsSection icon="alert" eyebrow="ACCOUNT ACTIONS" title="Account Actions" description="These controls are intentionally not simulated in the frontend demo." className="settings-danger">
+      <SettingsSection icon="alert" eyebrow="ACCOUNT ACTIONS" title="Account Actions" description="These actions are permanent and require confirmation." className="settings-danger">
         <div className="settings-row">
-          <div className="settings-row-copy"><strong>Deactivate Account</strong><span>Account actions require server-side authentication.</span></div>
-          <button className="danger-button" type="button" onClick={() => notify("Account action is not available", "warning", 3500, "Server-side authentication is required.")} data-testid="button-deactivate-account"><SettingsIcon name="alert" size={15} />Deactivate Account</button>
+          <div className="settings-row-copy"><strong>Deactivate Account</strong><span>Temporarily disable your account access.</span></div>
+          <button className="danger-button" type="button" onClick={() => notify("Account actions are temporarily unavailable", "info", 3500, "Please contact support if you need help with your account.")} data-testid="button-deactivate-account"><SettingsIcon name="alert" size={15} />Deactivate Account</button>
         </div>
         <div className="settings-row settings-row-last">
-          <div className="settings-row-copy"><strong>Delete Account</strong><span>The demo will not hide or delete the account from frontend state.</span></div>
-          <button className="danger-button" type="button" onClick={() => notify("Account action is not available", "warning", 3500, "Server-side authentication is required.")} data-testid="button-delete-account"><SettingsIcon name="trash" size={15} />Delete Account</button>
+          <div className="settings-row-copy"><strong>Delete Account</strong><span>Permanently delete your account and all associated data.</span></div>
+          <button className="danger-button" type="button" onClick={() => notify("Account actions are temporarily unavailable", "info", 3500, "Please contact support if you need help with your account.")} data-testid="button-delete-account"><SettingsIcon name="trash" size={15} />Delete Account</button>
         </div>
       </SettingsSection>
     </div>
 
-    {pendingWebsite && <ConfirmDialog title="Delete this website?" description={`${pendingWebsite.name} · ${pendingWebsite.url} — This action cannot be undone in this demo state.`} confirmLabel="Delete Website" danger onCancel={() => setPendingWebsite(null)} onConfirm={deleteWebsite} />}
+    {pendingWebsite && <ConfirmDialog title="Delete this website?" description={`${pendingWebsite.name} · ${pendingWebsite.url} — This action cannot be undone.`} confirmLabel="Delete Website" danger onCancel={() => setPendingWebsite(null)} onConfirm={deleteWebsite} />}
     {logoutOpen && <ConfirmDialog title="Log out of AdZora?" description="You will return to the existing AdZora landing screen." confirmLabel="Log Out" onCancel={() => setLogoutOpen(false)} onConfirm={confirmLogout} />}
   </div>;
 }

@@ -646,3 +646,55 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
   .profile-personal-grid { grid-template-columns: 1fr; }
   .profile-security-note { align-items: flex-start; }
 }
+
+/* UI/UX pass: hero metric hierarchy, grouped sidebar navigation, calmer overview */
+.welcome-row.compact { margin-bottom: 18px; }
+.welcome-row.compact h1 { font-size: clamp(22px, 2.4vw, 28px); margin: 6px 0; }
+.welcome-row.compact p { font-size: 13px; }
+
+.hero-metric-row { display: grid; grid-template-columns: minmax(240px, .95fr) minmax(0, 1.6fr); gap: 12px; align-items: stretch; margin-bottom: 8px; }
+.metric-hero { display: flex; flex-direction: column; padding: 22px; border: 1px solid #b9cfff; border-radius: 15px; background: linear-gradient(160deg, var(--blue-soft), #fff); box-shadow: 0 14px 34px rgba(23,92,255,.1); }
+.metric-hero-top { display: flex; align-items: center; gap: 9px; color: var(--blue-dark); }
+.metric-hero-top .metric-icon { background: #fff; }
+.metric-hero-top .metric-label { font-size: 12px; font-weight: 700; letter-spacing: .02em; }
+.metric-hero-value { display: block; margin-top: 16px; color: var(--text); font-family: Arial, sans-serif; font-size: 38px; font-weight: 700; letter-spacing: -.03em; direction: ltr; text-align: right; }
+.metric-hero-hint { display: block; margin-top: 6px; color: var(--muted); font-size: 11px; }
+.metric-hero-action { align-self: flex-start; margin-top: auto; padding-top: 12px; }
+.metric-secondary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.metric-secondary-grid .metric-card { min-height: 0; padding: 14px; justify-content: center; }
+.metric-secondary-grid .metric-value { margin-top: 10px; font-size: 19px; }
+
+.subtle-panel { box-shadow: none; border-color: var(--line); background: var(--surface-elevated); }
+
+/* Grouped sidebar navigation */
+.nav-item-wrap { display: grid; gap: 3px; }
+.nav-group-label { display: block; margin: 16px 4px 2px; color: var(--muted-2); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; direction: ltr; text-align: right; }
+.side-nav { gap: 0; }
+.nav-item-wrap:first-child .nav-group-label { margin-top: 6px; }
+
+/* Website card: single primary action, calmer secondary, icon-only tertiary */
+.publisher-site-open { display: block; width: 100%; padding: 0; border: 0; background: transparent; text-align: right; cursor: pointer; border-radius: 12px; }
+.publisher-site-open:hover .publisher-site-identity strong { color: var(--blue); }
+.website-view-details { flex: 0 0 auto; width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); }
+.website-view-details svg { transform: rotate(180deg); }
+.website-view-details:hover { color: var(--blue); border-color: var(--blue); background: var(--blue-soft); }
+.publisher-website-actions .secondary-button { flex: 0 1 150px; }
+
+@media (max-width: 900px) {
+  .hero-metric-row { grid-template-columns: 1fr; }
+  .metric-secondary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .metric-secondary-grid { grid-template-columns: 1fr 1fr; }
+  .metric-hero { padding: 18px; }
+  .metric-hero-value { font-size: 30px; }
+}
+@media (max-width: 420px) {
+  .metric-secondary-grid { grid-template-columns: 1fr; }
+}
+
+/* Ensure comfortable touch targets on small screens */
+@media (max-width: 480px) {
+  .nav-item, .quick-action, .settings-row, .primary-button, .secondary-button, .ghost-button { min-height: 44px; }
+  .icon-button, .website-view-details, .notification-button { min-width: 40px; min-height: 40px; }
+}
