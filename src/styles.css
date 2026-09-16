@@ -609,3 +609,40 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
   .publisher-analytics-metrics .metric-label { font-size: 10px; }
   .website-analytics-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Profile and settings boundaries */
+.profile-personal-grid { align-items: stretch; }
+.profile-avatar-fallback { display: grid; place-items: center; color: #fff; background: var(--blue); }
+.profile-security-note { display: flex; align-items: center; gap: 9px; padding: 11px 12px; margin-top: 14px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); background: var(--surface-elevated); font-size: 11px; line-height: 1.6; }
+.profile-security-note svg { flex: 0 0 auto; color: var(--blue); }
+.settings-row-last { padding-bottom: 0; border-bottom: 0; }
+
+/* A restrained tactile surface language shared by the application. */
+:where(.panel, .light-panel, .metric-card, .website-analytics-card, .format-performance-card, .profile-hero, .profile-section, .settings-section, .settings-website, .confirm-dialog, .code-card, .form-panel, .form-section, .creative-card, .publisher-site-card, .role-card, .landing-format-card, .workflow-column, .capability, .wallet-method, .ad-type-option, .network-node, .network-audience) {
+  box-shadow: 0 4px 0 rgba(16, 23, 34, .08), 0 10px 22px rgba(16, 23, 34, .055);
+  transition: box-shadow .18s ease, transform .18s ease;
+}
+:where(.panel, .light-panel, .metric-card, .website-analytics-card, .format-performance-card, .profile-hero, .profile-section, .settings-section, .settings-website, .confirm-dialog, .code-card, .form-panel, .form-section, .creative-card, .publisher-site-card, .role-card, .landing-format-card, .workflow-column, .capability, .wallet-method, .ad-type-option, .network-node, .network-audience):hover {
+  box-shadow: 0 5px 0 rgba(16, 23, 34, .09), 0 13px 25px rgba(16, 23, 34, .07);
+}
+:where(.primary-button, .secondary-button, .ghost-button, .filter-button, .row-action, .danger-button, .landing-cta, .landing-outline, .upload-control-button) {
+  box-shadow: 0 3px 0 rgba(16, 23, 34, .12), 0 7px 13px rgba(16, 23, 34, .06);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease, color .18s ease;
+}
+:where(.primary-button, .secondary-button, .ghost-button, .filter-button, .row-action, .danger-button, .landing-cta, .landing-outline, .upload-control-button):hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 rgba(16, 23, 34, .13), 0 10px 16px rgba(16, 23, 34, .08);
+}
+:where(.primary-button, .secondary-button, .ghost-button, .filter-button, .row-action, .danger-button, .landing-cta, .landing-outline, .upload-control-button):active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(16, 23, 34, .14), 0 4px 8px rgba(16, 23, 34, .06);
+}
+:where(.primary-button, .secondary-button, .ghost-button, .filter-button, .row-action, .danger-button, .landing-cta, .landing-outline, .upload-control-button):disabled {
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+  .profile-personal-grid { grid-template-columns: 1fr; }
+  .profile-security-note { align-items: flex-start; }
+}
