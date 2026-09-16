@@ -56,6 +56,80 @@ html, body, #root, .app-shell, .main-content, .page-content { max-width: 100%; o
 @media (max-width: 760px) { .global-toast-region { top: 78px; right: 12px; width: calc(100vw - 24px); }.profile-hero, .website-detail-summary { align-items: flex-start; flex-wrap: wrap; }.profile-hero .status-badge { margin-right: auto; }.profile-form-grid, .profile-facts-grid { grid-template-columns: 1fr; }.password-editor { align-items: stretch; flex-direction: column; }.password-editor button { width: 100%; }.website-summary-facts { width: 100%; }.website-summary-facts span { flex: 1; }.website-detail-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }.website-detail-page .workspace-page-header > .secondary-button { width: 100%; } }
 @media (max-width: 420px) { .global-toast { padding: 11px 9px 11px 10px; }.global-toast-message { font-size: 11px; }.profile-hero { padding: 14px; }.profile-avatar { width: 46px; height: 46px; border-radius: 12px; font-size: 14px; }.website-detail-stats { gap: 9px; }.website-detail-stats .metric-card { padding: 12px; }.website-summary-facts span { min-width: 0; }.danger-actions { display: grid; grid-template-columns: 1fr; }.danger-button { width: 100%; } }
 
+/* Profile, settings, and notification refinement. */
+.profile-avatar { width: 82px; height: 82px; overflow: hidden; border: 1px solid #d9e4f5; border-radius: 50%; background: #edf3ff; }
+.profile-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.profile-hero-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; color: var(--muted-2); font-size: 11px; }
+.profile-hero-meta span + span { padding-right: 8px; border-right: 1px solid var(--line); }
+.global-toast-region { top: 16px; right: 16px; width: min(420px, calc(100vw - 32px)); }
+.global-toast { align-items: flex-start; min-height: 62px; padding: 13px 12px 13px 14px; border: 1px solid rgba(255,255,255,.14); border-right: 1px solid rgba(255,255,255,.14); border-radius: 13px; color: #fff; background: #000; box-shadow: 0 15px 30px rgba(0,0,0,.16); animation: toast-in .2s ease both; }
+.global-toast-icon { width: 25px; height: 25px; color: #fff; background: transparent; }
+.global-toast-message { display: grid; gap: 3px; color: #fff; font-size: 12px; line-height: 1.45; }
+.global-toast-message strong { font-weight: 700; }
+.global-toast-message small { color: rgba(255,255,255,.7); font-size: 11px; line-height: 1.45; }
+.global-toast-close { color: rgba(255,255,255,.65); }
+.global-toast-close:hover { color: #fff; background: rgba(255,255,255,.1); }
+.toast-success, .toast-error, .toast-warning { border-right-color: rgba(255,255,255,.14); }
+.toast-success .global-toast-icon, .toast-error .global-toast-icon, .toast-warning .global-toast-icon { color: #fff; background: transparent; }
+.settings-page { display: grid; gap: 14px; }
+.settings-layout { display: grid; gap: 14px; }
+.settings-section { padding: 20px; border: 1px solid var(--line); border-radius: 13px; background: #fff; box-shadow: var(--shadow); }
+.settings-section-heading { display: flex; align-items: flex-start; gap: 11px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.settings-section-icon { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto; border-radius: 9px; color: var(--blue); background: var(--blue-soft); }
+.settings-section-heading h2 { margin: 4px 0 4px; color: var(--text); font-size: 17px; }
+.settings-section-heading p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.settings-row:last-child { padding-bottom: 0; border-bottom: 0; }
+.settings-row-copy { display: grid; gap: 4px; min-width: 0; }
+.settings-row-copy strong { color: var(--text); font-size: 13px; }
+.settings-row-copy span { color: var(--muted); font-size: 11px; line-height: 1.55; }
+.settings-website-list { display: grid; gap: 10px; padding-top: 16px; }
+.settings-website { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 15px; padding: 13px; border: 1px solid var(--line); border-radius: 10px; }
+.settings-website-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.settings-website-info > div { display: grid; gap: 4px; min-width: 0; flex: 1; }
+.settings-website-info strong, .settings-website-info span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.settings-website-info strong { color: var(--text); font-size: 12px; }
+.settings-website-info div span { color: var(--muted); direction: ltr; text-align: right; font-size: 11px; }
+.settings-website-icon { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto; border-radius: 9px; color: var(--blue); background: var(--blue-soft); }
+.settings-website-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+.settings-website-actions .danger-button { font-size: 11px; }
+.settings-empty { display: grid; justify-items: center; gap: 9px; padding: 25px 12px 10px; color: var(--muted); text-align: center; }
+.settings-empty > svg { color: var(--blue); }
+.settings-empty strong { color: var(--text); font-size: 13px; }
+.settings-empty span { font-size: 11px; }
+.toggle-button { position: relative; width: 46px; height: 26px; flex: 0 0 auto; padding: 3px; border: 1px solid var(--line-strong); border-radius: 99px; background: #eef2f8; cursor: pointer; transition: .18s ease; }
+.toggle-button span { display: block; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.18); transition: transform .18s ease; }
+.toggle-button.is-on { border-color: var(--blue); background: var(--blue); }
+.toggle-button.is-on span { transform: translateX(-18px); }
+.settings-status { padding: 7px 10px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); background: #f7f9fc; font-size: 10px; direction: ltr; }
+.settings-danger { border-color: #e4b7b9; background: #fffafa; }
+.settings-danger .settings-section-icon { color: #a52a34; background: #fff0f1; }
+.settings-danger .settings-section-heading h2 { color: #a52a34; }
+.settings-dialog-backdrop { z-index: 150; }
+.confirm-dialog { width: min(430px, calc(100vw - 32px)); padding: 24px; text-align: right; }
+.confirm-dialog-icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 14px; border-radius: 11px; color: var(--blue); background: var(--blue-soft); }
+.confirm-dialog h2 { margin: 0 0 7px; color: var(--text); font-size: 19px; }
+.confirm-dialog p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.confirm-dialog-actions { display: flex; justify-content: flex-start; gap: 8px; margin-top: 22px; }
+.confirm-dialog-actions .danger-button { background: #fff; }
+@media (max-width: 760px) {
+  .global-toast-region { top: 16px; right: 12px; width: calc(100vw - 24px); }
+  .profile-avatar { width: 76px; height: 76px; }
+  .settings-website { grid-template-columns: 1fr; }
+  .settings-website-actions { justify-content: flex-start; }
+  .settings-website-actions button { flex: 1; }
+  .settings-row { align-items: flex-start; flex-direction: column; }
+  .settings-row > button, .settings-row > .toggle-button { align-self: flex-start; }
+}
+@media (max-width: 420px) {
+  .profile-avatar { width: 68px; height: 68px; }
+  .settings-section { padding: 16px; }
+  .settings-website-actions { display: grid; grid-template-columns: 1fr; width: 100%; }
+  .settings-website-actions button { width: 100%; }
+  .confirm-dialog-actions { display: grid; grid-template-columns: 1fr; }
+  .confirm-dialog-actions button { width: 100%; }
+}
+
 .finance-lower-grid { margin-top: 15px; }.finance-signal-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }.finance-signal-list span { display: grid; gap: 4px; padding: 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-elevated); }.finance-signal-list b { color: var(--muted-2); font-size: 10px; font-weight: 500; }.finance-signal-list strong { color: var(--text); font-family: Arial, sans-serif; font-size: 17px; direction: ltr; }.finance-signal-list small { color: var(--muted-2); font-size: 10px; }.finance-callout { display: grid; gap: 9px; padding: 18px 0 4px; }.finance-callout strong { color: var(--text); font-size: 18px; direction: ltr; text-align: right; }.finance-callout p { margin: 0 0 5px; color: var(--muted); font-size: 12px; line-height: 1.7; }.withdraw-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, .75fr); gap: 14px; align-items: start; }.withdraw-balance { display: grid; gap: 4px; padding: 15px; margin: 20px 0; border: 1px solid #b9cfff; border-radius: 10px; background: var(--blue-soft); }.withdraw-balance span { color: var(--muted); font-size: 11px; }.withdraw-balance strong { color: var(--text); font-family: Arial, sans-serif; font-size: 26px; direction: ltr; text-align: right; }.withdraw-balance small { color: var(--muted-2); font-size: 10px; }.compact-finance-row { grid-template-columns: minmax(180px, 1fr) .7fr auto; }.success-panel, .confirm-panel { max-width: 760px; }.success-mark { display: grid; place-items: center; width: 54px; height: 54px; margin-bottom: 15px; border-radius: 50%; color: var(--blue); background: var(--blue-soft); }.success-panel h2, .confirm-panel h2 { margin: 0 0 7px; font-size: 20px; }.success-panel > p { margin: 0 0 18px; color: var(--muted); font-size: 13px; direction: ltr; text-align: right; }.success-panel .detail-facts { margin-bottom: 18px; }.confirm-panel .review-facts { margin-bottom: 20px; }
 .linked-creative-note { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 8px; padding: 10px 12px; margin-top: 15px; border-right: 3px solid var(--blue); color: var(--blue-dark); background: var(--blue-soft); font-size: 11px; }.linked-creative-note span { flex-basis: 100%; color: var(--muted); font-size: 10px; }
 @media (max-width: 760px) { .withdraw-layout { grid-template-columns: 1fr; }.compact-finance-row { grid-template-columns: 1fr 1fr; }.compact-finance-row .row-main { grid-column: 1 / -1; }.compact-finance-row .status-badge { justify-self: start; } }
