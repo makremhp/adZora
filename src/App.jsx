@@ -174,27 +174,6 @@ function ComingSoon({ workspace, page, onNavigate }) {
   return <section className="coming-page"><div className="coming-orbit"><span /><span /><span /><Icon name={item.icon} size={32} /></div><span className="eyebrow">{config.label.toUpperCase()} WORKSPACE</span><h1>{item.arabic}</h1><p>هذه الشاشة موجودة في بنية المنتج وستُبنى في المرحلة التالية. لن تكون رابطًا ميتًا؛ سنضيف إليها حالات التحميل والفراغ والخطأ والنجاح مع منطقها الفعلي.</p><div className="coming-meta"><span><b>Section</b>{item.label}</span><span><b>Next phase</b>Functional workflow</span></div><button className="secondary-button" onClick={() => onNavigate("overview")}><Icon name="grid" size={16} />العودة إلى النظرة العامة</button></section>;
 }
 
-function LegacyAccountAccess({ onClose, onSuccess }) {
-  const { notify } = useNotifications();
-  const [mode, setMode] = useState("login");
-  const [form, setForm] = useState({ email: "", password: "", name: "" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const submit = async (event) => {
-    event.preventDefault();
-    setError("");
-    if (mode === "signup" && !form.name.trim()) { setError("Enter your name."); return; }
-    if (!form.email.includes("@")) { setError("Enter a valid email address."); return; }
-    if ((mode === "login" || mode === "signup") && form.password.length < 6) { setError("Use a password with at least 6 characters."); return; }
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 350));
-    setLoading(false);
-    notify(mode === "login" ? "Demo login successful." : mode === "signup" ? "Demo account created successfully." : "Password reset instructions are ready in this demo.", mode === "forgot" || mode === "reset" ? "info" : "success");
-    if (mode === "login" || mode === "signup") onSuccess();
-  };
-  return <div className="modal-backdrop" role="presentation" onMouseDown={event => event.target === event.currentTarget && onClose()}><section className="access-modal light-panel" role="dialog" aria-modal="true" aria-labelledby="access-title"><div className="panel-heading"><div><span className="eyebrow">ACCOUNT ACCESS</span><h2 id="access-title">{mode === "login" ? "Welcome back" : mode === "signup" ? "Create your account" : mode === "forgot" ? "Forgot password" : "Reset password"}</h2></div><button className="icon-button" type="button" onClick={onClose} aria-label="Close account dialog"><Icon name="close" /></button></div>{(mode === "login" || mode === "signup") && <div className="access-tabs"><button className={mode === "login" ? "access-tab active" : "access-tab"} type="button" onClick={() => { setMode("login"); setError(""); }}>Login</button><button className={mode === "signup" ? "access-tab active" : "access-tab"} type="button" onClick={() => { setMode("signup"); setError(""); }}>Sign up</button></div>}<form className="access-form" onSubmit={submit}>{mode === "signup" && <label className="field"><span>Name</span><input className="input" value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} placeholder="Your name" /></label>}{mode !== "reset" && <label className="field"><span>Email</span><input className="input" type="email" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} placeholder="you@example.com" autoComplete="email" /></label>}{(mode === "login" || mode === "signup" || mode === "reset") && <label className="field"><span>{mode === "reset" ? "New password" : "Password"}</span><input className="input" type="password" value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} placeholder="At least 6 characters" autoComplete={mode === "login" ? "current-password" : "new-password"} /></label>}{error && <small className="field-error access-error" role="alert">{error}</small>}<button className="primary-button access-submit" type="submit" disabled={loading}>{loading ? "Please wait…" : mode === "login" ? "Login" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset instructions" : "Reset password"}</button></form>{mode === "login" && <button className="text-button access-link" type="button" onClick={() => { setMode("forgot"); setError(""); }}>Forgot password?</button>}{(mode === "forgot" || mode === "reset") && <button className="text-button access-link" type="button" onClick={() => { setMode("reset"); setError(""); }}>Continue to password reset</button>}<p className="demo-note">Frontend demo only. No authentication server or credentials are connected.</p></section></div>;
-}
-
 function getPasswordStrength(password) {
   if (!password) return 0;
   let strength = password.length >= 8 ? 60 : Math.min(50, password.length * 6);
@@ -204,11 +183,10 @@ function getPasswordStrength(password) {
   return Math.min(strength, 100);
 }
 
-
 function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
   const { notify } = useNotifications();
   const [mode, setMode] = useState(initialMode);
-  const [form, setForm] = useState({ email: "", password: "", name: "" });
+  const [form, setForm] = useState({ email: "", password: "", confirmPassword: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const passwordStrength = getPasswordStrength(form.password);
@@ -218,34 +196,33 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
     setError("");
   };
 
-
   const submit = async (event) => {
     event.preventDefault();
     setError("");
-    if (mode === "signup" && !form.name.trim()) {
-      setError("اكتب اسمك للمتابعة.");
-      return;
-    }
-    if (mode !== "reset" && !form.email.includes("@")) {
+    if (!form.email.includes("@")) {
       setError("اكتب بريدًا إلكترونيًا صحيحًا.");
       return;
     }
-    if ((mode === "login" || mode === "signup" || mode === "reset") && form.password.length < 8) {
+    if (form.password.length < 8) {
       setError("يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.");
+      return;
+    }
+    if (mode === "signup" && form.password !== form.confirmPassword) {
+      setError("كلمتا المرور غير متطابقتين. أعد كتابة كلمة المرور نفسها.");
       return;
     }
     setLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 350));
     setLoading(false);
     notify(
-      mode === "signup" ? "تم إنشاء حسابك التجريبي بنجاح." : mode === "login" ? "تم تسجيل الدخول التجريبي بنجاح." : "تعليمات إعادة تعيين كلمة المرور جاهزة.",
-      mode === "forgot" || mode === "reset" ? "info" : "success",
+      mode === "signup" ? "تم إنشاء حسابك التجريبي بنجاح." : "تم تسجيل الدخول التجريبي بنجاح.",
+      "success",
     );
     if (mode === "login" || mode === "signup") onSuccess();
   };
 
   const isSignup = mode === "signup";
-  const title = mode === "login" ? "مرحبًا بعودتك" : mode === "signup" ? "أنشئ حسابك في AdZora" : mode === "forgot" ? "هل نسيت كلمة المرور؟" : "إعادة تعيين كلمة المرور";
+  const title = isSignup ? "أنشئ حسابك في AdZora" : "مرحبًا بعودتك";
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
@@ -259,7 +236,6 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
           <button className="icon-button" type="button" onClick={onClose} aria-label="إغلاق نافذة التسجيل"><Icon name="close" /></button>
         </div>
 
-
         {(mode === "login" || mode === "signup") && (
           <div className="access-tabs" role="tablist" aria-label="نوع الحساب">
             <button className={mode === "signup" ? "access-tab active" : "access-tab"} type="button" onClick={() => { setMode("signup"); setError(""); }}>إنشاء حساب</button>
@@ -268,27 +244,23 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
         )}
 
         <form className="access-form" onSubmit={submit}>
+          <label className="field">
+            <span>البريد الإلكتروني</span>
+            <input className="input" type="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} placeholder="you@example.com" autoComplete="email" dir="ltr" />
+          </label>
+          <label className="field">
+            <span>كلمة المرور</span>
+            <input className="input" type="password" value={form.password} onChange={(event) => updateField("password", event.target.value)} placeholder="8 أحرف على الأقل" autoComplete={mode === "login" ? "current-password" : "new-password"} dir="ltr" />
+            {isSignup && (
+              <span className="password-requirement">
+                كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل
+              </span>
+            )}
+          </label>
           {isSignup && (
             <label className="field">
-              <span>الاسم الكامل</span>
-              <input className="input" value={form.name} onChange={(event) => updateField("name", event.target.value)} placeholder="اكتب اسمك الكامل" autoComplete="name" />
-            </label>
-          )}
-          {mode !== "reset" && (
-            <label className="field">
-              <span>البريد الإلكتروني</span>
-              <input className="input" type="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} placeholder="you@example.com" autoComplete="email" dir="ltr" />
-            </label>
-          )}
-          {(mode === "login" || mode === "signup" || mode === "reset") && (
-            <label className="field">
-              <span>{mode === "reset" ? "كلمة المرور الجديدة" : "كلمة المرور"}</span>
-              <input className="input" type="password" value={form.password} onChange={(event) => updateField("password", event.target.value)} placeholder="8 أحرف على الأقل" autoComplete={mode === "login" ? "current-password" : "new-password"} dir="ltr" />
-              {isSignup && (
-                <span className="password-requirement">
-                  كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل
-                </span>
-              )}
+              <span>إعادة كتابة كلمة المرور</span>
+              <input className="input" type="password" value={form.confirmPassword} onChange={(event) => updateField("confirmPassword", event.target.value)} placeholder="اكتب كلمة المرور مرة أخرى" autoComplete="new-password" dir="ltr" />
             </label>
           )}
           {isSignup && (
@@ -300,12 +272,10 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
           )}
           {error && <small className="field-error access-error" role="alert">{error}</small>}
           <button className="primary-button access-submit" type="submit" disabled={loading}>
-            {loading ? "جارٍ المعالجة…" : isSignup ? "إنشاء الحساب" : mode === "login" ? "تسجيل الدخول" : mode === "forgot" ? "إرسال التعليمات" : "تغيير كلمة المرور"}
+            {loading ? "جارٍ المعالجة…" : isSignup ? "إنشاء الحساب" : "تسجيل الدخول"}
           </button>
         </form>
 
-        {mode === "login" && <button className="text-button access-link" type="button" onClick={() => { setMode("forgot"); setError(""); }}>هل نسيت كلمة المرور؟</button>}
-        {(mode === "forgot" || mode === "reset") && <button className="text-button access-link" type="button" onClick={() => { setMode("reset"); setError(""); }}>المتابعة إلى إعادة التعيين</button>}
         <p className="demo-note">واجهة التسجيل الحالية تجريبية، وسيتم ربط الحسابات الفعلية بعد إعداد المصادقة.</p>
       </section>
     </div>
