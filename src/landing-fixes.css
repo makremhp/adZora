@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
 /* Final landing page fixes. Loaded after styles.css so these rules win. */
 .landing-page {
   --landing-bg: #ffffff;
@@ -32,7 +34,8 @@
 }
 
 .access-modal.signup-modal {
-  width: min(100%, 490px);
+  width: 50vw;
+  max-width: 50vw;
   max-height: calc(100dvh - 32px);
   margin: auto;
   padding: clamp(22px, 4vw, 34px);
@@ -64,59 +67,6 @@
   color: #617594;
   font-size: 12px;
   line-height: 1.8;
-}
-
-.google-auth-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 48px;
-  margin-top: 22px;
-  border: 1px solid #cbd8ea;
-  border-radius: 10px;
-  color: #172337;
-  background: #fff;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
-}
-
-.google-auth-button:hover {
-  border-color: #175cff;
-  box-shadow: 0 7px 20px rgba(23, 92, 255, .1);
-  transform: translateY(-1px);
-}
-
-.google-mark {
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  color: #4285f4;
-  font-family: Arial, sans-serif;
-  font-size: 18px;
-  font-weight: 800;
-}
-
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  margin: 20px 0 16px;
-  color: #8493a9;
-  font-size: 10px;
-  white-space: nowrap;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  content: "";
-  height: 1px;
-  flex: 1;
-  background: #e2e8f2;
 }
 
 .signup-modal .access-tabs {
@@ -235,6 +185,60 @@
     font-size: 21px;
   }
 }
+
+/* The account dialog is intentionally compact on desktop and only fluid on small screens. */
+.modal-backdrop .access-modal {
+  width: 50vw;
+  max-width: 50vw;
+  min-width: 0;
+  margin: auto;
+  font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif;
+}
+
+.modal-backdrop .access-modal .eyebrow,
+.modal-backdrop .access-modal .access-tab,
+.modal-backdrop .access-modal .access-submit,
+.modal-backdrop .access-modal .demo-note,
+.modal-backdrop .access-modal .access-link {
+  font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif;
+}
+
+.modal-backdrop .access-modal .eyebrow {
+  direction: ltr;
+  font-family: 'Manrope', 'IBM Plex Sans Arabic', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.modal-backdrop .access-modal .access-heading h2 {
+  font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.modal-backdrop .access-modal .input[dir='ltr'],
+.modal-backdrop .access-modal .input[dir='ltr']::placeholder,
+.modal-backdrop .access-modal .password-strength-heading strong {
+  font-family: 'Manrope', 'IBM Plex Sans Arabic', sans-serif;
+}
+
+.modal-backdrop .access-modal .input[dir='ltr'] {
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 760px) {
+  .modal-backdrop .access-modal,
+  .modal-backdrop .access-modal.signup-modal {
+    width: min(100%, 470px);
+    max-width: 100%;
+  }
+}
+
+.modal-backdrop {
+  align-items: center;
+}
+
 .landing-nav a {
   display: inline-flex;
   align-items: center;
