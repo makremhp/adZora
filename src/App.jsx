@@ -37,7 +37,7 @@ function Icon({ name, size = 18 }) {
 }
 
 function Brand() {
-  return <div className="brand"><span className="brand-mark">A</span><span>AdZora</span></div>;
+  return <div className="brand"><img className="brand-logo" src={adzoraLogo} alt="AdZora" /></div>;
 }
 
 const landingFormatIcons = {
@@ -222,8 +222,8 @@ export default function App() {
 
   return <div className="app-shell">
     <Sidebar workspace={workspace} setWorkspace={(next) => { setWorkspace(next); setActivePage("overview"); }} activePage={activePage} onNavigate={navigate} drawerOpen={drawerOpen} closeDrawer={() => setDrawerOpen(false)} />
-     <main className="main-content">
-       <header className="topbar"><button className="icon-button menu-button" onClick={() => setDrawerOpen(true)} aria-label="Open menu"><Icon name="menu" /></button><div className="breadcrumbs"><span>AdZora</span><Icon name="chevron" size={13} /><strong>{config.label}</strong><Icon name="chevron" size={13} /><span>{pageTitle}</span></div><div className="header-actions"><div className="header-balance" aria-label={config.balanceLabel}><span>{config.balanceLabel}</span><strong>$0.00</strong></div><button className="notification-button" aria-label="Notifications"><span className="notification-dot" /><Icon name="receipt" size={18} /></button><button className="avatar avatar-button" aria-label="Open account access" onClick={() => setAccountOpen(true)}>M</button></div></header>
+       <main className="main-content">
+        <header className="topbar"><button className="icon-button menu-button" onClick={() => setDrawerOpen(true)} aria-label="Open menu"><Icon name="menu" /></button><div className="breadcrumbs"><span>AdZora</span><Icon name="chevron" size={13} /><strong>{config.label}</strong><Icon name="chevron" size={13} /><span>{pageTitle}</span></div><div className="header-actions"><div className="header-balance" aria-label={config.balanceLabel}><span>{config.balanceLabel}</span><strong>$0.00</strong></div><button className="notification-button" aria-label="Notifications"><span className="notification-dot" /><Icon name="receipt" size={18} /></button></div></header>
        <div className="page-content">{activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : workspace === "publisher" && ["websites", "ad-codes", "earnings", "transactions", "withdrawals", "analytics"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} finance={publisherFinance} setFinance={setPublisherFinance} withdrawals={publisherWithdrawals} setWithdrawals={setPublisherWithdrawals} onNavigate={navigate} /> : workspace === "advertiser" && activePage === "creatives" ? <AdvertiserCreatives data={creativeData} setData={setCreativeData} /> : workspace === "advertiser" && ["campaigns", "create-campaign", "balance", "deposits", "transactions", "billing", "analytics", "reports"].includes(activePage) ? <AdvertiserWorkspace page={activePage} data={campaignData} setData={setCampaignData} creatives={creativeData} deposits={advertiserDeposits} setDeposits={setAdvertiserDeposits} onNavigate={navigate} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
     </main>
     {accountOpen && <AccountAccess onClose={() => setAccountOpen(false)} onSuccess={() => { setAccountOpen(false); setView("workspace"); }} />}
