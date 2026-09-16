@@ -2,8 +2,6 @@ export const AD_FORMATS = [
   { id: "banner", name: "Image / Banner", description: "Standard display placements for high-visibility inventory.", pricing: ["CPM", "CPC"], share: { publisher: 40, platform: 60 } },
   { id: "native", name: "Native", description: "Content-integrated ads with a clear sponsored label.", pricing: ["CPM", "CPC"], share: { publisher: 45, platform: 55 } },
   { id: "social", name: "Social", description: "Social-style creative with brand, title, and call to action.", pricing: ["CPM", "CPC"], share: { publisher: 40, platform: 60 } },
-  { id: "popup", name: "Popup", description: "A controlled popup placement shown through preview states.", pricing: ["CPM", "CPC"], share: { publisher: 35, platform: 65 } },
-  { id: "popunder", name: "Popunder", description: "A browser-safe triggered destination with frequency controls.", pricing: ["CPC"], share: { publisher: 45, platform: 55 } },
   { id: "video", name: "Video", description: "Video placements with poster, playback, and CTA states.", pricing: ["CPM", "CPV"], share: { publisher: 50, platform: 50 } },
 ];
 
@@ -29,7 +27,6 @@ export const AD_ZONE_REQUIREMENTS = {
   banner: { title: "Banner requirements", summary: "Choose one supported banner size.", fields: ["size"] },
   native: { title: "Native requirements", summary: "Add an image and a short content title.", fields: ["image", "title"] },
   social: { title: "Social requirements", summary: "Add an image and a social-style headline.", fields: ["image", "title"] },
-  popup: { title: "Popup requirements", summary: "Add the message and destination visitors will see.", fields: ["title", "destination"] },
   video: { title: "Video requirements", summary: "Upload an MP4 or WebM video up to 20 MB and 5–60 seconds.", fields: ["video"] },
 };
 
