@@ -8,14 +8,23 @@ const INITIAL = { name: "", format: "native", budget: "", pricingModel: "CPM", d
 function hasRequiredMedia(form) { return form.format === "social" ? Boolean(form.profileFile && form.postFile) : Boolean(form.file); }
 
 function FormatVisual({ type }) {
-  if (type === "banner") return <svg viewBox="0 0 92 48" aria-hidden="true"><rect x="5" y="13" width="82" height="22" rx="4" /><path d="M11 29 25 19l10 7 10-8 18 11" /><circle cx="23" cy="20" r="3" /></svg>;
-  if (type === "native") return <svg viewBox="0 0 92 48" aria-hidden="true"><rect x="8" y="8" width="24" height="32" rx="4" /><path d="M39 15h42M39 24h32M39 33h23" /></svg>;
-  if (type === "social") return <svg viewBox="0 0 92 48" aria-hidden="true"><rect x="8" y="7" width="76" height="34" rx="7" /><circle cx="20" cy="17" r="4" /><path d="M29 17h25M16 29h45" /><path d="m70 27 6 4-6 4z" /></svg>;
-  if (type === "video") return <svg viewBox="0 0 92 48" aria-hidden="true"><rect x="8" y="8" width="76" height="32" rx="6" /><path d="m42 17 14 7-14 7z" /><path d="M17 35h58" /></svg>;
-  return null;
+  const visuals = {
+    native: <><rect x="7" y="7" width="27" height="34" rx="4" /><path d="M39 14h43M39 23h34M39 32h25" /><path d="M43 38h19" /></>,
+    social: <><rect x="7" y="5" width="78" height="38" rx="7" /><circle cx="18" cy="13" r="3.5" /><path d="M26 13h22M14 23h63M14 28h63" /><path d="M15 36h4M23 36h4M31 36h4" /></>,
+    video: <><rect x="7" y="7" width="78" height="34" rx="6" /><path d="m42 15 13 9-13 9z" /><path d="M16 36h29M58 36h16" /></>,
+  };
+  return <span className={`format-card-visual format-card-visual-${type}`} aria-hidden="true"><svg viewBox="0 0 92 48">{visuals[type]}</svg></span>;
 }
 
-function TypeSelector({ value, onChange }) { return <div className="ad-type-selector">{TYPES.map(item => <button type="button" key={item.id} className={value === item.id ? "ad-type-option active" : "ad-type-option"} onClick={() => onChange(item.id)}><span className="ad-type-icon"><Icon name={item.icon} size={19} /></span><FormatVisual type={item.id} /><strong>{item.name}</strong><small>{item.description}</small></button>)}</div>; }
+function TypeSelector({ value, onChange }) {
+  return <div className="ad-type-selector" role="radiogroup" aria-label="Ad format">
+    {TYPES.map(item => <button type="button" role="radio" aria-checked={value === item.id} key={item.id} className={value === item.id ? "ad-type-option active" : "ad-type-option"} onClick={() => onChange(item.id)}>
+      <span className="ad-type-option-top"><span className="ad-type-icon"><Icon name={item.icon} size={18} /></span>{value === item.id && <span className="ad-type-selected"><Icon name="check" size={13} />Selected</span>}</span>
+      <FormatVisual type={item.id} />
+      <span className="ad-type-copy"><strong>{item.name}</strong><small>{item.description}</small></span>
+    </button>)}
+  </div>;
+}
 function Toggle({ label, checked, onChange }) { return <label className="toggle-field"><input type="checkbox" checked={checked} onChange={event => onChange(event.target.checked)} /><span className="toggle-ui" /><span>{label}</span></label>; }
 function MediaField({ form, update, error, kind = "file", label, accept }) { const prefix = kind === "file" ? "" : kind; const inputId = "campaign-" + (prefix || "main") + "-file"; const fileKey = prefix ? prefix + "File" : "file"; const nameKey = prefix ? prefix + "FileName" : "fileName"; const typeKey = prefix ? prefix + "FileType" : "fileType"; const urlKey = prefix ? prefix + "Url" : "previewUrl"; const isVideo = form.format === "video"; const resolvedAccept = accept || (isVideo ? "video/mp4,video/webm,video/quicktime" : "image/jpeg,image/png,image/webp,image/gif"); const onFile = event => { const file = event.target.files?.[0]; if (!file) return; update({ [fileKey]: file, [nameKey]: file.name, [typeKey]: file.type, [urlKey]: URL.createObjectURL(file) }); }; return <Field label={label || (isVideo ? "Upload Video" : "Upload Image")} error={error} hint="Frontend preview only. Storage API is not connected."><div className="upload-control"><span className="upload-control-icon"><Icon name={isVideo ? "video" : "image"} size={20} /></span><label className="upload-control-button" htmlFor={inputId}>{isVideo ? "Choose video" : "Choose image"}</label><input id={inputId} className="sr-only" type="file" accept={resolvedAccept} onChange={onFile} /><span className="upload-file-name">{form[nameKey] || "No file selected"}</span></div></Field>; }
 function ContentFields({ form, update, errors }) {
@@ -38,13 +47,26 @@ function BehaviorFields({ form, update }) {
   </div>;
 }
 
+function SocialActionIcon({ name }) {
+  const paths = {
+    like: <path d="M20.8 8.5c0 5.5-8.8 10.2-8.8 10.2S3.2 14 3.2 8.5A4.5 4.5 0 0 1 12 6.2a4.5 4.5 0 0 1 8.8 2.3Z" />,
+    comment: <path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.8 8.8 0 0 1-4.1-1L4 19l1-3.4A7.2 7.2 0 0 1 4.5 12 7.5 7.5 0 0 1 12 4.5a7.5 7.5 0 0 1 8 7Z" />,
+    share: <><path d="M21 3 10 14" /><path d="m21 3-7 18-4-7-7-4Z" /></>,
+    save: <path d="M6 4.5A2.5 2.5 0 0 1 8.5 2h7A2.5 2.5 0 0 1 18 4.5V21l-6-3-6 3Z" />,
+    views: <><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></>,
+  };
+  return <svg viewBox="0 0 24 24" aria-hidden="true">{paths[name]}</svg>;
+}
+
 function Preview({ form }) {
-  const media = form.previewUrl && form.fileType.startsWith("video") ? <video className="preview-media" src={form.previewUrl} muted={form.muted} autoPlay={form.autoplay} controls={form.controls} /> : form.previewUrl ? <img className="preview-media" src={form.previewUrl} alt="Creative preview" /> : <div className="preview-placeholder"><Icon name={form.format === "video" ? "video" : "image"} size={27} /><span>Media preview</span></div>;
-  const profileMedia = form.profileUrl ? <img className="social-avatar-preview" src={form.profileUrl} alt="Profile preview" /> : <span className="social-avatar-placeholder">A</span>;
-  const postMedia = form.postUrl ? <img className="social-post-preview" src={form.postUrl} alt="Social post preview" /> : <div className="social-post-placeholder"><Icon name="image" size={27} /><span>Post image</span></div>;
-  if (form.format === "native") return <div className="ad-preview native-preview">{form.showImage && media}<div><small>Sponsored</small><strong>{form.title || "Native headline"}</strong>{form.showDescription && <p>{form.description || "Native description will appear here."}</p>}{form.showCta && <button type="button">{form.cta || "Learn more"}</button>}</div></div>;
-  if (form.format === "social") return <div className="ad-preview social-preview"><div className="social-preview-header">{profileMedia}<div><strong>{form.brandName || "Your Brand"}</strong><small>{form.username || "@yourbrand"}</small></div><b>ADZORA</b></div>{postMedia}<div className="social-preview-actions">♡　◯　↗　<span>▱</span></div><small className="social-preview-stats">1,248 likes　 ·　 ◉ 8,421 views</small><p><strong>{form.brandName || "Your Brand"}</strong> {form.text || "Your sponsored post text will appear here."} <em>Sponsored · Learn more</em></p></div>;
-  return <div className="ad-preview video-preview">{media}<div className="video-preview-copy"><small>Sponsored · ADZORA</small><strong>{form.title || "Video campaign"}</strong><span>Video Player · Play / Pause · Volume · Progress · Fullscreen</span></div></div>;
+  const nativeImage = form.previewUrl ? <img className="adzora-native-media" src={form.previewUrl} alt="Native ad" /> : <div className="adzora-native-media-placeholder"><Icon name="image" size={27} /><span>Ad image</span></div>;
+  const profileMedia = form.profileUrl ? <img className="adzora-social-avatar" src={form.profileUrl} alt="Profile" /> : <span className="adzora-social-avatar-placeholder">A</span>;
+  const postMedia = form.postUrl ? <img className="adzora-social-media" src={form.postUrl} alt="Social post" /> : <div className="adzora-social-media-placeholder"><Icon name="image" size={27} /><span>Post image</span></div>;
+  const videoMedia = form.previewUrl && form.fileType.startsWith("video") ? <video className="adzora-video" src={form.previewUrl} muted={form.muted} autoPlay={form.autoplay} controls={form.controls} playsInline /> : <div className="adzora-video-placeholder"><Icon name="video" size={30} /><span>Video preview</span><b>Play · Volume · Progress · Fullscreen</b></div>;
+
+  if (form.format === "native") return <div className="ad-preview live-preview-shell"><div className="adzora-native" data-url={form.destination || undefined}>{form.showImage && nativeImage}<div className="adzora-native-info"><div className="adzora-native-sponsored">Sponsored</div><h3>{form.title || "Your advertisement title"}</h3>{form.showDescription && <p>{form.description || "Advertisement description will appear here."}</p>}{form.showCta && <span className="adzora-native-cta">{form.cta || "Learn More"}</span>}</div></div></div>;
+  if (form.format === "social") return <div className="ad-preview live-preview-shell"><div className="adzora-social" data-url={form.destination || undefined} role="presentation"><div className="adzora-social-header">{profileMedia}<div className="adzora-social-account"><strong>{form.brandName || "Your Brand"}</strong><span>{form.username || "@yourbrand"}</span></div><div className="adzora-social-brand">ADZORA</div></div>{postMedia}<div className="adzora-social-actions"><button type="button" aria-label="Like"><SocialActionIcon name="like" /></button><button type="button" aria-label="Comment"><SocialActionIcon name="comment" /></button><button type="button" aria-label="Share"><SocialActionIcon name="share" /></button><button type="button" className="adzora-social-save" aria-label="Save"><SocialActionIcon name="save" /></button></div><div className="adzora-social-stats">1,248 likes</div><div className="adzora-social-views"><SocialActionIcon name="views" /><span>8,421 views</span></div><div className="adzora-social-caption"><b>{form.brandName || "Your Brand"}</b><span>{form.text || "Your sponsored post text will appear here."}</span><span className="adzora-social-sponsored">Sponsored · Learn more</span></div></div></div>;
+  return <div className="ad-preview live-preview-shell"><div className="adzora-autoplay"><div className="adzora-video-frame">{videoMedia}</div>{form.title && <div className="adzora-video-caption"><span>Sponsored · ADZORA</span><strong>{form.title}</strong></div>}<button type="button" className="adzora-autoplay-close" aria-label="Close advertisement">×</button></div></div>;
 }
 
 function Eligibility({ form }) { const creativeReady = hasRequiredMedia(form); const checks = [["Campaign status", form.name.trim() ? "Draft / ready for review" : "Name required", Boolean(form.name.trim())], ["Budget available", Number(form.budget) > 0 ? formatMoney(Number(form.budget)) : "Add campaign budget", Number(form.budget) > 0], ["Creative available", creativeReady ? "Available" : form.format === "social" ? "Profile and post images required" : "Upload required", creativeReady], ["Campaign date", form.duration ? form.duration + " days" : "Set duration", Boolean(form.duration)], ["Targeting", form.targeting.trim() || "All eligible publishers", true], ["Frequency cap", form.frequencyCap || "Not set", Boolean(form.frequencyCap)]]; return <section className="light-panel eligibility-panel"><div className="panel-heading"><div><span className="eyebrow">AD SERVER ELIGIBILITY</span><h2>Pre-delivery checks</h2></div><span className="phase-chip">Frontend demo</span></div><p className="muted-copy">لا يختار Ad Server الإعلان عشوائيًا: يتحقق من الحالة والميزانية والـCreative والتاريخ والاستهداف والـFrequency Cap أولًا.</p><div className="eligibility-list">{checks.map(([label, value, ok]) => <div key={label}><span className={ok ? "check-state ok" : "check-state"}><Icon name={ok ? "check" : "close"} size={13} /></span><span><strong>{label}</strong><small>{value}</small></span></div>)}</div></section>; }
