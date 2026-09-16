@@ -16,7 +16,7 @@ function NotificationIcon({ type }) {
 function Toast({ item, onDismiss }) {
   return <article className={`global-toast toast-${item.type}`} role={item.type === "error" ? "alert" : "status"} data-testid={`toast-${item.id}`}>
     <span className="global-toast-icon"><NotificationIcon type={item.type} /></span>
-    <span className="global-toast-message">{item.message}</span>
+    <span className="global-toast-message"><strong>{item.message}</strong>{item.description && <small>{item.description}</small>}</span>
     <button className="global-toast-close" type="button" onClick={() => onDismiss(item.id)} aria-label="Dismiss notification" data-testid={`button-dismiss-toast-${item.id}`}>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
     </button>
@@ -34,9 +34,9 @@ export function NotificationProvider({ children }) {
     timers.current.delete(id);
   }, []);
 
-  const notify = useCallback((message, type = "info", duration = 3500) => {
+  const notify = useCallback((message, type = "info", duration = 3500, description = "") => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    setItems(previous => [...previous.slice(-3), { id, message, type }]);
+    setItems(previous => [...previous.slice(-3), { id, message, type, description }]);
     const timer = window.setTimeout(() => dismiss(id), duration);
     timers.current.set(id, timer);
     return id;
