@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { DEPOSIT_CONFIG, DEPOSIT_DESTINATIONS, PAYMENT_METHODS, WITHDRAWAL_CONFIG, formatMoney } from "./config";
+import { DEPOSIT_CONFIG, DEPOSIT_DESTINATIONS, PAYMENT_ASSETS, PAYMENT_METHODS, WITHDRAWAL_CONFIG, formatMoney } from "./config";
 import { useNotifications } from "./NotificationSystem";
 
 function Icon({ name, size = 17 }) {
@@ -25,7 +25,9 @@ function Field({ label, hint, error, children }) {
 }
 
 function methodLabel(methodId) {
-  return PAYMENT_METHODS.find(method => method.id === methodId)?.label || methodId;
+  const method = PAYMENT_METHODS.find(item => item.id === methodId);
+  const asset = PAYMENT_ASSETS[methodId];
+  return method ? `${method.label}${asset ? ` · ${asset}` : ""}` : methodId;
 }
 
 function MethodSelector({ value, onChange, mode }) {
@@ -102,7 +104,7 @@ function WithdrawalWorkspace({ requests, setRequests, available }) {
       type: "withdrawal",
       method,
       amount,
-      currency: WITHDRAWAL_CONFIG.currency,
+      currency: PAYMENT_ASSETS[method] || WITHDRAWAL_CONFIG.currency,
       status: WITHDRAWAL_CONFIG.status,
       createdAt: new Date().toLocaleString("en-US"),
       destination: method === "cwallet" ? form.cwalletIdentifier.trim() : method === "binance" ? form.binanceUid.trim() : "TON wallet pending SDK integration",
@@ -265,7 +267,7 @@ function DepositWorkspace({ requests, setRequests }) {
       type: "deposit",
       method,
       amount: amountValue,
-      currency: DEPOSIT_CONFIG.currency,
+      currency: PAYMENT_ASSETS[method] || DEPOSIT_CONFIG.currency,
       paymentDestination: method === "ton" ? "TON wallet pending SDK integration" : destination,
       network: method === "binance" ? form.network : method === "ton" ? "TON" : "",
       txid: needsTxid ? form.txid.trim() : "",
@@ -325,6 +327,7 @@ function DepositWorkspace({ requests, setRequests }) {
         <div className="invoice-rows">
           <InvoiceRow label="Amount" value={formatMoney(amountValue)} />
           <InvoiceRow label="Payment Method" value={methodLabel(method)} />
+          <InvoiceRow label="Asset" value={PAYMENT_ASSETS[method] || DEPOSIT_CONFIG.currency} />
           {method === "binance" && <InvoiceRow label="Network" value={form.network} />}
           <InvoiceRow label="Payment Destination" value={destination} copyable />
         </div>
