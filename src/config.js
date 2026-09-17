@@ -27,16 +27,23 @@ export const AD_ZONE_REQUIREMENTS = {
 };
 
 export const PAYMENT_METHODS = [
-  { id: "cwallet", label: "Cwallet", description: "Account identifier · manual review", icon: "wallet" },
+  { id: "cwallet", label: "Cwallet", description: "USDT only · Account identifier · manual review", icon: "wallet" },
   { id: "ton", label: "TON Network", description: "Wallet SDK connection prepared", icon: "arrow-down" },
-  { id: "binance", label: "Binance", description: "Network and account details", icon: "card" },
+  { id: "binance", label: "Binance", description: "USDT only · Network and account details", icon: "card" },
 ];
+
+export const PAYMENT_ASSETS = {
+  cwallet: "USDT",
+  ton: "TON",
+  binance: "USDT",
+};
 
 export const DEPOSIT_CONFIG = {
   currency: "USD",
   status: "Pending",
   statuses: ["Pending", "Processing", "Completed", "Rejected"],
   methods: PAYMENT_METHODS.map(method => method.id),
+  assets: PAYMENT_ASSETS,
   networks: ["BSC", "Ethereum", "TRON", "TON"],
   fees: { cwallet: 0, ton: 0, binance: 0 },
   minimumAmount: 1,
@@ -72,6 +79,7 @@ export const WITHDRAWAL_CONFIG = {
   status: "Pending",
   statuses: ["Pending", "Processing", "Completed", "Rejected"],
   methods: PAYMENT_METHODS.map(method => method.id),
+  assets: PAYMENT_ASSETS,
   networks: ["TON"],
   fees: { cwallet: 0, ton: 0, binance: 0 },
 };
