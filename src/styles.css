@@ -237,38 +237,53 @@ h1, h2, h3, p { overflow-wrap: anywhere; }
 .behavior-grid { display: grid; gap: 8px; margin-top: 17px; }
 .behavior-note { padding: 11px 12px; border-right: 3px solid var(--amber); color: var(--muted); background: var(--amber-soft); font-size: 11px; line-height: 1.7; }
 .preview-panel { min-width: 0; }
-.live-preview-shell { display: grid; place-items: center; min-height: 240px; margin-top: 18px; padding: 16px; border: 1px solid var(--line); border-radius: 9px; background: #edf1f1; }
-.adzora-native, .adzora-social { width: min(100%, 380px); overflow: hidden; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); cursor: pointer; }
-.adzora-native > img, .adzora-social-media { display: block; width: 100%; max-height: 230px; object-fit: cover; }
-.adzora-native-media-placeholder, .adzora-social-media-placeholder, .adzora-video-placeholder { display: grid; place-items: center; gap: 6px; min-height: 170px; color: var(--muted-2); background: var(--surface-muted); }
-.adzora-native-info { padding: 14px; }
-.adzora-native-sponsored, .adzora-social-sponsored { color: var(--teal); font-family: Manrope, sans-serif; font-size: 9px; text-transform: uppercase; }
-.adzora-native-info h3 { margin: 7px 0 4px; font-size: 16px; }
-.adzora-native-info p { margin: 0 0 12px; color: var(--muted); font-size: 11px; line-height: 1.6; }
-.adzora-native-cta { display: inline-flex; padding: 7px 10px; border-radius: 6px; color: #fff; background: var(--teal); font-size: 11px; text-decoration: none; }
-.adzora-social-header { display: flex; align-items: center; gap: 9px; padding: 11px; }
-.adzora-social-avatar, .adzora-social-avatar-placeholder { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; object-fit: cover; color: #fff; background: var(--teal); font-family: Manrope, sans-serif; font-size: 11px; }
-.adzora-social-account { min-width: 0; flex: 1; }
+.ad-preview { position: relative; display: flex; align-items: center; justify-content: center; gap: 13px; min-height: 230px; padding: 20px; border: 1px solid #d9e4f5; border-radius: 14px; background: linear-gradient(145deg, #f8faff, #fff); overflow: hidden; }
+.ad-preview button { border: 0; border-radius: 7px; padding: 8px 13px; color: #fff; background: #175cff; cursor: default; }
+.live-preview-shell { width: 100%; min-width: 0; padding: clamp(12px, 2.2vw, 20px); overflow: hidden; }
+.adzora-native, .adzora-social, .adzora-autoplay { min-width: 0; box-sizing: border-box; }
+.adzora-native { width: min(650px, 100%); display: flex; align-items: center; gap: 13px; min-height: 108px; padding: 12px; overflow: hidden; border: 1px solid #252a26; border-radius: 15px; color: #f1f1f1; background: #0b0e0c; font-family: Inter, Arial, sans-serif; cursor: pointer; }
+.adzora-native img, .adzora-native-media-placeholder { display: grid; place-items: center; width: 130px; height: 108px; flex: 0 0 130px; overflow: hidden; border-radius: 12px; color: #777d78; background: #101311; object-fit: cover; }
+.adzora-native-info { min-width: 0; flex: 1; }
+.adzora-native-sponsored { margin-bottom: 5px; color: #d4af37; font-size: 9px; font-weight: 700; }
+.adzora-native h3 { min-width: 0; margin: 0 0 6px; overflow: hidden; color: #f1f1f1; font-size: 18px; text-overflow: ellipsis; white-space: nowrap; }
+.adzora-native p { margin: 0 0 9px; overflow-wrap: anywhere; color: #8d938e; font-size: 12px; line-height: 1.5; }
+.adzora-native-cta { display: inline-block; max-width: 100%; overflow: hidden; border-radius: 7px; padding: 7px 10px; color: #080908; background: #d4af37; font-size: 10px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
+.adzora-social { width: min(500px, 100%); overflow: hidden; border: 2px solid transparent; border-radius: 18px; color: #e8edf5; background-image: linear-gradient(#080b09,#080b09), linear-gradient(135deg,#d4af37,#9f46ff,#e13c77,#d4af37); background-origin: border-box; background-clip: padding-box,border-box; font-family: Inter, Arial, sans-serif; cursor: pointer; transition: opacity .35s ease, transform .35s ease; }
+.adzora-social:hover { transform: translateY(-2px); }
+.adzora-social-header { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 13px; }
+.adzora-social-avatar, .adzora-social-avatar-placeholder { width: 36px; height: 36px; flex: 0 0 36px; overflow: hidden; border: 1px solid #d4af37; border-radius: 50%; object-fit: cover; }
+.adzora-social-avatar-placeholder { display: grid; place-items: center; color: #080b09; background: #d4af37; font-size: 15px; font-weight: 800; }
+.adzora-social-account { min-width: 0; }
 .adzora-social-account strong, .adzora-social-account span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.adzora-social-account strong { font-size: 11px; }
-.adzora-social-account span { color: var(--muted-2); font-family: Manrope, sans-serif; font-size: 9px; direction: ltr; }
-.adzora-social-brand { color: var(--teal); font-family: Manrope, sans-serif; font-size: 9px; font-weight: 800; }
-.adzora-social-actions { display: flex; gap: 13px; padding: 9px 12px 3px; }
-.adzora-social-actions button { padding: 0; border: 0; color: var(--muted); background: transparent; cursor: pointer; }
-.adzora-social-actions svg, .adzora-social-views svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+.adzora-social-account strong { color: #f1f1f1; font-size: 12px; }
+.adzora-social-account span { margin-top: 2px; color: #777d78; font-size: 10px; direction: ltr; text-align: right; }
+.adzora-social-brand { margin-right: auto; flex: 0 0 auto; color: #d4af37; font-size: 9px; font-weight: 800; letter-spacing: 1.5px; }
+.adzora-social-media, .adzora-social-media-placeholder { display: block; width: 100%; aspect-ratio: 1 / 1; min-width: 0; overflow: hidden; border: 0; background: #101311; object-fit: cover; }
+.adzora-social-media-placeholder { display: grid; place-items: center; gap: 5px; color: #777d78; font-size: 11px; }
+.adzora-social-actions { display: flex; align-items: center; gap: 15px; padding: 11px 13px 4px; }
+.adzora-social-actions button { display: grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; color: #eee; background: none; cursor: pointer; }
+.adzora-social-actions svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .adzora-social-save { margin-right: auto; }
-.adzora-social-stats, .adzora-social-views, .adzora-social-caption { padding: 3px 12px; color: var(--muted); font-size: 10px; }
-.adzora-social-views { display: flex; align-items: center; gap: 5px; font-family: Manrope, sans-serif; direction: ltr; }
-.adzora-social-caption { display: grid; gap: 3px; padding-bottom: 13px; line-height: 1.5; }
-.adzora-social-caption b { color: var(--text); }
-.adzora-autoplay { position: relative; width: min(100%, 430px); aspect-ratio: 16 / 9; overflow: hidden; border-radius: 9px; color: #fff; background: #20353b; }
-.adzora-autoplay video { display: block; width: 100%; height: 100%; object-fit: cover; }
-.adzora-video-brand, .adzora-video-title { position: absolute; z-index: 2; }
-.adzora-video-brand { top: 12px; right: 12px; color: #cfe7e5; font-family: Manrope, sans-serif; font-size: 10px; font-weight: 800; }
-.adzora-video-title { right: 12px; bottom: 13px; max-width: calc(100% - 24px); overflow: hidden; font-size: 13px; line-height: 1.35; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
-.adzora-autoplay-close, .adzora-autoplay-sound { position: absolute; z-index: 3; border: 0; border-radius: 6px; color: #fff; background: rgba(21,35,61,.78); cursor: pointer; }
-.adzora-autoplay-close { top: 10px; left: 10px; width: 30px; height: 30px; padding: 7px; }
-.adzora-autoplay-sound { bottom: 11px; left: 11px; padding: 6px 9px; font-size: 10px; }
+.adzora-social-stats { padding: 0 13px 5px; color: #bbb; font-size: 10px; }
+.adzora-social-views { display: flex; align-items: center; gap: 5px; padding: 0 13px 9px; color: #777d78; font-size: 9px; direction: ltr; }
+.adzora-social-views svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.adzora-social-caption { padding: 0 13px 14px; overflow-wrap: anywhere; color: #ddd; font-size: 11px; line-height: 1.55; }
+.adzora-social-caption b { margin-left: 4px; color: #fff; }
+.adzora-social-caption span { display: inline; }
+.adzora-social-sponsored { margin-right: 4px; color: #d4af37; }
+.adzora-social-hidden-note, .ad-preview-closed-note { display: grid; justify-items: center; gap: 10px; width: min(500px, 100%); padding: 22px; border: 1px dashed #d9e4f5; border-radius: 16px; color: #5f6b7d; font-size: 12px; text-align: center; }
+.adzora-autoplay { position: relative; width: min(500px, 100%); overflow: hidden; border: 1px solid #292d2a; border-radius: 22px; background: #000; }
+.adzora-autoplay video, .adzora-video-placeholder { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.adzora-video-placeholder { display: grid; place-items: center; gap: 7px; color: #b9cbe7; background: #101a32; font-size: 12px; }
+.adzora-video-brand, .adzora-video-title { position: absolute; z-index: 2; overflow: hidden; max-width: calc(100% - 28px); color: #fff; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
+.adzora-video-brand { top: 13px; left: 14px; padding: 5px 8px; border: 1px solid rgba(255,255,255,.22); border-radius: 7px; color: #fff; background: rgba(7,12,22,.62); font-family: Inter, Arial, sans-serif; font-size: 10px; font-weight: 800; letter-spacing: .08em; line-height: 1; }
+.adzora-video-title { right: 14px; bottom: 14px; padding: 6px 10px; border-radius: 8px; background: linear-gradient(90deg, rgba(7,12,22,.82), rgba(7,12,22,.46)); font-size: 12px; font-weight: 600; line-height: 1.35; }
+.adzora-autoplay .adzora-autoplay-close, .adzora-autoplay .adzora-autoplay-sound { box-sizing: border-box; position: absolute; z-index: 5; display: flex; align-items: center; justify-content: center; margin: 0; border: 0; cursor: pointer; transform: none; }
+.adzora-autoplay .adzora-autoplay-close { top: 10px; right: 10px; width: 30px; height: 30px; flex: 0 0 30px; padding: 0; border-radius: 50%; color: #fff; background: rgba(0,0,0,.6); font-size: 0; line-height: 0; }
+.adzora-autoplay-close svg { display: block; width: 14px; height: 14px; flex: 0 0 14px; }
+.adzora-autoplay .adzora-autoplay-close:hover { background: rgba(0,0,0,.78); }
+.adzora-autoplay .adzora-autoplay-sound { right: 12px; bottom: 12px; min-height: 30px; max-width: calc(100% - 24px); padding: 6px 10px; border-radius: 999px; color: #fff; background: rgba(0,0,0,.72); font-size: 11px; line-height: 1.2; white-space: nowrap; }
+.adzora-autoplay .adzora-autoplay-sound:hover { background: rgba(0,0,0,.88); }
 .wallet-method { display: flex; align-items: center; gap: 9px; text-align: right; }
 .wallet-method > span:nth-child(2) { min-width: 0; flex: 1; }
 .wallet-method strong, .wallet-method small { display: block; }
