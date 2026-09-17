@@ -7,7 +7,7 @@ function PageHeader({ title, description, action, onAction }) { return <div clas
 const TYPES = [{ id: "native", name: "Native", description: "صورة وعنوان ووصف داخل المحتوى", icon: "image" }, { id: "social", name: "Social", description: "منشور اجتماعي كامل بعناصر ثابتة", icon: "megaphone" }, { id: "video", name: "Video", description: "فيديو مع تشغيل تلقائي وزر إغلاق", icon: "video" }];
 const INITIAL = { name: "", format: "native", budget: "", pricingModel: "CPM", duration: "30", targeting: "", title: "", description: "", cta: "Learn more", brandName: "", username: "", text: "", destination: "", file: null, fileName: "", fileType: "", previewUrl: "", profileFile: null, profileFileName: "", profileFileType: "", profileUrl: "", postFile: null, postFileName: "", postFileType: "", postUrl: "" };
 function hasRequiredMedia(form) { return form.format === "social" ? Boolean(form.profileFile && form.postFile) : Boolean(form.file); }
-export function detectAdFont(text = "") { return /[\u0600-\u06FF]/.test(String(text)) ? "\"Tajawal\", sans-serif" : "\"Inter\", Arial, sans-serif"; }
+export function detectAdFont(text = "") { return /[\u0600-\u06FF]/.test(String(text)) ? "\"IBM Plex Sans Arabic\", sans-serif" : "\"Manrope\", sans-serif"; }
 
 function FormatVisual({ type }) {
   const visuals = {
@@ -15,7 +15,7 @@ function FormatVisual({ type }) {
     social: <><rect x="7" y="5" width="78" height="38" rx="7" /><circle cx="18" cy="13" r="3.5" /><path d="M26 13h22M14 23h63M14 28h63" /><path d="M15 36h4M23 36h4M31 36h4" /></>,
     video: <><rect x="7" y="7" width="78" height="34" rx="6" /><path d="m42 15 13 9-13 9z" /><path d="M16 36h29M58 36h16" /></>,
   };
-  return <span className={`format-card-visual format-card-visual-${type}`} aria-hidden="true"><svg viewBox="0 0 92 48">{visuals[type]}</svg></span>;
+  return <span className={`format-card-visual format-card-visual-${type}`} aria-hidden="true"><svg viewBox="0 0 92 48" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{visuals[type]}</svg></span>;
 }
 
 function TypeSelector({ value, onChange }) {
@@ -35,7 +35,7 @@ function ContentFields({ form, update, errors }) {
     <Field label="Destination URL" error={errors.destination}><input className="input" type="url" value={form.destination} onChange={event => update({ destination: event.target.value })} placeholder="https://example.com/offer" /></Field>
     {format === "native" && <><Field label="Title" error={errors.title}><input className="input" value={form.title} onChange={event => update({ title: event.target.value })} placeholder="Sponsored headline" /></Field><Field label="Description" error={errors.description}><textarea className="input textarea" value={form.description} onChange={event => update({ description: event.target.value })} placeholder="Explain the offer briefly" /></Field><Field label="CTA" hint="Optional — defaults to Learn More"><input className="input" value={form.cta} onChange={event => update({ cta: event.target.value })} placeholder="Learn more" /></Field></>}
     {format === "social" && <><Field label="Account / Brand Name" error={errors.brandName}><input className="input" value={form.brandName} onChange={event => update({ brandName: event.target.value })} placeholder="Your Brand" /></Field><Field label="Username" error={errors.username}><input className="input" value={form.username} onChange={event => update({ username: event.target.value })} placeholder="@yourbrand" /></Field><Field label="Post Text" error={errors.text}><textarea className="input textarea" value={form.text} onChange={event => update({ text: event.target.value })} placeholder="Write the sponsored post text" /></Field></>}
-    {format === "video" && <Field label="Title" error={errors.title}><input className="input" value={form.title} onChange={event => update({ title: event.target.value })} placeholder="Video campaign" /></Field>}
+     {format === "video" && <Field label="Title" error={errors.title} hint="Maximum 20 characters"><input className="input" maxLength={20} value={form.title} onChange={event => update({ title: event.target.value.slice(0, 20) })} placeholder="Video campaign" /></Field>}
   </div>;
 }
 
@@ -109,6 +109,7 @@ function VideoAd({ videoUrl, videoType, title }) {
   const [closed, setClosed] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [showClose, setShowClose] = useState(false);
+  const displayTitle = String(title || "Video campaign").slice(0, 20);
   useEffect(() => {
     setClosed(false);
     setAutoplayBlocked(false);
@@ -143,7 +144,7 @@ function VideoAd({ videoUrl, videoType, title }) {
   };
   if (closed) return <div className="ad-preview-closed-note"><span>Closed — the close button always pauses and hides the AdZora video ad.</span><button className="ghost-button" type="button" onClick={() => setClosed(false)}>Reset preview</button></div>;
   return <div className="adzora-autoplay">
-    {videoUrl ? <><video ref={videoRef} autoPlay loop playsInline preload="auto"><source src={videoUrl} type={videoType || "video/mp4"} /></video><span className="adzora-video-brand">AdZora</span><span className="adzora-video-title" style={{ fontFamily: detectAdFont(title) }}>{title || "Video campaign"}</span>{autoplayBlocked && <button type="button" className="adzora-autoplay-sound" onClick={event => { event.stopPropagation(); playWithSound(); }}>تشغيل الصوت</button>}{showClose && <button type="button" className="adzora-autoplay-close" aria-label="Close advertisement" onClick={close}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>}</> : <div className="adzora-video-placeholder"><Icon name="video" size={30} /><span>Video preview</span></div>}
+    {videoUrl ? <><video ref={videoRef} autoPlay loop playsInline preload="auto"><source src={videoUrl} type={videoType || "video/mp4"} /></video><span className="adzora-video-brand">AdZora</span><span className="adzora-video-title" style={{ fontFamily: detectAdFont(displayTitle) }}>{displayTitle}</span>{autoplayBlocked && <button type="button" className="adzora-autoplay-sound" onClick={event => { event.stopPropagation(); playWithSound(); }}>تشغيل الصوت</button>}{showClose && <button type="button" className="adzora-autoplay-close" aria-label="Close advertisement" onClick={close}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>}</> : <div className="adzora-video-placeholder"><Icon name="video" size={30} /><span>Video preview</span></div>}
   </div>;
 }
 
