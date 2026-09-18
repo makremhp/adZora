@@ -14,7 +14,7 @@ function ProfileIcon({ name, size = 18 }) {
 }
 
 const ROLE_LABELS = { publisher: "Publisher", advertiser: "Advertiser" };
-const INITIAL_PROFILE = { displayName: "Account Holder", email: "you@example.com", accountId: "AZ-10492", joinedDate: "Jan 2026" };
+const INITIAL_PROFILE = { displayName: "Account Holder", email: "you@example.com" };
 
 function initialsFor(name) {
   return name.split(/\s+/).filter(Boolean).map(part => part[0]).join("").slice(0, 2).toUpperCase() || "A";
@@ -55,6 +55,7 @@ export default function ProfilePage({ workspace }) {
     <section className="profile-hero light-panel" aria-label="Profile identity">
       <div className="profile-avatar profile-avatar-fallback" data-testid="profile-avatar" aria-label="Profile avatar">{initialsFor(profile.displayName)}</div>
       <div className="profile-hero-copy">
+        <span className="eyebrow">ACCOUNT HOLDER</span>
         <h2 data-testid="text-profile-display-name">{profile.displayName}</h2>
         <p>{profile.email}</p>
         <div className="profile-hero-meta"><span>{role}</span><span className="status-text-active">Active</span></div>
@@ -64,23 +65,20 @@ export default function ProfilePage({ workspace }) {
 
     <section className="profile-section light-panel">
       <div className="panel-heading">
-        <div><h2>Personal Information</h2></div>
+        <div><span className="eyebrow">PERSONAL INFORMATION</span><h2>Personal Information</h2></div>
         {!editing && <button className="secondary-button" type="button" onClick={() => setEditing(true)} data-testid="button-edit-profile"><ProfileIcon name="user" size={15} />Edit Profile</button>}
       </div>
       <div className="profile-form-grid profile-personal-grid">
         <label className="field"><span>Display Name</span><input className="input" value={profile.displayName} readOnly={!editing} onChange={event => updateProfile("displayName", event.target.value)} data-testid="input-profile-display-name" /></label>
         <label className="field"><span>Email</span><input className="input" type="email" value={profile.email} readOnly={!editing} onChange={event => updateProfile("email", event.target.value)} data-testid="input-profile-email" /></label>
         <ProfileFact label="Workspace role">{role}</ProfileFact>
-        <ProfileFact label="Account ID">{profile.accountId}</ProfileFact>
-        <ProfileFact label="Joined">{profile.joinedDate}</ProfileFact>
-        <ProfileFact label="Verification status">Not verified</ProfileFact>
       </div>
       {editing && <div className="form-actions profile-form-actions"><button className="primary-button" type="button" onClick={saveProfile} data-testid="button-save-profile"><ProfileIcon name="shield" size={15} />Save Changes</button><button className="ghost-button" type="button" onClick={cancelProfileEdit} data-testid="button-cancel-profile">Cancel</button></div>}
       
     </section>
 
     <section className="profile-section light-panel">
-      <div className="panel-heading"><div><h2>Basic security</h2></div><ProfileIcon name="lock" size={18} /></div>
+      <div className="panel-heading"><div><span className="eyebrow">SECURITY</span><h2>Basic security</h2></div><ProfileIcon name="lock" size={18} /></div>
       <div className="security-row">
         <div className="security-row-icon"><ProfileIcon name="lock" size={17} /></div>
         <div><strong>Password</strong><span>••••••••</span></div>

@@ -8,7 +8,7 @@ function MiniIcon({ name, size = 17 }) {
   const paths = {
     plus: <><path d="M12 5v14M5 12h14" /></>, globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18" /></>,
     code: <><path d="m8 9-4 3 4 3M16 9l4 3-4 3M14 5l-4 14" /></>, link: <><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" /><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 7 20l1.1-1.1" /></>,
-    copy: <><rect x="8" y="8" width="11" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2" /></>, check: <path d="m5 12 4 4L19 6" />, arrow: <path d="m9 18 6-6-6-6" />, eye: <><path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z" /><circle cx="12" cy="12" r="2.2" /></>, wallet: <><path d="M4 6h15a2 2 0 0 1 2 2v11H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14" /><path d="M16 13h5" /><circle cx="16" cy="13" r=".5" /></>, clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>, trend: <><path d="M3 17 9 11l4 4 8-9" /><path d="M16 6h5v5" /></>, chart: <><path d="M4 20V10M11 20V4M18 20v-7" /></>,
+    copy: <><rect x="8" y="8" width="11" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2" /></>, check: <path d="m5 12 4 4L19 6" />, arrow: <path d="m9 18 6-6-6-6" />, eye: <><path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z" /><circle cx="12" cy="12" r="2.2" /></>, wallet: <><path d="M4 6h15a2 2 0 0 1 2 2v11H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14" /><path d="M16 13h5" /><circle cx="16" cy="13" r=".5" /></>, clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>, trend: <><path d="M3 17 9 11l4 4 8-9" /><path d="M16 6h5v5" /></>,
   };
   return <svg {...props}>{paths[name] || paths.plus}</svg>;
 }
@@ -36,6 +36,54 @@ function FinanceMetrics({ finance }) { const metrics = [["Available Earnings", f
 function EarningsPage({ finance, onNavigate }) { return <div className="workspace-page"><PageHeader title="Publisher Earnings" description="تابع أرباح الناشر منفصلة عن Advertiser Spend من مكان واحد." action="Withdraw earnings" onAction={() => onNavigate("withdrawals")} icon="arrow" /><FinanceMetrics finance={finance} /><section className="light-panel"><div className="panel-heading"><div><span className="eyebrow">TRACKING</span><h2>Publisher revenue events</h2></div></div><div className="event-chip-list"><span>Impression</span><span>Click</span><span>Video View</span></div><p className="muted-copy">تُستخدم هذه الأحداث لاحتساب أرباحك تلقائيًا فور بدء استقبال الزيارات المؤهلة.</p></section></div>; }
 function WithdrawalsPage({ finance, withdrawals, setFinance, setWithdrawals }) { const { notify } = useNotifications(); const [amount, setAmount] = useState(""); const [error, setError] = useState(""); const submit = () => { const value = Number(amount); if (!value || value < finance.minimum) { setError("The amount is below the minimum withdrawal."); return; } if (value > finance.available) { setError("The amount exceeds available earnings."); return; } const item = { id: "withdrawal-" + Date.now(), amount: value, status: "Pending", date: new Date().toLocaleDateString("en-US") }; setFinance(previous => ({ ...previous, available: previous.available - value })); setWithdrawals(previous => [...previous, item]); setAmount(""); setError(""); notify("Your withdrawal request has been submitted and is now pending review.", "success"); }; return <div className="workspace-page"><PageHeader title="Withdrawals" description="أدر طلبات سحب أرباحك بشكل منفصل عن إنفاق المعلن." /><section className="form-panel light-panel"><div className="withdraw-balance"><span>Available Earnings</span><strong>{"$"}{finance.available.toFixed(2)}</strong><small>Minimum: {"$"}{finance.minimum.toFixed(2)}</small></div><div className="form-grid"><Field label="Amount" error={error}><input className="input" type="number" value={amount} min={finance.minimum} onChange={event => { setAmount(event.target.value); setError(""); }} placeholder="50" /></Field><Field label="Payment method"><select className="input select"><option>Bank transfer</option><option>Manual review</option></select></Field></div><button className="primary-button" type="button" onClick={submit}><MiniIcon name="check" size={16} />Submit Withdrawal Request</button></section><section className="light-panel"><div className="panel-heading"><div><span className="eyebrow">WITHDRAWAL STATUS</span><h2>Recent requests</h2></div><span className="result-count">{withdrawals.length} records</span></div>{!withdrawals.length ? <EmptyState icon="trend" title="No withdrawals yet" description="ستظهر طلبات السحب هنا بمجرد إنشائها." /> : <div className="data-list">{withdrawals.map(item => <div className="data-row compact-finance-row" key={item.id}><div className="row-main"><span className="row-icon"><MiniIcon name="trend" /></span><div><strong>{"$"}{item.amount.toFixed(2)}</strong><small>{item.date}</small></div></div><span className="status-badge pending">{item.status}</span></div>)}</div>}</section></div>; }
 
+function WebsiteAnalyticsPage({ data, onNavigate }) {
+  const websites = data.websites || []; const [selectedId, setSelectedId] = useState(websites[0]?.id || ""); const selectedWebsite = websites.find(item => item.id === selectedId) || websites[0];
+  const metrics = [["Impressions", selectedWebsite?.impressions || 0, "eye"], ["Clicks", selectedWebsite?.clicks || 0, "trend"], ["CTR", "--", "trend"], ["Earnings", 0, "wallet"]];
+  return <div className="workspace-page"><PageHeader title="Website Analytics" description="تابع مؤشرات العرض والنقرات والأرباح لكل Publisher Website في مساحة واحدة." />{!selectedWebsite ? <section className="light-panel"><EmptyState icon="trend" title="No analytics scope yet" description="بعد إضافة Website سيظهر نطاق التحليلات وحالات التتبع المناسبة." action="Add Website" onAction={() => onNavigate("websites")} /></section> : <><section className="light-panel analytics-toolbar"><div><span className="eyebrow">TRACKING SCOPE</span><h2>{selectedWebsite.name}</h2><p>{selectedWebsite.url}</p></div><label className="field analytics-select"><span>Select Website</span><select className="input select" value={selectedId} onChange={event => setSelectedId(event.target.value)}>{websites.map(website => <option key={website.id} value={website.id}>{website.name}</option>)}</select></label></section><section className="analytics-metric-grid">{metrics.map(([label, value, icon]) => <article className="metric-card analytics-metric" key={label}><div className="metric-top"><span className="metric-icon"><MiniIcon name={icon} size={16} /></span><span className="metric-label">{label}</span></div><strong className="metric-value">{value === "--" ? value : value}</strong></article>)}</section><section className="analytics-grid"><section className="light-panel analytics-chart-card"><div className="panel-heading"><div><span className="eyebrow">LAST 30 DAYS</span><h2>Website performance</h2></div></div><div className="analytics-chart"><svg viewBox="0 0 760 220" role="img" aria-label="Website analytics chart"><path d="M20 180H740M20 125H740M20 70H740" className="chart-grid-line" /><path d="M20 180 C130 180 170 180 250 180 S390 180 470 180 S620 180 740 180 L740 210 L20 210 Z" className="chart-fill" /><path d="M20 180 C130 180 170 180 250 180 S390 180 470 180 S620 180 740 180" className="chart-line" /><circle cx="740" cy="180" r="5" className="chart-point" /></svg><div className="chart-empty-state"><span className="chart-empty-icon"><MiniIcon name="trend" size={18} /></span><strong>No activity yet</strong><span>Your chart will appear here once visits start being tracked.</span></div></div></section><section className="light-panel analytics-detail-card"><div className="panel-heading"><div><span className="eyebrow">SELECTED WEBSITE</span><h2>Tracking details</h2></div></div><div className="analytics-detail-list"><div><span>Name</span><strong>{selectedWebsite.name}</strong></div><div><span>Website URL</span><strong>{selectedWebsite.url}</strong></div><div><span>Tracking status</span><strong className="status-text-pending">Awaiting activity</strong></div><div><span>Events</span><strong>Impression · Click · Earnings</strong></div></div></section></section></>}</div>;
+}
+
+const publisherWebsiteDemoAnalytics = [
+  {
+    impressions: 12420, clicks: 386, ctr: "3.11%", cpm: "$1.82", cpc: "$0.058", earnings: 22.61,
+    formats: {
+      native: { impressions: 7420, clicks: 218, ctr: "2.94%", earnings: 13.52 },
+      social: { impressions: 3800, clicks: 124, ctr: "3.26%", earnings: 6.81 },
+      video: { impressions: 1200, clicks: 44, ctr: "3.67%", earnings: 2.28 },
+    },
+    series: {
+      impressions: [620, 710, 680, 840, 790, 930, 1010, 980, 1100, 1060, 1170, 1240, 1190, 1310, 1280, 1390, 1360, 1450, 1410, 1520, 1490, 1610, 1580, 1690, 1650, 1780, 1740, 1880, 1960, 2040],
+      clicks: [18, 21, 20, 25, 23, 29, 31, 30, 34, 33, 36, 39, 38, 41, 40, 44, 43, 46, 45, 49, 48, 52, 50, 55, 53, 57, 56, 60, 64, 68],
+      earnings: [2.1, 2.4, 2.3, 2.8, 2.7, 3.1, 3.4, 3.2, 3.7, 3.5, 4.0, 4.3, 4.1, 4.6, 4.4, 4.9, 4.8, 5.2, 5.0, 5.6, 5.4, 5.9, 5.7, 6.2, 6.0, 6.6, 6.4, 7.1, 7.6, 8.2],
+    },
+  },
+  {
+    impressions: 8420, clicks: 256, ctr: "3.04%", cpm: "$1.68", cpc: "$0.055", earnings: 42.15,
+    formats: {
+      native: { impressions: 4860, clicks: 151, ctr: "3.11%", earnings: 24.18 },
+      social: { impressions: 2520, clicks: 72, ctr: "2.86%", earnings: 11.04 },
+      video: { impressions: 1040, clicks: 33, ctr: "3.17%", earnings: 6.93 },
+    },
+    series: {
+      impressions: [420, 510, 480, 590, 540, 630, 670, 640, 720, 700, 760, 810, 790, 860, 830, 900, 880, 940, 920, 990, 970, 1030, 1010, 1090, 1060, 1140, 1110, 1190, 1230, 1280],
+      clicks: [11, 14, 13, 16, 15, 18, 20, 19, 22, 21, 23, 25, 24, 27, 26, 28, 27, 30, 29, 31, 30, 33, 32, 35, 34, 36, 35, 38, 40, 42],
+      earnings: [1.4, 1.7, 1.6, 2.0, 1.9, 2.2, 2.4, 2.3, 2.6, 2.5, 2.8, 3.0, 2.9, 3.2, 3.1, 3.4, 3.3, 3.6, 3.5, 3.8, 3.7, 4.0, 3.9, 4.2, 4.1, 4.4, 4.3, 4.6, 4.8, 5.0],
+    },
+  },
+  {
+    impressions: 6580, clicks: 168, ctr: "2.55%", cpm: "$1.54", cpc: "$0.061", earnings: 24.45,
+    formats: {
+      native: { impressions: 3520, clicks: 92, ctr: "2.61%", earnings: 12.74 },
+      social: { impressions: 2080, clicks: 53, ctr: "2.55%", earnings: 7.72 },
+      video: { impressions: 980, clicks: 23, ctr: "2.35%", earnings: 3.99 },
+    },
+    series: {
+      impressions: [310, 360, 340, 420, 390, 460, 490, 470, 520, 500, 550, 580, 570, 610, 590, 630, 620, 660, 650, 700, 680, 730, 710, 760, 740, 790, 770, 820, 850, 890],
+      clicks: [8, 10, 9, 12, 11, 13, 14, 14, 15, 15, 16, 18, 17, 19, 18, 20, 19, 21, 20, 22, 21, 23, 22, 24, 23, 25, 24, 26, 28, 30],
+      earnings: [0.9, 1.1, 1.0, 1.3, 1.2, 1.4, 1.5, 1.5, 1.7, 1.6, 1.8, 1.9, 1.9, 2.1, 2.0, 2.2, 2.1, 2.3, 2.2, 2.4, 2.3, 2.5, 2.4, 2.6, 2.5, 2.7, 2.6, 2.8, 2.9, 3.1],
+    },
+  },
+];
+
 const formatLabels = { native: "Native", social: "Social", video: "Video" };
 const periodOptions = ["Today", "7 Days", "30 Days", "90 Days"];
 
@@ -43,35 +91,66 @@ function getWebsiteDomain(url) {
   try { return new URL(url).hostname; } catch { return url; }
 }
 
+function cloneDemoAnalytics(source) {
+  return {
+    ...source,
+    formats: Object.fromEntries(Object.entries(source.formats).map(([key, value]) => [key, { ...value }])),
+    series: Object.fromEntries(Object.entries(source.series).map(([key, value]) => [key, [...value]])),
+  };
+}
+
+function getDemoAnalytics(index) {
+  const source = cloneDemoAnalytics(publisherWebsiteDemoAnalytics[index % publisherWebsiteDemoAnalytics.length]);
+  if (index < publisherWebsiteDemoAnalytics.length) return source;
+  const multiplier = 1 + (index - publisherWebsiteDemoAnalytics.length + 1) * 0.08;
+  return {
+    ...source,
+    impressions: Math.round(source.impressions * multiplier),
+    clicks: Math.round(source.clicks * multiplier),
+    earnings: Number((source.earnings * multiplier).toFixed(2)),
+    series: Object.fromEntries(Object.entries(source.series).map(([key, values]) => [key, values.map(value => Number((value * multiplier).toFixed(2)))])),
+  };
+}
+
+function buildWebsiteAnalytics(website, index) {
+  return {
+    ...website,
+    ...getDemoAnalytics(index),
+    websiteId: website.id,
+    domain: getWebsiteDomain(website.url),
+    status: website.status || "Active",
+  };
+}
+
+function buildAnalyticsPath(values, maxValue) {
+  const width = 720;
+  const height = 142;
+  const xOffset = 20;
+  const yOffset = 20;
+  const points = values.length > 1 ? values : [values[0] || 0, values[0] || 0];
+  return points.map((value, index) => {
+    const x = xOffset + (index / (points.length - 1)) * width;
+    const y = yOffset + height - (value / maxValue) * height;
+    return `${index === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
+  }).join(" ");
+}
+
+function getPeriodSeries(values, period) {
+  if (period === "Today") {
+    const value = values[values.length - 1] || 0;
+    return [value * 0.94, value];
+  }
+  if (period === "7 Days") return values.slice(-7);
+  if (period === "90 Days") return values.flatMap(value => [value * 0.82, value * 0.91, value]);
+  return values;
+}
+
 function formatAnalyticsNumber(value) {
-  return Number(value || 0).toLocaleString("en-US");
+  return Number(value).toLocaleString("en-US");
 }
 
 function formatAnalyticsMoney(value) {
-  return "$" + Number(value || 0).toFixed(2);
-}
-
-function computeCtr(impressions, clicks) {
-  if (!impressions) return "--";
-  return ((clicks / impressions) * 100).toFixed(2) + "%";
-}
-
-// Builds a website's analytics summary strictly from real stored fields (impressions,
-// clicks). There is no synthetic/demo dataset here: a website with no recorded activity
-// shows zero metrics and an explicit empty state instead of invented numbers.
-function buildWebsiteAnalytics(website) {
-  const impressions = website.impressions || 0;
-  const clicks = website.clicks || 0;
-  return {
-    ...website,
-    websiteId: website.id,
-    domain: getWebsiteDomain(website.url),
-    status: website.status || "Pending",
-    impressions,
-    clicks,
-    ctr: computeCtr(impressions, clicks),
-    hasActivity: impressions > 0,
-  };
+  return "$" + Number(value).toFixed(2);
 }
 
 function AnalyticsMetric({ label, value, icon }) {
@@ -79,37 +158,40 @@ function AnalyticsMetric({ label, value, icon }) {
 }
 
 function WebsitePerformanceCard({ website, onDetails }) {
-  const metrics = [["Impressions", formatAnalyticsNumber(website.impressions)], ["Clicks", formatAnalyticsNumber(website.clicks)], ["CTR", website.ctr]];
-  return <article className="website-analytics-card"><div className="website-analytics-card-header"><div className="website-analytics-identity"><strong>{website.name}</strong><span>{website.domain}</span></div><span className={"status-badge " + (website.status === "Active" ? "ready" : "pending")}>{website.status}</span></div><div className="website-analytics-metrics">{metrics.map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>{!website.hasActivity && <p className="muted-copy analytics-card-note">No analytics yet — this website has not received tracked activity.</p>}<button className="secondary-button website-details-button" type="button" onClick={() => onDetails(website.websiteId)}><MiniIcon name="eye" size={15} />View Details</button></article>;
+  const metrics = [["Impressions", formatAnalyticsNumber(website.impressions)], ["Clicks", formatAnalyticsNumber(website.clicks)], ["CTR", website.ctr], ["CPM", website.cpm], ["CPC", website.cpc], ["Earnings", formatAnalyticsMoney(website.earnings)]];
+  return <article className="website-analytics-card"><div className="website-analytics-card-header"><div className="website-analytics-identity"><strong>{website.name}</strong><span>{website.domain}</span></div><span className={"status-badge " + (website.status === "Active" ? "ready" : "pending")}>{website.status}</span></div><div className="website-analytics-metrics">{metrics.map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div><button className="secondary-button website-details-button" type="button" onClick={() => onDetails(website.websiteId)}><MiniIcon name="eye" size={15} />View Details</button></article>;
 }
 
-function WebsiteAnalyticsDetail({ website, websites, onSelectWebsite, onBack }) {
-  return <section className="website-analytics-detail"><div className="detail-header"><button className="link-button" type="button" onClick={onBack}><MiniIcon name="arrow" size={15} />Back to Analytics</button><label className="field analytics-select"><span>Website</span><select className="input select" value={website.websiteId} onChange={event => onSelectWebsite(event.target.value)}><option value="all">All Websites</option>{websites.map(item => <option key={item.websiteId} value={item.websiteId}>{item.name}</option>)}</select></label></div><section className="light-panel selected-website-summary"><div><h2>{website.name}</h2><p>{website.domain} · <span className={website.status === "Active" ? "status-text-active" : "status-text-pending"}>{website.status}</span></p></div></section><section className="analytics-metric-grid detail-metrics">{[["Impressions", formatAnalyticsNumber(website.impressions), "eye"], ["Clicks", formatAnalyticsNumber(website.clicks), "trend"], ["CTR", website.ctr, "chart"], ["Earnings", formatAnalyticsMoney(website.earnings || 0), "wallet"]].map(([label, value, icon]) => <AnalyticsMetric key={label} label={label} value={value} icon={icon} />)}</section><section className="light-panel publisher-performance-panel"><div className="panel-heading"><div><h2>{website.name} performance</h2></div></div>{website.hasActivity ? <p className="muted-copy">Performance charts will populate here once the tracking endpoint reports real events for this website.</p> : <div className="chart-empty-state static-empty"><span className="chart-empty-icon"><MiniIcon name="trend" size={18} /></span><strong>No analytics yet</strong><span>Add the Universal AdZora Code to this website and verify it to start collecting impressions and clicks.</span></div>}</section><section className="light-panel ad-format-panel"><div className="panel-heading"><div><h2>Ad Format Performance</h2></div><span className="phase-chip">Native · Social · Video</span></div><div className="chart-empty-state static-empty format-empty-note"><span className="chart-empty-icon"><MiniIcon name="chart" size={18} /></span><strong>No format breakdown yet</strong><span>Once campaigns start delivering on this website, performance will be split by Native, Social, and Video here.</span></div></section></section>;
+function WebsiteAnalyticsChart({ website, period }) {
+  const series = Object.fromEntries(Object.entries(website.series).map(([key, values]) => [key, getPeriodSeries(values, period)]));
+  const maxes = Object.fromEntries(Object.entries(series).map(([key, values]) => [key, Math.max(...values, 1) * 1.12]));
+  const axisLabels = period === "Today" ? ["Start", "Now"] : period === "7 Days" ? ["-6d", "-3d", "Today"] : period === "90 Days" ? ["-90d", "-60d", "-30d", "Today"] : ["01", "08", "15", "22", "30"];
+  return <div className="publisher-chart website-detail-chart"><svg viewBox="0 0 760 190" role="img" aria-label={`${website.name} ${period} performance chart`} preserveAspectRatio="none"><path d="M20 162H740M20 115H740M20 68H740M20 20H740" className="chart-grid-line" /><path d={buildAnalyticsPath(series.impressions, maxes.impressions)} className="publisher-chart-line impressions-line" /><path d={buildAnalyticsPath(series.clicks, maxes.clicks)} className="publisher-chart-line clicks-line" /><path d={buildAnalyticsPath(series.earnings, maxes.earnings)} className="publisher-chart-line earnings-line" /></svg><div className="chart-axis">{axisLabels.map(label => <span key={label}>{label}</span>)}</div></div>;
 }
 
-function PublisherAnalyticsPage({ data, finance, onNavigate, selectedWebsiteId = "" }) {
+function WebsiteAnalyticsDetail({ website, websites, period, setPeriod, onSelectWebsite, onBack }) {
+  return <section className="website-analytics-detail"><div className="detail-header"><button className="link-button" type="button" onClick={onBack}><MiniIcon name="arrow" size={15} />Back to Analytics</button><label className="field analytics-select"><span>Website</span><select className="input select" value={website.websiteId} onChange={event => onSelectWebsite(event.target.value)}><option value="all">All Websites</option>{websites.map(item => <option key={item.websiteId} value={item.websiteId}>{item.name}</option>)}</select></label></div><section className="light-panel selected-website-summary"><div><span className="eyebrow">WEBSITE DETAILS</span><h2>{website.name}</h2><p>{website.domain} · <span className="status-text-active">{website.status}</span></p></div></section><section className="analytics-metric-grid detail-metrics">{[["Impressions", formatAnalyticsNumber(website.impressions), "eye"], ["Clicks", formatAnalyticsNumber(website.clicks), "trend"], ["CTR", website.ctr, "chart"], ["CPM", website.cpm, "wallet"], ["CPC", website.cpc, "trend"], ["Earnings", formatAnalyticsMoney(website.earnings), "wallet"]].map(([label, value, icon]) => <AnalyticsMetric key={label} label={label} value={value} icon={icon} />)}</section><section className="light-panel publisher-performance-panel"><div className="panel-heading"><div><span className="eyebrow">PERFORMANCE CHART</span><h2>{website.name} performance</h2></div><div className="analytics-period-control" aria-label="Analytics period">{periodOptions.map(option => <button type="button" key={option} className={period === option ? "is-active" : ""} onClick={() => setPeriod(option)}>{option}</button>)}</div></div><div className="chart-legend"><span><i className="legend-impressions" />Impressions</span><span><i className="legend-clicks" />Clicks</span><span><i className="legend-earnings" />Earnings</span></div><WebsiteAnalyticsChart website={website} period={period} /></section><section className="light-panel ad-format-panel"><div className="panel-heading"><div><span className="eyebrow">FORMAT BREAKDOWN</span><h2>Ad Format Performance</h2></div><span className="phase-chip">Native · Social · Video</span></div><div className="format-performance-grid">{Object.entries(website.formats).map(([key, format]) => <article className={"format-performance-card format-" + key} key={key}><div className="format-card-heading"><span className="format-card-mark">{formatLabels[key].slice(0, 1)}</span><div><strong>{formatLabels[key]}</strong><small>Last 30 days</small></div></div><div className="format-card-metrics"><div><span>Impressions</span><strong>{formatAnalyticsNumber(format.impressions)}</strong></div><div><span>Clicks</span><strong>{formatAnalyticsNumber(format.clicks)}</strong></div><div><span>CTR</span><strong>{format.ctr}</strong></div><div><span>Earnings</span><strong>{formatAnalyticsMoney(format.earnings)}</strong></div></div></article>)}</div></section></section>;
+}
+
+function PublisherAnalyticsPage({ data, onNavigate, selectedWebsiteId = "" }) {
+  const [period, setPeriod] = useState("30 Days");
   const [selectedId, setSelectedId] = useState(selectedWebsiteId);
   const websites = data.websites || [];
   useEffect(() => { if (selectedWebsiteId) setSelectedId(selectedWebsiteId); }, [selectedWebsiteId]);
   const websiteAnalytics = websites.map(buildWebsiteAnalytics);
   const selectedWebsite = websiteAnalytics.find(website => website.websiteId === selectedId);
-  const totalImpressions = websiteAnalytics.reduce((sum, item) => sum + item.impressions, 0);
-  const totalClicks = websiteAnalytics.reduce((sum, item) => sum + item.clicks, 0);
-  const summaryMetrics = [
-    ["Impressions", formatAnalyticsNumber(totalImpressions), "eye"],
-    ["Clicks", formatAnalyticsNumber(totalClicks), "trend"],
-    ["CTR", computeCtr(totalImpressions, totalClicks), "chart"],
-    ["Total Earned", formatAnalyticsMoney(finance.earned), "wallet"],
-  ];
-  if (selectedWebsite) return <div className="workspace-page publisher-analytics"><PageHeader eyebrow="PUBLISHER / ANALYTICS" title="Analytics" description="Track your websites, ad performance, and earnings." /><WebsiteAnalyticsDetail website={selectedWebsite} websites={websiteAnalytics} onSelectWebsite={id => id === "all" ? setSelectedId("") : setSelectedId(id)} onBack={() => setSelectedId("")} /></div>;
+  const summaryMetrics = [["Impressions", "24,860", "eye"], ["Clicks", "742", "trend"], ["CTR", "2.98%", "chart"], ["Earnings", "$125.00", "wallet"], ["CPM", "$1.84", "wallet"], ["CPC", "$0.058", "trend"]];
+  const periodControl = <div className="analytics-period-control" aria-label="Analytics period">{periodOptions.map(option => <button type="button" key={option} className={period === option ? "is-active" : ""} onClick={() => setPeriod(option)}>{option}</button>)}</div>;
+  if (selectedWebsite) return <div className="workspace-page publisher-analytics"><PageHeader eyebrow="PUBLISHER / ANALYTICS" title="Analytics" description="Track your websites, ad performance, and earnings." aside={<div className="analytics-header-controls">{periodControl}</div>} /><WebsiteAnalyticsDetail website={selectedWebsite} websites={websiteAnalytics} period={period} setPeriod={setPeriod} onSelectWebsite={id => id === "all" ? setSelectedId("") : setSelectedId(id)} onBack={() => setSelectedId("")} /></div>;
+  const activitySites = websiteAnalytics.length ? [0, 1, 2].map(index => websiteAnalytics[index % websiteAnalytics.length]) : [{ name: "My Website" }, { name: "Store Website" }, { name: "Blog Website" }];
   return <div className="workspace-page publisher-analytics">
-    <PageHeader eyebrow="PUBLISHER / ANALYTICS" title="Analytics" description="Track your websites, ad performance, and earnings." />
+    <PageHeader eyebrow="PUBLISHER / ANALYTICS" title="Analytics" description="Track your websites, ad performance, and earnings." aside={<div className="analytics-header-controls">{periodControl}</div>} />
     <section className="analytics-metric-grid publisher-analytics-metrics">{summaryMetrics.map(([label, value, icon]) => <AnalyticsMetric key={label} label={label} value={value} icon={icon} />)}</section>
-    <section className="light-panel earnings-summary-panel"><div className="panel-heading"><div><h2>Earnings overview</h2></div></div><div className="earnings-summary-grid"><div><span>Available Earnings</span><strong>{formatAnalyticsMoney(finance.available)}</strong></div><div><span>Pending Earnings</span><strong>{formatAnalyticsMoney(finance.pending)}</strong></div><div><span>Total Earned</span><strong>{formatAnalyticsMoney(finance.earned)}</strong></div><div><span>Total Withdrawn</span><strong>{formatAnalyticsMoney(finance.withdrawn)}</strong></div></div></section>
+    <section className="light-panel earnings-summary-panel"><div className="panel-heading"><div><span className="eyebrow">OVERVIEW</span><h2>Overview</h2></div></div><div className="earnings-summary-grid"><div><span>Available Earnings</span><strong>$125.00</strong></div><div><span>Pending Earnings</span><strong>$32.50</strong></div><div><span>Total Earned</span><strong>$642.50</strong></div><div><span>Total Withdrawn</span><strong>$485.00</strong></div></div></section>
     <section className="light-panel website-performance-panel"><div className="panel-heading"><div><span className="eyebrow">PUBLISHER INVENTORY</span><h2>Websites Performance</h2></div><button className="text-button" type="button" onClick={() => onNavigate("websites")}>Manage websites <MiniIcon name="arrow" size={14} /></button></div>{!websiteAnalytics.length ? <EmptyState icon="globe" title="No websites yet" description="Add a website to start receiving AdZora ads and analytics." action="Add Website" onAction={() => onNavigate("websites")} /> : <div className="website-analytics-grid">{websiteAnalytics.map(website => <WebsitePerformanceCard website={website} key={website.websiteId} onDetails={setSelectedId} />)}</div>}</section>
-    {!totalImpressions && websiteAnalytics.length > 0 && <section className="light-panel activity-panel"><div className="panel-heading"><div><h2>Recent Activity</h2></div></div><div className="empty-state compact-empty"><MiniIcon name="clock" size={22} /><h2>No activity yet</h2><p>Activity will appear here once your websites start receiving tracked impressions and clicks.</p></div></section>}
+    <section className="light-panel activity-panel"><div className="panel-heading"><div><span className="eyebrow">ACTIVITY</span><h2>Recent Activity</h2></div></div><div className="activity-list"><div><span className="activity-icon"><MiniIcon name="eye" size={15} /></span><span><strong>Ad impression</strong><small>{activitySites[0].name} · Today, 14:32</small></span><b>+1,240</b></div><div><span className="activity-icon"><MiniIcon name="trend" size={15} /></span><span><strong>Ad click</strong><small>{activitySites[1].name} · Today, 13:48</small></span><b>+42</b></div><div><span className="activity-icon"><MiniIcon name="wallet" size={15} /></span><span><strong>Earnings update</strong><small>{activitySites[2].name} · Today, 12:15</small></span><b>$8.20</b></div></div></section>
   </div>;
 }
 
 function PublisherTransactions({ withdrawals }) { return <div className="workspace-page"><PageHeader title="Publisher Transactions" description="سجل منفصل لأرباح الناشر والتعديلات والسحوبات، دون خلطه بإنفاق المعلن." /><section className="light-panel data-panel"><div className="panel-heading"><div><span className="eyebrow">TRANSACTION HISTORY</span><h2>{withdrawals.length} records</h2></div></div>{!withdrawals.length ? <EmptyState icon="code" title="No transactions yet" description="ستظهر Earnings وAdjustments وWithdrawals هنا عند وجود بيانات." /> : <div className="data-list">{withdrawals.map(item => <div className="data-row" key={item.id}><div className="row-main"><span className="row-icon"><MiniIcon name="trend" /></span><div><strong>Withdrawal · {"$"}{item.amount.toFixed(2)}</strong><small>{item.date}</small></div></div><span className="status-badge pending">{item.status}</span></div>)}</div>}</section></div>; }
-export default function PublisherWorkspace({ page, data, setData, onNavigate, selectedWebsiteId = "", finance = { available: 0, pending: 0, earned: 0, withdrawn: 0, minimum: 50 }, setFinance = () => {}, withdrawals = [], setWithdrawals = () => {} }) { const content = useMemo(() => page, [page]); const selectedWebsite = data.websites?.find(website => website.id === selectedWebsiteId); const selectedIndex = data.websites?.findIndex(website => website.id === selectedWebsiteId) ?? 0; return <div className="publisher-workspace">{content === "websites" && <WebsitesPage data={data} setData={setData} onNavigate={onNavigate} onDetails={id => onNavigate("website-details", id)} />}{content === "website-details" && <WebsiteDetailPage website={selectedWebsite} websiteIndex={selectedIndex < 0 ? 0 : selectedIndex} onBack={() => onNavigate("websites")} onAnalytics={id => onNavigate("analytics", id)} />}{content === "ad-codes" && <AdCodesPage data={data} onNavigate={onNavigate} />}{content === "earnings" && <EarningsPage finance={finance} onNavigate={onNavigate} />}{content === "withdrawals" && <WalletWorkspace mode="withdrawal" requests={withdrawals} setRequests={setWithdrawals} available={finance.available} />}{content === "transactions" && <PublisherTransactions withdrawals={withdrawals} />}{content === "analytics" && <PublisherAnalyticsPage data={data} finance={finance} onNavigate={onNavigate} selectedWebsiteId={selectedWebsiteId} />}</div>; }
+export default function PublisherWorkspace({ page, data, setData, onNavigate, selectedWebsiteId = "", finance = { available: 125, pending: 32.5, earned: 642.5, withdrawn: 485, minimum: 50 }, setFinance = () => {}, withdrawals = [], setWithdrawals = () => {} }) { const content = useMemo(() => page, [page]); const selectedWebsite = data.websites?.find(website => website.id === selectedWebsiteId); const selectedIndex = data.websites?.findIndex(website => website.id === selectedWebsiteId) ?? 0; return <div className="publisher-workspace">{content === "websites" && <WebsitesPage data={data} setData={setData} onNavigate={onNavigate} onDetails={id => onNavigate("website-details", id)} />}{content === "website-details" && <WebsiteDetailPage website={selectedWebsite} websiteIndex={selectedIndex < 0 ? 0 : selectedIndex} onBack={() => onNavigate("websites")} onAnalytics={id => onNavigate("analytics", id)} />}{content === "ad-codes" && <AdCodesPage data={data} onNavigate={onNavigate} />}{content === "earnings" && <EarningsPage finance={finance} onNavigate={onNavigate} />}{content === "withdrawals" && <WalletWorkspace mode="withdrawal" requests={withdrawals} setRequests={setWithdrawals} available={finance.available} />}{content === "transactions" && <PublisherTransactions withdrawals={withdrawals} />}{content === "analytics" && <PublisherAnalyticsPage data={data} onNavigate={onNavigate} selectedWebsiteId={selectedWebsiteId} />}</div>; }
