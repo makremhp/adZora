@@ -27,35 +27,22 @@ export const AD_ZONE_REQUIREMENTS = {
 };
 
 export const PAYMENT_METHODS = [
-  { id: "cwallet", label: "Cwallet", description: "USDT only · Account identifier · manual review", icon: "wallet" },
-  { id: "web3", label: "Web3 Wallet", description: "BNB · Send to the platform address", icon: "globe" },
-  { id: "binance", label: "Binance", description: "USDT · BNB Smart Chain (BEP20)", icon: "card" },
+  { id: "cwallet", label: "Cwallet", description: "Account identifier · manual review", icon: "wallet" },
   { id: "ton", label: "TON Network", description: "Wallet SDK connection prepared", icon: "arrow-down" },
+  { id: "binance", label: "Binance", description: "Network and account details", icon: "card" },
 ];
-
-export const PAYMENT_ASSETS = {
-  cwallet: "USDT",
-  web3: "BNB",
-  ton: "TON",
-  binance: "USDT",
-};
-
-export const DEPOSIT_METHODS = PAYMENT_METHODS.filter(method => ["web3", "binance", "cwallet"].includes(method.id));
-export const WITHDRAWAL_METHODS = PAYMENT_METHODS.filter(method => ["cwallet", "ton", "binance"].includes(method.id));
-export const BNB_NETWORK = "BNB Smart Chain (BEP20)";
 
 export const DEPOSIT_CONFIG = {
   currency: "USD",
   status: "Pending",
   statuses: ["Pending", "Processing", "Completed", "Rejected"],
-  methods: DEPOSIT_METHODS.map(method => method.id),
-  assets: PAYMENT_ASSETS,
-  networks: [BNB_NETWORK],
-  fees: { cwallet: 0, web3: 0, binance: 0 },
+  methods: PAYMENT_METHODS.map(method => method.id),
+  networks: ["BSC", "Ethereum", "TRON", "TON"],
+  fees: { cwallet: 0, ton: 0, binance: 0 },
   minimumAmount: 1,
   // A method only shows its Transaction ID field / requires a screenshot when listed here.
-  requireTxid: { web3: true, binance: true },
-  requireScreenshot: { web3: true, cwallet: true, binance: true },
+  requireTxid: { binance: true },
+  requireScreenshot: { cwallet: true, binance: true },
 };
 
 // Platform-owned deposit destinations. These identify where the USER sends funds TO the
@@ -64,19 +51,17 @@ export const DEPOSIT_CONFIG = {
 // supplies them — the Wallet UI must show a "currently unavailable" state instead of a
 // placeholder address when a value is missing here.
 export const DEPOSIT_DESTINATIONS = {
-  web3: {
-    address: "0x5FEA30932d42Ed880b7e6Fd93211bCA4Eadb2F3B",
-    network: BNB_NETWORK,
-  },
   cwallet: {
     // Platform Cwallet account ID / identifier that users transfer deposits to.
     accountId: "",
   },
   binance: {
-    // Add the real Binance deposit ID later. Zero means "not configured".
-    depositId: 0,
+    // Platform deposit address per network. Populate once the real addresses are available.
     networks: {
-      [BNB_NETWORK]: 0,
+      BSC: "",
+      Ethereum: "",
+      TRON: "",
+      TON: "",
     },
   },
 };
@@ -86,8 +71,7 @@ export const WITHDRAWAL_CONFIG = {
   minimumAmount: 50,
   status: "Pending",
   statuses: ["Pending", "Processing", "Completed", "Rejected"],
-  methods: WITHDRAWAL_METHODS.map(method => method.id),
-  assets: PAYMENT_ASSETS,
+  methods: PAYMENT_METHODS.map(method => method.id),
   networks: ["TON"],
   fees: { cwallet: 0, ton: 0, binance: 0 },
 };
