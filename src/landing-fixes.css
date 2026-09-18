@@ -1,30 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 
-/* Final landing page fixes. Loaded after styles.css so these rules win. */
+/* Final landing page fixes. Loaded after styles.css so these rules win.
+   Landing and dashboard share the same dark Violet/Cyan identity — no light
+   blue theme here. */
 .landing-page {
-  --landing-bg: #ffffff;
-  --landing-surface: #ffffff;
-  --landing-surface-2: #f6f8fc;
-  --landing-line: #e2e7f0;
-  --landing-muted: #5f6b7d;
-  --landing-gold: #175cff;
-  color: #111827;
-  background: #ffffff;
+  color: var(--text);
+  background: var(--bg);
 }
 
 .landing-header {
-  border-color: #e2e7f0;
-  background: rgba(255, 255, 255, .94);
+  border-color: var(--line);
+  background: rgba(8, 11, 20, .85);
 }
 
-.landing-brand .brand { color: #111827; }
-.landing-brand .brand-mark { color: #fff; background: #175cff; }
+.landing-brand .brand { color: var(--text); }
+.landing-brand .brand-mark { color: #fff; background: var(--violet); }
 .landing-nav a,
 .landing-login,
-.landing-footer button { color: #5f6b7d; }
+.landing-footer button { color: var(--muted); }
 .landing-nav a:hover,
 .landing-login:hover,
-.landing-footer button:hover { color: #175cff; }
+.landing-footer button:hover { color: var(--violet-bright); }
 
 /* Centered registration experience for the landing-page CTAs. */
 .modal-backdrop {
@@ -39,9 +35,9 @@
   max-height: calc(100dvh - 32px);
   margin: auto;
   padding: clamp(22px, 4vw, 34px);
-  border: 1px solid #dce5f4;
+  border: 1px solid var(--line);
   border-radius: 22px;
-  box-shadow: 0 28px 80px rgba(17, 52, 112, .2);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .5);
 }
 
 .access-header {
@@ -57,14 +53,14 @@
 
 .access-heading h2 {
   margin: 7px 0 6px;
-  color: #101722;
+  color: var(--text);
   font-size: clamp(21px, 3vw, 28px);
   line-height: 1.25;
 }
 
 .access-heading p {
   margin: 0;
-  color: #617594;
+  color: var(--muted);
   font-size: 12px;
   line-height: 1.8;
 }
@@ -82,69 +78,27 @@
 }
 
 .signup-modal .field > span:first-child {
-  color: #26344a;
+  color: var(--text);
   font-size: 11px;
   font-weight: 700;
 }
 
 .signup-modal .input {
   min-height: 46px;
-  border-color: #cbd8ea;
+  border-color: var(--line-strong);
   border-radius: 9px;
-  color: #101722;
-  background: #fbfdff;
+  color: var(--text);
+  background: var(--surface-hover);
   font-size: 13px;
 }
 
 .signup-modal .input:focus {
-  border-color: #175cff;
-  box-shadow: 0 0 0 3px rgba(23, 92, 255, .1);
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px rgba(124, 92, 252, .18);
 }
 
-.password-requirement {
-  color: #8493a9 !important;
-  font-size: 10px !important;
-  font-weight: 500 !important;
-}
-
-.password-strength {
-  display: grid;
-  gap: 7px;
+.password-requirements-list {
   margin-top: -2px;
-}
-
-.password-strength-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #617594;
-  font-size: 10px;
-}
-
-.password-strength-heading strong {
-  color: #175cff;
-  direction: ltr;
-  font-size: 11px;
-}
-
-.password-strength-track {
-  height: 6px;
-  overflow: hidden;
-  border-radius: 99px;
-  background: #e8eef8;
-}
-
-.password-strength-track span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: #175cff;
-  transition: width .25s ease;
-}
-
-.password-strength small {
-  color: #8493a9;
-  font-size: 10px;
 }
 
 .signup-modal .access-submit {
@@ -233,23 +187,23 @@
   gap: 8px;
   margin-top: 12px;
   padding: 10px 12px;
-  border: 1px solid #dbe6f5;
+  border: 1px solid var(--line);
   border-radius: 10px;
-  background: #f7faff;
-  color: #5f6b7d;
+  background: var(--bg-secondary);
+  color: var(--muted);
   font-size: 11px;
   line-height: 1.75;
 }
 
 .code-install-note strong {
   flex: 0 0 auto;
-  color: #175cff;
+  color: var(--violet-bright);
 }
 
 .code-install-note code {
   direction: ltr;
   font-family: 'Manrope', monospace;
-  color: #243b64;
+  color: var(--text);
   font-size: 0.95em;
 }
 
@@ -280,73 +234,73 @@
 .role-card h3,
 .landing-format-copy h3,
 .workflow-title h3,
-.landing-footer strong { color: #111827; }
+.landing-footer strong { color: var(--text); }
 .landing-hero h1 em,
 .landing-kicker,
 .role-tag,
 .role-link,
 .workflow-step b,
-.capability span { color: #175cff; }
+.capability span { color: var(--violet-bright); }
 .landing-hero-copy > p,
 .landing-section-heading p,
 .role-card p,
 .landing-format-copy p,
-.landing-footer-brand p { color: #5f6b7d; }
-.landing-cta { border-color: #175cff; color: #fff; background: #175cff; }
-.landing-cta:hover { color: #fff; background: #0c3cae; }
-.landing-outline { border-color: #b9cbe7; color: #111827; background: #fff; }
-.landing-outline:hover { border-color: #175cff; color: #175cff; }
-.landing-proof { color: #6f7c8e; }
+.landing-footer-brand p { color: var(--muted); }
+.landing-cta { border-color: var(--violet); color: #fff; background: var(--violet); }
+.landing-cta:hover { color: #fff; background: var(--violet-bright); }
+.landing-outline { border-color: var(--line-strong); color: var(--text); background: transparent; }
+.landing-outline:hover { border-color: var(--violet); color: var(--violet-bright); }
+.landing-proof { color: var(--muted); }
 .proof-mark,
 .role-symbol,
 .format-preview,
-.network-node-icon { color: #175cff; background: #edf3ff; }
-.proof-divider { background: #d9e4f5; }
+.network-node-icon { color: var(--violet-bright); background: var(--violet-soft); }
+.proof-divider { background: var(--line); }
 .network-visual {
-  border-color: #e2e7f0;
-  background: linear-gradient(145deg, #f8faff, #fff);
-  box-shadow: 0 24px 70px rgba(22, 54, 110, .1);
+  border-color: var(--line);
+  background: linear-gradient(145deg, var(--surface), var(--bg-secondary));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
 }
-.network-orbit { border-color: rgba(23, 92, 255, .16); }
-.network-line { background: linear-gradient(90deg, transparent, rgba(23, 92, 255, .55), transparent); }
+.network-orbit { border-color: rgba(124, 92, 252, .18); }
+.network-line { background: linear-gradient(90deg, transparent, rgba(124, 92, 252, .55), transparent); }
 .network-node {
-  border-color: #d9e4f5;
-  background: rgba(255, 255, 255, .94);
-  box-shadow: 0 15px 35px rgba(22, 54, 110, .1);
+  border-color: var(--line);
+  background: rgba(17, 24, 39, .9);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, .35);
 }
 .network-node small,
-.network-audience small { color: #758196; }
+.network-audience small { color: var(--muted-2); }
 .network-node strong,
-.network-audience strong { color: #111827; }
+.network-audience strong { color: var(--text); }
 .network-audience {
-  border-color: #d9e4f5;
-  color: #111827;
-  background: #fff;
-  box-shadow: 0 12px 28px rgba(22, 54, 110, .1);
+  border-color: var(--line);
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .35);
 }
 .landing-roles,
 .landing-formats,
 .landing-how,
-.landing-capabilities { border-color: #e2e7f0; }
+.landing-capabilities { border-color: var(--line); }
 .landing-roles,
-.landing-how { background: #f6f8fc; }
+.landing-how { background: var(--bg-secondary); }
 .landing-formats,
-.landing-capabilities { background: #fff; }
+.landing-capabilities { background: var(--bg); }
 .role-card,
 .landing-format-card,
 .workflow-column,
 .capability {
-  border-color: #d9e4f5;
-  background: #fff;
+  border-color: var(--line);
+  background: var(--surface);
 }
 .workflow-step,
-.format-preview { border-color: #d9e4f5; }
-.landing-footer { border-color: #d9e4f5; background: #f6f8fc; }
+.format-preview { border-color: var(--line); }
+.landing-footer { border-color: var(--line); background: var(--bg-secondary); }
 .landing-menu-button,
 .landing-nav-close {
-  border-color: #d9e4f5;
-  color: #111827;
-  background: #fff;
+  border-color: var(--line);
+  color: var(--text);
+  background: var(--surface);
 }
 
 @media (max-width: 760px) {
@@ -354,13 +308,13 @@
     display: block;
     width: 100%;
     padding: 16px 0;
-    border-bottom: 1px solid #e2e7f0;
-    color: #5f6b7d;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
     text-align: right;
   }
-  .landing-nav a:hover { color: #175cff; }
+  .landing-nav a:hover { color: var(--violet-bright); }
   .landing-nav.is-open {
-    background: #fff;
-    box-shadow: -20px 0 60px rgba(22, 54, 110, .12);
+    background: var(--surface);
+    box-shadow: -20px 0 60px rgba(0, 0, 0, .4);
   }
 }

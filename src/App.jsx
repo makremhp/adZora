@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { AD_FORMATS, ROLE_CONFIG, WITHDRAWAL_CONFIG } from "./config";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AD_FORMATS, ROLE_CONFIG, WITHDRAWAL_CONFIG, formatMoney } from "./config";
 import PublisherWorkspace from "./PublisherWorkspace";
 import AdvertiserWorkspace from "./AdvertiserWorkspace";
 import adzoraLogo from "../images/adzora-logo.png";
@@ -33,6 +33,7 @@ function Icon({ name, size = 18 }) {
     close: <><path d="m6 6 12 12M18 6 6 18" /></>,
      check: <path d="m5 12 4 4L19 6" />,
     chevron: <path d="m9 18 6-6-6-6" />,
+    bell: <><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" /></>,
   };
   return <svg {...common}>{paths[name] || paths.grid}</svg>;
 }
@@ -42,7 +43,6 @@ function Brand() {
 }
 
 const landingFormatIcons = {
-  banner: "layout",
   native: "grid",
   social: "image",
   video: "chart",
@@ -154,12 +154,22 @@ function MetricCard({ metric }) {
 function EmptyPanel({ workspace, onNavigate }) {
   const publisher = workspace === "publisher";
   return <section className="panel recent-panel">
-    <div className="panel-heading"><div><span className="eyebrow">ACTIVITY</span><h2>{publisher ? "Recent earnings" : "Campaign activity"}</h2></div><button className="text-button" onClick={() => onNavigate(publisher ? "earnings" : "campaigns")}>View all <Icon name="chevron" size={14} /></button></div>
+    <div className="panel-heading"><div><h2>{publisher ? "Recent earnings" : "Campaign activity"}</h2></div><button className="text-button" onClick={() => onNavigate(publisher ? "earnings" : "campaigns")}>View all <Icon name="chevron" size={14} /></button></div>
     <div className="empty-panel"><div className="empty-icon"><Icon name={publisher ? "trend" : "megaphone"} size={24} /></div><h3>{publisher ? "No earnings yet" : "No campaigns yet"}</h3><p>{publisher ? "Add a website to receive a universal code and start receiving eligible activity." : "Create your first campaign to start reaching relevant audiences."}</p><button className="secondary-button" onClick={() => onNavigate(publisher ? "websites" : "create-campaign")}><Icon name="plus" size={16} />{publisher ? "Add Website" : "Create Campaign"}</button></div>
   </section>;
 }
 
-function MetricHero({ metric, action, onNavigate }) {
+function MetricHero({ metric, action, onNavigate, workspace }) {
+  const isEmpty = metric.value === "$0.00";
+  if (isEmpty) {
+    const publisher = workspace === "publisher";
+    return <article className="metric-hero metric-hero-empty">
+      <div className="metric-hero-top"><span className="metric-icon"><Icon name={metric.icon} size={18} /></span><span className="metric-label">{metric.label}</span></div>
+      <strong className="metric-hero-empty-title">{publisher ? "No earnings yet" : "No balance yet"}</strong>
+      <span className="metric-hero-hint">{publisher ? "Add your website to start monetizing." : "Add funds to launch your first campaign."}</span>
+      <button className="primary-button metric-hero-action" onClick={() => onNavigate(publisher ? "websites" : "deposits")}><Icon name="plus" size={16} />{publisher ? "Add Website" : "Add Funds"}</button>
+    </article>;
+  }
   return <article className="metric-hero">
     <div className="metric-hero-top"><span className="metric-icon"><Icon name={metric.icon} size={18} /></span><span className="metric-label">{metric.label}</span></div>
     <strong className="metric-hero-value">{metric.value}</strong>
@@ -176,16 +186,16 @@ function Overview({ workspace, onNavigate }) {
   const [hero, ...secondaryMetrics] = config.metrics;
   return <>
     <section className="welcome-row compact">
-      <div><span className="eyebrow">{config.label.toUpperCase()} WORKSPACE</span><h1>{config.overviewTitle}</h1><p>{config.identity}</p></div>
+      <div><h1>{config.overviewTitle}</h1><p>{config.identity}</p></div>
       <div className="welcome-actions"><button className="primary-button" onClick={() => onNavigate(config.quickActions[0].id)}><Icon name={config.quickActions[0].icon} size={17} />{config.quickActions[0].arabic}</button><button className="ghost-button" onClick={() => onNavigate("analytics")}><Icon name="chart" size={17} />التحليلات</button></div>
     </section>
     <section className="hero-metric-row">
-      <MetricHero metric={hero} action={config.heroAction} onNavigate={onNavigate} />
+      <MetricHero metric={hero} action={config.heroAction} onNavigate={onNavigate} workspace={workspace} />
       <div className="metric-secondary-grid">{secondaryMetrics.map(metric => <MetricCard key={metric.label} metric={metric} />)}</div>
     </section>
-    <section className="section-heading"><div><span className="eyebrow">AT A GLANCE</span><h2>Performance overview</h2></div><div className="analytics-period-control" aria-label="Performance period">{PERIODS.map(option => <button type="button" key={option} className={period === option ? "is-active" : ""} onClick={() => setPeriod(option)}>{option}</button>)}</div></section>
+    <section className="section-heading"><div><h2>Performance overview</h2></div><div className="analytics-period-control" aria-label="Performance period">{PERIODS.map(option => <button type="button" key={option} className={period === option ? "is-active" : ""} onClick={() => setPeriod(option)}>{option}</button>)}</div></section>
     <section className="performance-grid">{config.performance.map(item => <div className="performance-item" key={item.label}><span>{item.label}</span><strong>{item.value}</strong>{item.value === "--" && <small>Not enough data</small>}</div>)}</section>
-    <section className="dashboard-grid"><section className="panel quick-panel"><div className="panel-heading"><div><span className="eyebrow">NEXT STEPS</span><h2>Quick actions</h2></div></div><div className="quick-list">{config.quickActions.map((action, index) => <button className={index === 0 ? "quick-action primary" : "quick-action"} key={action.id} onClick={() => onNavigate(action.id)}><span className="quick-action-icon"><Icon name={action.icon} size={18} /></span><span><strong>{action.arabic}</strong><small>{action.label}</small></span><Icon name="chevron" size={16} /></button>)}</div></section><EmptyPanel workspace={workspace} onNavigate={onNavigate} /></section>
+    <section className="dashboard-grid"><section className="panel quick-panel"><div className="panel-heading"><div><h2>Quick actions</h2></div></div><div className="quick-list">{config.quickActions.map((action, index) => <button className={index === 0 ? "quick-action primary" : "quick-action"} key={action.id} onClick={() => onNavigate(action.id)}><span className="quick-action-icon"><Icon name={action.icon} size={18} /></span><span><strong>{action.arabic}</strong><small>{action.label}</small></span><Icon name="chevron" size={16} /></button>)}</div></section><EmptyPanel workspace={workspace} onNavigate={onNavigate} /></section>
     {workspace === "advertiser" && <section className="formats-panel panel subtle-panel"><div className="panel-heading"><div><span className="eyebrow">AD FORMATS</span><h2>Available formats</h2></div><button className="text-button" onClick={() => onNavigate("create-campaign")}>Create campaign <Icon name="chevron" size={14} /></button></div><div className="format-list">{AD_FORMATS.map(format => <span className="format-chip" key={format.id}>{format.name}<small>{format.pricing.join(" · ")}</small></span>)}</div></section>}
   </>;
 }
@@ -196,13 +206,13 @@ function ComingSoon({ workspace, page, onNavigate }) {
   return <section className="coming-page"><div className="coming-orbit"><span /><span /><span /><Icon name={item.icon} size={32} /></div><span className="eyebrow">{config.label.toUpperCase()} WORKSPACE</span><h1>{item.arabic}</h1><p>هذا القسم قيد الإعداد حاليًا وسيتوفر قريبًا بكامل إمكانياته.</p><div className="coming-meta"><span><b>Section</b>{item.label}</span><span><b>Status</b>Coming soon</span></div><button className="secondary-button" onClick={() => onNavigate("overview")}><Icon name="grid" size={16} />العودة إلى النظرة العامة</button></section>;
 }
 
-function getPasswordStrength(password) {
-  if (!password) return 0;
-  let strength = password.length >= 8 ? 60 : Math.min(50, password.length * 6);
-  if (/[A-Z]/.test(password)) strength += 15;
-  if (/[0-9]/.test(password)) strength += 15;
-  if (/[^A-Za-z0-9]/.test(password)) strength += 10;
-  return Math.min(strength, 100);
+function getPasswordChecks(password) {
+  return {
+    length: password.length >= 8,
+    upper: /[A-Z]/.test(password),
+    number: /[0-9]/.test(password),
+    symbol: /[^A-Za-z0-9]/.test(password),
+  };
 }
 
 function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
@@ -211,7 +221,31 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
   const [form, setForm] = useState({ email: "", password: "", confirmPassword: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const passwordStrength = getPasswordStrength(form.password);
+  const passwordChecks = getPasswordChecks(form.password);
+  const modalRef = useRef(null);
+  const firstFieldRef = useRef(null);
+  const previousFocusRef = useRef(null);
+
+  useEffect(() => {
+    previousFocusRef.current = document.activeElement;
+    firstFieldRef.current?.focus();
+    return () => { previousFocusRef.current?.focus?.(); };
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") { onClose(); return; }
+      if (event.key !== "Tab" || !modalRef.current) return;
+      const focusable = modalRef.current.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -237,7 +271,7 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
     await new Promise((resolve) => setTimeout(resolve, 350));
     setLoading(false);
     notify(
-      mode === "signup" ? "تم إنشاء حسابك التجريبي بنجاح." : "تم تسجيل الدخول التجريبي بنجاح.",
+      mode === "signup" ? "تم إنشاء حسابك بنجاح." : "تم تسجيل الدخول بنجاح.",
       "success",
     );
     if (mode === "login" || mode === "signup") onSuccess();
@@ -248,10 +282,9 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className={`access-modal light-panel ${isSignup ? "signup-modal" : ""}`} role="dialog" aria-modal="true" aria-labelledby="access-title" dir="rtl">
+      <section ref={modalRef} className={`access-modal light-panel ${isSignup ? "signup-modal" : ""}`} role="dialog" aria-modal="true" aria-labelledby="access-title" dir="rtl">
         <div className="access-header">
           <div className="access-heading">
-            <span className="eyebrow">ADZORA ACCOUNT</span>
             <h2 id="access-title">{title}</h2>
             <p>{isSignup ? "ابدأ بإدارة حملاتك ومساحاتك الإعلانية من مكان واحد." : "أدخل بياناتك للمتابعة إلى مساحة العمل."}</p>
           </div>
@@ -268,16 +301,11 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
         <form className="access-form" onSubmit={submit}>
           <label className="field">
             <span>البريد الإلكتروني</span>
-            <input className="input" type="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} placeholder="you@example.com" autoComplete="email" dir="ltr" />
+            <input ref={firstFieldRef} className="input" type="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} placeholder="you@example.com" autoComplete="email" dir="ltr" />
           </label>
           <label className="field">
             <span>كلمة المرور</span>
             <input className="input" type="password" value={form.password} onChange={(event) => updateField("password", event.target.value)} placeholder="8 أحرف على الأقل" autoComplete={mode === "login" ? "current-password" : "new-password"} dir="ltr" />
-            {isSignup && (
-              <span className="password-requirement">
-                كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل
-              </span>
-            )}
           </label>
           {isSignup && (
             <label className="field">
@@ -287,9 +315,13 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
           )}
           {isSignup && (
             <div className="password-strength" aria-live="polite">
-              <div className="password-strength-heading"><span>قوة كلمة المرور</span><strong>{passwordStrength}%</strong></div>
-              <div className="password-strength-track"><span style={{ width: `${passwordStrength}%` }} /></div>
-              <small>{passwordStrength >= 80 ? "كلمة مرور قوية" : passwordStrength >= 60 ? "مقبولة ويمكن تحسينها" : "أضف 8 أحرف على الأقل"}</small>
+              <div className="password-strength-heading"><span>متطلبات كلمة المرور</span></div>
+              <ul className="password-requirements-list">
+                <li className={passwordChecks.length ? "met" : ""}><Icon name="check" size={13} />8 أحرف على الأقل</li>
+                <li className={passwordChecks.upper ? "met" : ""}><Icon name="check" size={13} />حرف كبير واحد على الأقل (A-Z)</li>
+                <li className={passwordChecks.number ? "met" : ""}><Icon name="check" size={13} />رقم واحد على الأقل</li>
+                <li className={passwordChecks.symbol ? "met" : ""}><Icon name="check" size={13} />رمز واحد على الأقل (مثل !@#)</li>
+              </ul>
             </div>
           )}
           {error && <small className="field-error access-error" role="alert">{error}</small>}
@@ -310,12 +342,18 @@ function AppContent() {
   const [selectedWebsiteId, setSelectedWebsiteId] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [publisherData, setPublisherData] = useState({ websites: [], zones: [] });
-  const [publisherFinance, setPublisherFinance] = useState({ available: 125, pending: 32.5, earned: 642.5, withdrawn: 485, minimum: WITHDRAWAL_CONFIG.minimumAmount });
+  const [publisherFinance, setPublisherFinance] = useState({ available: 0, pending: 0, earned: 0, withdrawn: 0, minimum: WITHDRAWAL_CONFIG.minimumAmount });
   const [publisherWithdrawals, setPublisherWithdrawals] = useState([]);
   const [advertiserDeposits, setAdvertiserDeposits] = useState([]);
   const [campaignData, setCampaignData] = useState([]);
   const [accountOpen, setAccountOpen] = useState(false);
   const config = useMemo(() => ROLE_CONFIG[workspace], [workspace]);
+  // Advertiser balance only increases once a deposit request is reviewed and approved by
+  // an admin — this frontend never marks a deposit as approved on its own, so the balance
+  // stays at 0 until that real review happens. This keeps the header consistent with the
+  // Balance page instead of inventing a number.
+  const advertiserBalance = 0;
+  const headerBalance = workspace === "publisher" ? publisherFinance.available : advertiserBalance;
   const { notify } = useNotifications();
 
   useEffect(() => {
@@ -350,7 +388,7 @@ function AppContent() {
   return <div className="app-shell">
      <Sidebar workspace={workspace} setWorkspace={(next) => { setWorkspace(next); setActivePage("overview"); setSelectedWebsiteId(""); }} activePage={activePage} onNavigate={navigate} drawerOpen={drawerOpen} closeDrawer={() => setDrawerOpen(false)} />
        <main className="main-content">
-        <header className="topbar"><button className="icon-button menu-button" onClick={() => setDrawerOpen(true)} aria-label="Open menu"><Icon name="menu" /></button><div className="breadcrumbs"><span>AdZora</span><Icon name="chevron" size={13} /><strong>{config.label}</strong><Icon name="chevron" size={13} /><span>{pageTitle}</span></div><div className="header-actions"><div className="header-balance" aria-label={config.balanceLabel}><span>{config.balanceLabel}</span><strong>$0.00</strong></div><button className="notification-button" type="button" aria-label="Notifications" onClick={() => notify("You are up to date.", "info")}><span className="notification-dot" /><Icon name="receipt" size={18} /></button></div></header>
+        <header className="topbar"><button className="icon-button menu-button" onClick={() => setDrawerOpen(true)} aria-label="Open menu"><Icon name="menu" /></button><div className="breadcrumbs"><span>AdZora</span><Icon name="chevron" size={13} /><strong>{config.label}</strong><Icon name="chevron" size={13} /><span>{pageTitle}</span></div><div className="header-actions"><div className="header-balance" aria-label={config.balanceLabel}><span>{config.balanceLabel}</span><strong>{formatMoney(headerBalance)}</strong></div><button className="notification-button" type="button" aria-label="Notifications" onClick={() => notify("You are up to date.", "info")}><span className="notification-dot" /><Icon name="bell" size={18} /></button></div></header>
          <div className="page-content">{activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : activePage === "profile" ? <ProfilePage workspace={workspace} /> : activePage === "settings" ? <SettingsPage workspace={workspace} publisherData={publisherData} setPublisherData={setPublisherData} onNavigate={navigate} onLogout={logout} /> : workspace === "publisher" && ["websites", "website-details", "ad-codes", "earnings", "transactions", "withdrawals", "analytics"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} selectedWebsiteId={selectedWebsiteId} finance={publisherFinance} setFinance={setPublisherFinance} withdrawals={publisherWithdrawals} setWithdrawals={setPublisherWithdrawals} onNavigate={navigate} /> : workspace === "advertiser" && ["campaigns", "create-campaign", "balance", "deposits", "transactions", "billing", "analytics", "reports"].includes(activePage) ? <AdvertiserWorkspace page={activePage} data={campaignData} setData={setCampaignData} deposits={advertiserDeposits} setDeposits={setAdvertiserDeposits} onNavigate={navigate} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
     </main>
     {accountOpen && <AccountAccess onClose={() => setAccountOpen(false)} onSuccess={() => { setAccountOpen(false); setView("workspace"); }} />}

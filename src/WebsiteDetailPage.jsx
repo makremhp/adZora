@@ -22,12 +22,12 @@ function codeFor(website) {
   return `<!-- AdZora Universal Code -->\n<script src="https://ad-zora.vercel.app/ad.js" data-adzora-website="${website.id}" async></script>`;
 }
 
-function buildStats(website, index) {
-  const impressions = website.impressions || [12420, 8420, 6580][index % 3];
-  const clicks = website.clicks || [386, 256, 168][index % 3];
-  const earnings = [22.61, 42.15, 24.45][index % 3];
-  const ctr = `${((clicks / impressions) * 100).toFixed(2)}%`;
-  return [["Impressions", impressions.toLocaleString("en-US"), "eye"], ["Clicks", clicks.toLocaleString("en-US"), "trend"], ["CTR", ctr, "trend"], ["CPM", ["$1.82", "$1.68", "$1.54"][index % 3], "wallet"], ["CPC", "$0.058", "trend"], ["Earnings", `$${earnings.toFixed(2)}`, "wallet"]];
+function buildStats(website) {
+  const impressions = website.impressions || 0;
+  const clicks = website.clicks || 0;
+  const earnings = website.earnings || 0;
+  const ctr = impressions ? `${((clicks / impressions) * 100).toFixed(2)}%` : "--";
+  return [["Impressions", impressions.toLocaleString("en-US"), "eye"], ["Clicks", clicks.toLocaleString("en-US"), "trend"], ["CTR", ctr, "trend"], ["Earnings", `$${earnings.toFixed(2)}`, "wallet"]];
 }
 
 export default function WebsiteDetailPage({ website, websiteIndex = 0, onBack, onAnalytics }) {
@@ -39,8 +39,9 @@ export default function WebsiteDetailPage({ website, websiteIndex = 0, onBack, o
     try { await navigator.clipboard.writeText(value); notify(message, "success"); } catch { notify("Copy is unavailable in this browser.", "error"); }
   };
   return <div className="workspace-page website-detail-page">
-    <div className="workspace-page-header"><div><button className="link-button detail-back-button" type="button" onClick={onBack}><DetailIcon name="arrow" size={15} />Back to Websites</button><span className="eyebrow">PUBLISHER / WEBSITE DETAILS</span><h1>{website.name}</h1><p className="website-domain">{domain}</p></div><button className="secondary-button" type="button" onClick={() => onAnalytics(website.id)}><DetailIcon name="trend" size={16} />View Analytics</button></div>
-    <section className="light-panel website-detail-summary"><div><span className="eyebrow">WEBSITE STATUS</span><h2>{website.name}</h2><p className="website-long-domain">{website.url}</p></div><div className="website-summary-facts"><span><small>Status</small><strong className={website.status === "Active" ? "status-text-active" : "status-text-pending"}>{website.status || "Active"}</strong></span><span><small>Date Added</small><strong>{website.dateAdded || "—"}</strong></span></div></section>
+    <div className="workspace-page-header"><div><button className="link-button detail-back-button" type="button" onClick={onBack}><DetailIcon name="arrow" size={15} />Back to Websites</button><h1>{website.name}</h1><p className="website-domain">{domain}</p></div><button className="secondary-button" type="button" onClick={() => onAnalytics(website.id)}><DetailIcon name="trend" size={16} />View Analytics</button></div>
+    <section className="light-panel website-detail-summary"><div><h2>{website.name}</h2><p className="website-long-domain">{website.url}</p></div><div className="website-summary-facts"><span><small>Status</small><strong className={website.status === "Active" ? "status-text-active" : "status-text-pending"}>{website.status || "Pending"}</strong></span><span><small>Date Added</small><strong>{website.dateAdded || "—"}</strong></span></div></section>
+    {website.status !== "Active" && <section className="light-panel status-explainer-panel"><DetailIcon name="globe" size={16} /><div><strong>{website.status || "Pending"}</strong><p>Waiting for verification. Add the AdZora Universal Code to your website, then verify it to start receiving eligible ads.</p></div></section>}
      <section className="light-panel website-code-panel"><div className="panel-heading"><div><span className="eyebrow">UNIVERSAL ADZORA CODE</span><h2>One code for this website</h2></div><span className="status-badge ready">Universal</span></div><p className="muted-copy">Paste this code into your website. AdZora handles eligible campaign selection after the tracking endpoint is connected.</p><pre className="code-box website-detail-code"><code>{code}</code></pre><div className="code-actions"><button className="primary-button" type="button" onClick={() => copy(code, "Ad code copied successfully")}><DetailIcon name="copy" size={16} />Copy Code</button></div></section>
     {website.directLink && <section className="light-panel website-code-panel"><div className="panel-heading"><div><span className="eyebrow">DIRECT LINK</span><h2>Optional direct link</h2></div></div><div className="direct-link-value">{website.directLink}</div><div className="code-actions"><button className="secondary-button" type="button" onClick={() => copy(website.directLink, "Direct link copied.")}><DetailIcon name="copy" size={16} />Copy Link</button></div></section>}
     <section className="analytics-metric-grid website-detail-stats">{buildStats(website, websiteIndex).map(([label, value, icon]) => <article className="metric-card analytics-metric" key={label}><div className="metric-top"><span className="metric-icon"><DetailIcon name={icon} size={16} /></span><span className="metric-label">{label}</span></div><strong className="metric-value">{value}</strong><span className="metric-hint">This website</span></article>)}</section>
