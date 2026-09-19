@@ -39,22 +39,27 @@ function SettingsSection({ icon, eyebrow, title, description, children, classNam
   </section>;
 }
 
-export default function SettingsPage({ workspace, publisherData, setPublisherData, onNavigate, onLogout }) {
+export default function SettingsPage({ workspace, publisherData, onDeleteWebsite, onNavigate, onLogout }) {
   const { notify } = useNotifications();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [pendingWebsite, setPendingWebsite] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const websites = publisherData?.websites || [];
   const isPublisher = workspace === "publisher";
 
-  const deleteWebsite = () => {
-    if (!pendingWebsite) return;
-    setPublisherData(previous => ({
-      ...previous,
-      websites: previous.websites.filter(website => website.id !== pendingWebsite.id),
-    }));
-    notify("Website deleted successfully", "success", 3500, "The website was removed from your account.");
-    setPendingWebsite(null);
+  const deleteWebsite = async () => {
+    if (!pendingWebsite || deleting) return;
+    setDeleting(true);
+    try {
+      await onDeleteWebsite(pendingWebsite.id);
+      notify("Website deleted successfully", "success", 3500, "The website was removed from your account.");
+      setPendingWebsite(null);
+    } catch (error) {
+      notify(error.message || "Could not delete the website.", "error");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const confirmLogout = () => {
