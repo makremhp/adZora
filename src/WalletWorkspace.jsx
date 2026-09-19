@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { BNB_NETWORK, DEPOSIT_CONFIG, PAYMENT_ASSETS, PAYMENT_METHODS, WITHDRAWAL_CONFIG, formatMoney } from "./config";
+import { BNB_NETWORK, DEPOSIT_CONFIG, DEPOSIT_DESTINATIONS, PAYMENT_ASSETS, PAYMENT_METHODS, WITHDRAWAL_CONFIG, formatMoney } from "./config";
 import { useNotifications } from "./NotificationSystem";
-import { api } from "./api";
 
 function Icon({ name, size = 17 }) {
   const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -49,7 +48,7 @@ function PageHeader({ mode }) {
 
 function RequestList({ mode, requests }) {
   const deposit = mode === "deposit";
-  return <section className="light-panel data-panel wallet-request-list"><div className="panel-heading"><div><span className="eyebrow">{deposit ? "DEPOSIT STATUS" : "WITHDRAWAL STATUS"}</span><h2>Recent requests</h2></div><span className="result-count">{requests.length} records</span></div>{!requests.length ? <div className="wallet-empty"><Icon name="clock" size={22} /><strong>No requests yet</strong><span>New requests will start as Pending and require review.</span></div> : <div className="data-list">{requests.map(request => { const createdAt = request.createdAt || (request.created_at ? new Date(request.created_at).toLocaleString("en-US") : ""); const invoiceId = request.invoiceId || request.invoice_id; const destinationLabel = request.network || request.paymentDestination || request.payment_destination || request.destination || "Pending review"; return <article className="data-row wallet-request-row" key={request.id}><div className="row-main"><span className="row-icon"><Icon name={deposit ? "arrow-down" : "arrow-up"} /></span><div><strong>{methodLabel(request.method)} · {formatMoney(request.amount)}</strong><small>{invoiceId ? `${invoiceId} · ` : ""}{createdAt} · {destinationLabel}</small></div></div><span className="status-badge pending">{request.status}</span></article>; })}</div>}</section>;
+  return <section className="light-panel data-panel wallet-request-list"><div className="panel-heading"><div><span className="eyebrow">{deposit ? "DEPOSIT STATUS" : "WITHDRAWAL STATUS"}</span><h2>Recent requests</h2></div><span className="result-count">{requests.length} records</span></div>{!requests.length ? <div className="wallet-empty"><Icon name="clock" size={22} /><strong>No requests yet</strong><span>New requests will start as Pending and require review.</span></div> : <div className="data-list">{requests.map(request => <article className="data-row wallet-request-row" key={request.id}><div className="row-main"><span className="row-icon"><Icon name={deposit ? "arrow-down" : "arrow-up"} /></span><div><strong>{methodLabel(request.method)} · {formatMoney(request.amount)}</strong><small>{request.invoiceId ? `${request.invoiceId} · ` : ""}{request.createdAt} · {request.network || request.paymentDestination || request.destination || "Pending review"}</small></div></div><span className="status-badge pending">{request.status}</span></article>)}</div>}</section>;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -63,7 +62,7 @@ function TonNotice({ onConnect, connected }) {
   return <div className="wallet-sdk-note" role="status"><div><Icon name="info" size={17} /><span>{connected ? "TON wallet connection is being set up." : "TON wallet connection will be available soon."}</span></div><button className="secondary-button" type="button" onClick={onConnect}>{connected ? "Connection unavailable" : "Connect TON Wallet"}</button></div>;
 }
 
-function WithdrawalForm({ method, form, setForm, onSubmit, error, onTonConnect, tonAttempted, submitting = false }) {
+function WithdrawalForm({ method, form, setForm, onSubmit, error, onTonConnect, tonAttempted }) {
   const update = (key, value) => setForm(previous => ({ ...previous, [key]: value }));
   return <section className="form-panel light-panel wallet-request-panel">
     <div className="panel-heading"><div><span className="eyebrow">NEW WITHDRAWAL REQUEST</span><h2>Request a withdrawal</h2></div><span className="status-badge pending">Pending only</span></div>
@@ -76,48 +75,45 @@ function WithdrawalForm({ method, form, setForm, onSubmit, error, onTonConnect, 
     {method === "cwallet" && <p className="wallet-help"><Icon name="info" size={15} />Your withdrawal will remain pending until it is reviewed.</p>}
     {method === "ton" && <p className="wallet-help"><Icon name="info" size={15} />You will be notified once direct TON wallet connection is available.</p>}
     {method === "binance" && <p className="wallet-help"><Icon name="info" size={15} />The transaction reference is produced by the system after a real withdrawal; it is not requested from the recipient now.</p>}
-    <div className="form-actions"><button className="primary-button" type="button" onClick={onSubmit} disabled={submitting}><Icon name="arrow-up" size={16} />{submitting ? "Submitting…" : "Request Withdrawal"}</button></div>
+    <div className="form-actions"><button className="primary-button" type="button" onClick={onSubmit}><Icon name="arrow-up" size={16} />Request Withdrawal</button></div>
   </section>;
 }
 
-function WithdrawalWorkspace({ requests, available, minimum, onSubmit }) {
+function WithdrawalWorkspace({ requests, setRequests, available }) {
   const { notify } = useNotifications();
   const [method, setMethod] = useState(WITHDRAWAL_CONFIG.methods[0]);
   const [form, setForm] = useState(EMPTY_WITHDRAWAL_FORM);
   const [errors, setErrors] = useState({});
   const [tonAttempted, setTonAttempted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const minimumAmount = minimum ?? WITHDRAWAL_CONFIG.minimumAmount;
 
   const changeMethod = nextMethod => { setMethod(nextMethod); setForm(previous => ({ ...EMPTY_WITHDRAWAL_FORM, amount: previous.amount })); setErrors({}); setTonAttempted(false); };
   const connectTon = () => { setTonAttempted(true); notify("TON wallet connection will be available after SDK integration.", "info"); };
 
-  const submit = async () => {
-    if (submitting) return;
+  const submit = () => {
     const next = {};
     const amount = Number(form.amount);
     if (!amount || amount <= 0) next.amount = "Enter a valid amount.";
-    if (amount < minimumAmount) next.amount = `Minimum withdrawal is ${formatMoney(minimumAmount)}.`;
+    if (amount < WITHDRAWAL_CONFIG.minimumAmount) next.amount = `Minimum withdrawal is ${formatMoney(WITHDRAWAL_CONFIG.minimumAmount)}.`;
     if (amount > available) next.amount = "The amount exceeds your available earnings.";
     if (method === "cwallet" && !form.cwalletIdentifier.trim()) next.cwalletIdentifier = "Enter a Cwallet account or identifier.";
     if (method === "binance" && !form.binanceUid.trim()) next.binanceUid = "Enter the Binance ID / UID.";
     setErrors(next);
     if (Object.keys(next).length) return;
-
-    const destination = method === "cwallet" ? form.cwalletIdentifier.trim() : method === "binance" ? form.binanceUid.trim() : "TON wallet pending SDK integration";
-    const network = method === "ton" ? "TON" : "";
-
-    setSubmitting(true);
-    try {
-      await onSubmit({ amount, method, destination, network });
-      setForm(EMPTY_WITHDRAWAL_FORM);
-      setErrors({});
-      notify("Withdrawal request submitted and is now pending review.", "success");
-    } catch (error) {
-      notify(error.message || "Could not submit the withdrawal request.", "error");
-    } finally {
-      setSubmitting(false);
-    }
+    const request = {
+      id: `request-withdrawal-${Date.now()}`,
+      type: "withdrawal",
+      method,
+      amount,
+      currency: PAYMENT_ASSETS[method] || WITHDRAWAL_CONFIG.currency,
+      status: WITHDRAWAL_CONFIG.status,
+      createdAt: new Date().toLocaleString("en-US"),
+      destination: method === "cwallet" ? form.cwalletIdentifier.trim() : method === "binance" ? form.binanceUid.trim() : "TON wallet pending SDK integration",
+      network: method === "ton" ? "TON" : "",
+    };
+    setRequests(previous => [request, ...previous]);
+    setForm(EMPTY_WITHDRAWAL_FORM);
+    setErrors({});
+    notify("Withdrawal request submitted and is now pending review.", "success");
   };
 
   return <div className="workspace-page wallet-workspace">
@@ -125,9 +121,9 @@ function WithdrawalWorkspace({ requests, available, minimum, onSubmit }) {
     <section className="wallet-method-panel light-panel">
       <div className="panel-heading"><div><span className="eyebrow">WITHDRAWAL METHODS</span><h2>Choose a method</h2></div></div>
       <MethodSelector mode="withdrawal" value={method} onChange={changeMethod} />
-      <div className="withdrawal-availability"><span>Available Earnings</span><strong>{formatMoney(available)}</strong><small>Minimum withdrawal: {formatMoney(minimumAmount)}</small></div>
+      <div className="withdrawal-availability"><span>Available Earnings</span><strong>{formatMoney(available)}</strong><small>Minimum withdrawal: {formatMoney(WITHDRAWAL_CONFIG.minimumAmount)}</small></div>
     </section>
-    <WithdrawalForm method={method} form={form} setForm={setForm} onSubmit={submit} error={errors} onTonConnect={connectTon} tonAttempted={tonAttempted} submitting={submitting} />
+    <WithdrawalForm method={method} form={form} setForm={setForm} onSubmit={submit} error={errors} onTonConnect={connectTon} tonAttempted={tonAttempted} />
     <RequestList mode="withdrawal" requests={requests} />
   </div>;
 }
@@ -153,11 +149,10 @@ function validateProofFile(file) {
   return "";
 }
 
-function resolveDepositDestination(method, destinations) {
-  if (!destinations) return "";
-  if (method === "web3") return destinations.web3?.address || "";
-  if (method === "cwallet") return destinations.cwallet?.accountId || "";
-  if (method === "binance") return destinations.binance?.depositId || "";
+function resolveDepositDestination(method, network) {
+  if (method === "web3") return DEPOSIT_DESTINATIONS.web3.address;
+  if (method === "cwallet") return DEPOSIT_DESTINATIONS.cwallet.accountId || "";
+  if (method === "binance") return DEPOSIT_DESTINATIONS.binance.depositId || "";
   return "";
 }
 
@@ -221,7 +216,7 @@ function ProofUpload({ file, error, onSelect, onRemove }) {
 
 const EMPTY_DEPOSIT_FORM = { amount: "", network: BNB_NETWORK, txid: "", proofFile: null };
 
-function DepositWorkspace({ requests, onSubmit }) {
+function DepositWorkspace({ requests, setRequests }) {
   const { notify } = useNotifications();
   const [method, setMethod] = useState(DEPOSIT_CONFIG.methods[0]);
   const [form, setForm] = useState(EMPTY_DEPOSIT_FORM);
@@ -229,11 +224,6 @@ function DepositWorkspace({ requests, onSubmit }) {
   const [invoiceId, setInvoiceId] = useState(generateInvoiceId);
   const [submitting, setSubmitting] = useState(false);
   const [lastSubmitted, setLastSubmitted] = useState(null);
-  const [destinations, setDestinations] = useState(null);
-
-  useEffect(() => {
-    api.paymentDestinations().then(({ destinations: value }) => setDestinations(value)).catch(() => setDestinations({}));
-  }, []);
 
   const update = (key, value) => setForm(previous => ({ ...previous, [key]: value }));
 
@@ -247,12 +237,12 @@ function DepositWorkspace({ requests, onSubmit }) {
   const amountValue = Number(form.amount);
   const amountValid = form.amount.trim() !== "" && Number.isFinite(amountValue) && amountValue >= DEPOSIT_CONFIG.minimumAmount;
   const invoiceUnlocked = amountValid;
-  const destination = resolveDepositDestination(method, destinations);
+  const destination = resolveDepositDestination(method, form.network);
   const destinationAvailable = invoiceUnlocked && Boolean(destination);
   const needsTxid = Boolean(DEPOSIT_CONFIG.requireTxid[method]);
   const needsScreenshot = Boolean(DEPOSIT_CONFIG.requireScreenshot[method]);
 
-  const submit = async () => {
+  const submit = () => {
     if (submitting) return;
     const next = {};
     if (!amountValid) next.amount = form.amount.trim() === "" ? "Enter a valid amount." : `Minimum deposit is ${formatMoney(DEPOSIT_CONFIG.minimumAmount)}.`;
@@ -266,26 +256,29 @@ function DepositWorkspace({ requests, onSubmit }) {
     if (Object.keys(next).length) return;
 
     setSubmitting(true);
-    try {
-      // No object-storage backend is wired up yet, so only the proof file's metadata is sent —
-      // the binary itself stays on the user's device until a real upload endpoint exists.
-      await onSubmit({
-        amount: amountValue,
-        method,
-        network: method === "web3" || method === "binance" ? BNB_NETWORK : "",
-        txid: needsTxid ? form.txid.trim() : "",
-        proof: form.proofFile ? { name: form.proofFile.name, type: form.proofFile.type, size: form.proofFile.size } : null,
-      });
-      setLastSubmitted({ invoiceId, status: "Pending" });
-      setForm(EMPTY_DEPOSIT_FORM);
-      setErrors({});
-      setInvoiceId(generateInvoiceId());
-      notify("Deposit request submitted and is now pending review.", "success");
-    } catch (error) {
-      notify(error.message || "Could not submit the deposit request.", "error");
-    } finally {
-      setSubmitting(false);
-    }
+    const request = {
+      id: `request-deposit-${Date.now()}`,
+      invoiceId,
+      type: "deposit",
+      method,
+      amount: amountValue,
+      currency: PAYMENT_ASSETS[method] || DEPOSIT_CONFIG.currency,
+      paymentDestination: method === "ton" ? "TON wallet pending SDK integration" : destination,
+      network: method === "web3" || method === "binance" ? BNB_NETWORK : "",
+      txid: needsTxid ? form.txid.trim() : "",
+      // No file storage backend is wired up yet: keep the file reference (name/type/size) so the
+      // Admin Panel can be connected to real storage later without changing this contract.
+      screenshot: form.proofFile ? { name: form.proofFile.name, type: form.proofFile.type, size: form.proofFile.size } : null,
+      status: DEPOSIT_CONFIG.status,
+      createdAt: new Date().toLocaleString("en-US"),
+    };
+    setRequests(previous => [request, ...previous]);
+    setLastSubmitted({ invoiceId, status: request.status });
+    setForm(EMPTY_DEPOSIT_FORM);
+    setErrors({});
+    setInvoiceId(generateInvoiceId());
+    setSubmitting(false);
+    notify("Deposit request submitted and is now pending review.", "success");
   };
 
   return <div className="workspace-page wallet-workspace">
@@ -359,7 +352,7 @@ function DepositWorkspace({ requests, onSubmit }) {
   </div>;
 }
 
-export default function WalletWorkspace({ mode = "deposit", requests = [], available = 0, minimum, onSubmit = async () => {} }) {
-  if (mode === "deposit") return <DepositWorkspace requests={requests} onSubmit={onSubmit} />;
-  return <WithdrawalWorkspace requests={requests} available={available} minimum={minimum} onSubmit={onSubmit} />;
+export default function WalletWorkspace({ mode = "deposit", requests = [], setRequests = () => {}, available = 0 }) {
+  if (mode === "deposit") return <DepositWorkspace requests={requests} setRequests={setRequests} />;
+  return <WithdrawalWorkspace requests={requests} setRequests={setRequests} available={available} />;
 }

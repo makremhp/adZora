@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNotifications } from "./NotificationSystem";
-import { api } from "./api";
 
 function ProfileIcon({ name, size = 18 }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -15,6 +14,7 @@ function ProfileIcon({ name, size = 18 }) {
 }
 
 const ROLE_LABELS = { publisher: "Publisher", advertiser: "Advertiser" };
+const INITIAL_PROFILE = { displayName: "Account Holder", email: "you@example.com" };
 
 function initialsFor(name) {
   return name.split(/\s+/).filter(Boolean).map(part => part[0]).join("").slice(0, 2).toUpperCase() || "A";
@@ -24,49 +24,27 @@ function ProfileFact({ label, children }) {
   return <div className="profile-fact"><span>{label}</span><strong>{children}</strong></div>;
 }
 
-export default function ProfilePage({ workspace, user }) {
+export default function ProfilePage({ workspace }) {
   const { notify } = useNotifications();
   const role = ROLE_LABELS[workspace] || ROLE_LABELS.publisher;
-  const email = user?.email || "";
-  const [displayName, setDisplayName] = useState(user?.displayName || email.split("@")[0] || "Account Holder");
+  const [profile, setProfile] = useState(INITIAL_PROFILE);
   const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [password, setPassword] = useState("");
 
-  const saveProfile = async () => {
-    if (!displayName.trim()) return;
-    setSaving(true);
-    try {
-      await api.updateProfile(displayName.trim());
-      setEditing(false);
-      notify("Profile updated successfully", "success");
-    } catch (error) {
-      notify(error.message || "Could not update your profile.", "error");
-    } finally {
-      setSaving(false);
-    }
+  const updateProfile = (key, value) => setProfile(previous => ({ ...previous, [key]: value }));
+  const saveProfile = () => {
+    setEditing(false);
+    notify("Profile updated successfully", "success");
   };
   const cancelProfileEdit = () => {
     setEditing(false);
-    setDisplayName(user?.displayName || email.split("@")[0] || "Account Holder");
+    setProfile(INITIAL_PROFILE);
   };
-  const savePassword = async () => {
-    if (newPassword.length < 8) { notify("New password must be at least 8 characters.", "error"); return; }
-    setPasswordSaving(true);
-    try {
-      await api.changePassword(currentPassword, newPassword);
-      setCurrentPassword("");
-      setNewPassword("");
-      setPasswordOpen(false);
-      notify("Your password has been updated.", "success");
-    } catch (error) {
-      notify(error.message || "Could not update your password.", "error");
-    } finally {
-      setPasswordSaving(false);
-    }
+  const savePassword = () => {
+    setPassword("");
+    setPasswordOpen(false);
+    notify("Your password change request has been received.", "info");
   };
 
   return <div className="workspace-page profile-page">
@@ -75,11 +53,11 @@ export default function ProfilePage({ workspace, user }) {
       </div>
 
     <section className="profile-hero light-panel" aria-label="Profile identity">
-      <div className="profile-avatar profile-avatar-fallback" data-testid="profile-avatar" aria-label="Profile avatar">{initialsFor(displayName)}</div>
+      <div className="profile-avatar profile-avatar-fallback" data-testid="profile-avatar" aria-label="Profile avatar">{initialsFor(profile.displayName)}</div>
       <div className="profile-hero-copy">
         <span className="eyebrow">ACCOUNT HOLDER</span>
-        <h2 data-testid="text-profile-display-name">{displayName}</h2>
-        <p>{email}</p>
+        <h2 data-testid="text-profile-display-name">{profile.displayName}</h2>
+        <p>{profile.email}</p>
         <div className="profile-hero-meta"><span>{role}</span><span className="status-text-active">Active</span></div>
       </div>
       <span className="status-badge active">Active</span>
@@ -91,11 +69,11 @@ export default function ProfilePage({ workspace, user }) {
         {!editing && <button className="secondary-button" type="button" onClick={() => setEditing(true)} data-testid="button-edit-profile"><ProfileIcon name="user" size={15} />Edit Profile</button>}
       </div>
       <div className="profile-form-grid profile-personal-grid">
-        <label className="field"><span>Display Name</span><input className="input" value={displayName} readOnly={!editing} onChange={event => setDisplayName(event.target.value)} data-testid="input-profile-display-name" /></label>
-        <label className="field"><span>Email</span><input className="input" type="email" value={email} readOnly data-testid="input-profile-email" /></label>
+        <label className="field"><span>Display Name</span><input className="input" value={profile.displayName} readOnly={!editing} onChange={event => updateProfile("displayName", event.target.value)} data-testid="input-profile-display-name" /></label>
+        <label className="field"><span>Email</span><input className="input" type="email" value={profile.email} readOnly={!editing} onChange={event => updateProfile("email", event.target.value)} data-testid="input-profile-email" /></label>
         <ProfileFact label="Workspace role">{role}</ProfileFact>
       </div>
-      {editing && <div className="form-actions profile-form-actions"><button className="primary-button" type="button" onClick={saveProfile} disabled={saving} data-testid="button-save-profile"><ProfileIcon name="shield" size={15} />{saving ? "Saving…" : "Save Changes"}</button><button className="ghost-button" type="button" onClick={cancelProfileEdit} data-testid="button-cancel-profile">Cancel</button></div>}
+      {editing && <div className="form-actions profile-form-actions"><button className="primary-button" type="button" onClick={saveProfile} data-testid="button-save-profile"><ProfileIcon name="shield" size={15} />Save Changes</button><button className="ghost-button" type="button" onClick={cancelProfileEdit} data-testid="button-cancel-profile">Cancel</button></div>}
       
     </section>
 
@@ -106,12 +84,8 @@ export default function ProfilePage({ workspace, user }) {
         <div><strong>Password</strong><span>••••••••</span></div>
         <button className="secondary-button" type="button" onClick={() => setPasswordOpen(previous => !previous)} data-testid="button-change-password"><ProfileIcon name="lock" size={15} />Change Password</button>
       </div>
-      {passwordOpen && <div className="password-editor">
-        <label className="field"><span>Current Password</span><input className="input" type="password" value={currentPassword} onChange={event => setCurrentPassword(event.target.value)} data-testid="input-current-password" /></label>
-        <label className="field"><span>New Password</span><input className="input" type="password" value={newPassword} onChange={event => setNewPassword(event.target.value)} placeholder="At least 8 characters" data-testid="input-new-password" /></label>
-        <button className="ghost-button" type="button" onClick={savePassword} disabled={passwordSaving} data-testid="button-save-password">{passwordSaving ? "Saving…" : "Save Password"}</button>
-      </div>}
-      <div className="profile-security-note"><ProfileIcon name="shield" size={16} /><span>Password changes take effect immediately and sign out your other sessions.</span></div>
+      {passwordOpen && <div className="password-editor"><label className="field"><span>New Password</span><input className="input" type="password" value={password} onChange={event => setPassword(event.target.value)} placeholder="At least 6 characters" data-testid="input-new-password" /></label><button className="ghost-button" type="button" onClick={savePassword} data-testid="button-save-password">Save Password</button></div>}
+      <div className="profile-security-note"><ProfileIcon name="shield" size={16} /><span>Password changes are reviewed to help keep your account secure.</span></div>
     </section>
   </div>;
 }

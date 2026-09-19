@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PRICING_MODELS, formatMoney } from "./config";
 import WalletWorkspace from "./WalletWorkspace";
-import { useNotifications } from "./NotificationSystem";
 function Icon({ name, size = 17 }) { const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" }; const paths = { plus: <><path d="M12 5v14M5 12h14" /></>, megaphone: <><path d="m3 11 18-5v12L3 14z" /><path d="M11 15v5M6 16l1.5 4" /></>, image: <><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9" r="1.5" /><path d="m21 15-5-5L5 20" /></>, video: <><rect x="3" y="5" width="14" height="14" rx="2" /><path d="m17 10 4-2v8l-4-2z" /></>, check: <path d="m5 12 4 4L19 6" />, upload: <><path d="M12 16V4M7 9l5-5 5 5" /><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5" /></>, shield: <><path d="M12 3 4 6v5c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z" /><path d="m8 12 2.5 2.5L16 9" /></> }; return <svg {...props}>{paths[name] || paths.megaphone}</svg>; }
 function Field({ label, error, hint, children }) { return <label className="field"><span>{label}</span>{children}{hint && !error && <small>{hint}</small>}{error && <small className="field-error">{error}</small>}</label>; }
 function PageHeader({ title, description, action, onAction }) { return <div className="workspace-page-header"><div><span className="eyebrow">ADVERTISER WORKSPACE</span><h1>{title}</h1><p>{description}</p></div>{action && <button className="primary-button" type="button" onClick={onAction}><Icon name="plus" size={16} />{action}</button>}</div>; }
@@ -99,6 +98,8 @@ function SocialAd({ profileImage, postImage, brandName, username, text, destinat
       <button type="button" aria-label="Share" onClick={event => event.stopPropagation()}><SocialActionIcon name="share" /></button>
       <button type="button" className="adzora-social-save" aria-label="Save" onClick={event => event.stopPropagation()}><SocialActionIcon name="save" /></button>
     </div>
+    <div className="adzora-social-stats">1,248 likes</div>
+    <div className="adzora-social-views"><SocialActionIcon name="views" /><span>8,421 views</span></div>
     <div className="adzora-social-caption"><b style={{ fontFamily: detectAdFont(brandName) }}>{brandName || "Your Brand"}</b><span style={{ fontFamily: detectAdFont(text) }}>{text || "Your sponsored post text will appear here."}</span><span className="adzora-social-sponsored">Sponsored · Learn more</span></div>
   </div>;
 }
@@ -153,14 +154,12 @@ function Preview({ form }) {
   return <div className="ad-preview live-preview-shell"><VideoAd videoUrl={form.previewUrl && form.fileType.startsWith("video") ? form.previewUrl : ""} videoType={form.fileType} title={form.title} /></div>;
 }
 
-function CreateCampaign({ onCreateCampaign, onNavigate }) {
-  const { notify } = useNotifications();
+function CreateCampaign({ data, setData, onNavigate }) {
   const [form, setForm] = useState(INITIAL);
   const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
   const update = patch => setForm(previous => ({ ...previous, ...patch }));
   const changeFormat = format => update({ format, file: null, fileName: "", fileType: "", previewUrl: "", profileFile: null, profileFileName: "", profileFileType: "", profileUrl: "", postFile: null, postFileName: "", postFileType: "", postUrl: "", destination: "" });
-  const submit = async () => {
+  const submit = () => {
     const next = {};
     if (!form.name.trim()) next.name = "Enter a campaign name.";
     if (!form.destination.trim()) next.destination = "Enter a destination URL."; else { try { const url = new URL(form.destination); if (!["http:", "https:"].includes(url.protocol)) next.destination = "Use an HTTP or HTTPS destination."; } catch { next.destination = "Enter a valid destination URL."; } }
@@ -171,26 +170,9 @@ function CreateCampaign({ onCreateCampaign, onNavigate }) {
     if (form.format === "video" && !form.title.trim()) next.title = "Enter a title.";
     setErrors(next);
     if (Object.keys(next).length) return;
-    setSubmitting(true);
-    try {
-      // Media files stay client-side (object URLs only) until a real object-storage
-      // endpoint is wired up — only the file's name/type metadata is sent to the backend.
-      await onCreateCampaign({
-        name: form.name.trim(),
-        format: form.format,
-        budget: Number(form.budget),
-        pricingModel: form.pricingModel,
-        duration: Number(form.duration) || 30,
-        targeting: form.targeting || "All eligible publishers",
-        creative: { fileName: form.fileName, fileType: form.fileType, profileFileName: form.profileFileName, postFileName: form.postFileName, title: form.title, description: form.description, brandName: form.brandName, username: form.username, text: form.text, cta: form.cta, destination: form.destination },
-      });
-      notify("Campaign draft saved.", "success");
-      onNavigate("campaigns");
-    } catch (error) {
-      notify(error.message || "Could not save the campaign.", "error");
-    } finally {
-      setSubmitting(false);
-    }
+    const campaign = { id: "campaign-" + Date.now(), name: form.name.trim(), format: form.format, status: "Draft", budget: Number(form.budget), pricingModel: form.pricingModel, duration: Number(form.duration) || 30, targeting: form.targeting || "All eligible publishers", creative: { fileName: form.fileName, fileType: form.fileType, previewUrl: form.previewUrl, profileFileName: form.profileFileName, profileUrl: form.profileUrl, postFileName: form.postFileName, postUrl: form.postUrl, title: form.title, description: form.description, brandName: form.brandName, username: form.username, text: form.text, cta: form.cta, destination: form.destination }, createdAt: new Date().toISOString() };
+    setData(previous => [campaign, ...previous]);
+    onNavigate("campaigns");
   };
   return <div className="workspace-page campaign-builder">
     <PageHeader title="Create Campaign" description="اختر Native أو Social أو Video؛ ستظهر فقط الحقول المناسبة للصيغة. كل صيغة لها متطلبات عرض واضحة." action="View Campaigns" onAction={() => onNavigate("campaigns")} />
@@ -199,26 +181,10 @@ function CreateCampaign({ onCreateCampaign, onNavigate }) {
     <section className="light-panel form-section"><div className="panel-heading"><div><span className="eyebrow">3 / CREATIVE</span><h2>{TYPES.find(item => item.id === form.format)?.name} content</h2></div><span className="phase-chip">Format-specific</span></div><ContentFields form={form} update={update} errors={errors} /></section>
      <section className="light-panel form-section"><div className="panel-heading"><div><span className="eyebrow">4 / AD BEHAVIOR</span><h2>Fixed by AdZora</h2></div></div><BehaviorFields format={form.format} /></section>
      <section className="light-panel preview-panel"><div className="panel-heading"><div><span className="eyebrow">LIVE PREVIEW</span><h2>Creative preview</h2></div><span className="phase-chip">Responsive</span></div><Preview form={form} /></section>
-    <section className="light-panel form-section tracking-roadmap"><div className="panel-heading"><div><span className="eyebrow">5 / TRACKING</span><h2>Events prepared for the Ad Server</h2></div></div><div className="event-chip-list"><span>Impression</span><span>Click</span><span>Video View</span><span>Video Completion</span></div><p className="muted-copy">سيتم استخدام هذه الأحداث لقياس أداء حملتك تلقائيًا مع بدء الحملة.</p><div className="form-actions"><button className="primary-button" type="button" onClick={submit} disabled={submitting}><Icon name="check" size={16} />{submitting ? "Saving…" : "Save Campaign Draft"}</button><button className="ghost-button" type="button" onClick={() => onNavigate("campaigns")}>Cancel</button></div></section>
+    <section className="light-panel form-section tracking-roadmap"><div className="panel-heading"><div><span className="eyebrow">5 / TRACKING</span><h2>Events prepared for the Ad Server</h2></div></div><div className="event-chip-list"><span>Impression</span><span>Click</span><span>Video View</span><span>Video Completion</span></div><p className="muted-copy">سيتم استخدام هذه الأحداث لقياس أداء حملتك تلقائيًا مع بدء الحملة.</p><div className="form-actions"><button className="primary-button" type="button" onClick={submit}><Icon name="check" size={16} />Save Campaign Draft</button><button className="ghost-button" type="button" onClick={() => onNavigate("campaigns")}>Cancel</button></div></section>
   </div>;
 }
 
-function CampaignsPage({ data, onNavigate }) { return <div className="workspace-page"><PageHeader title="Campaigns" description="كل حملة تفصل Creative عن Behavior وBudget وTargeting حتى يختار Ad Server الإعلان المؤهل فقط." action="Create Campaign" onAction={() => onNavigate("create-campaign")} />{!data.length ? <section className="light-panel"><div className="empty-state"><span className="empty-state-icon"><Icon name="megaphone" size={25} /></span><h2>No campaigns yet</h2><p>ابدأ بحملة، اختر نوع الإعلان، ثم استخدم المعاينة قبل الحفظ.</p><button className="secondary-button" type="button" onClick={() => onNavigate("create-campaign")}><Icon name="plus" size={16} />Create Campaign</button></div></section> : <section className="light-panel data-panel"><div className="panel-heading"><div><span className="eyebrow">CAMPAIGN LIBRARY</span><h2>{data.length} campaign{data.length === 1 ? "" : "s"}</h2></div><span className="result-count">Draft state</span></div><div className="data-list">{data.map(campaign => <div className="data-row campaign-row" key={campaign.id}><div className="row-main"><span className="row-icon"><Icon name={campaign.format === "video" ? "video" : "megaphone"} /></span><div><strong>{campaign.name}</strong><small>{TYPES.find(item => item.id === campaign.format)?.name || campaign.format} · {campaign.creative?.postFileName || campaign.creative?.fileName || "No media"}</small></div></div><div className="row-detail"><span className="row-label">Budget</span><strong>{formatMoney(campaign.budget)}</strong></div><div className="row-detail"><span className="row-label">Pricing / Duration</span><strong>{campaign.pricing_model || campaign.pricingModel} · {campaign.duration}d</strong></div><span className={"status-badge " + (campaign.status === "Active" ? "ready" : "draft")}>{campaign.status}</span></div>)}</div></section>}</div>; }
-function FinancialPage({ kind, finance = {}, deposits = [], onCreateDeposit, onNavigate }) {
-  const metrics = kind === "balance"
-    ? [["Available Balance", finance.available], ["Reserved Balance", finance.reserved], ["Total Spent", finance.spent], ["Total Deposited", finance.deposited]]
-    : [["Available Balance", finance.available], ["Campaign Spend", finance.spent], ["Reserved Balance", finance.reserved], ["Total Deposited", finance.deposited]];
-  return <div className="workspace-page">
-    <PageHeader title={kind === "deposits" ? "Deposit funds" : kind === "balance" ? "Balance" : "Billing & Transactions"} description="تابع رصيدك وسجل معاملاتك المالية من مكان واحد." />
-    <section className="metric-grid financial-metrics">{metrics.map(([label, value]) => <article className="metric-card" key={label}><span className="metric-label">{label}</span><strong className="metric-value">{formatMoney(value)}</strong></article>)}</section>
-    {kind !== "deposits" && (!deposits.length ? <section className="light-panel data-panel"><div className="empty-state compact-empty"><Icon name="shield" size={25} /><h2>No financial records yet</h2><p>ستظهر إيداعاتك وإنفاقك وتقاريرك هنا بمجرد تسجيل أول عملية.</p></div></section> : <section className="light-panel data-panel"><div className="panel-heading"><div><span className="eyebrow">DEPOSIT HISTORY</span><h2>{deposits.length} records</h2></div></div><div className="data-list">{deposits.map(item => <div className="data-row" key={item.id}><div className="row-main"><span className="row-icon"><Icon name="shield" /></span><div><strong>{item.method} · {formatMoney(item.amount)}</strong><small>{new Date(item.created_at).toLocaleDateString("en-US")}</small></div></div><span className="status-badge pending">{item.status}</span></div>)}</div></section>)}
-  </div>;
-}
-export default function AdvertiserWorkspace({ page, data, finance = {}, onNavigate, deposits = [], onCreateCampaign, onCreateDeposit }) {
-  const content = useMemo(() => page, [page]);
-  if (content === "campaigns") return <CampaignsPage data={data} onNavigate={onNavigate} />;
-  if (content === "create-campaign") return <CreateCampaign onCreateCampaign={onCreateCampaign} onNavigate={onNavigate} />;
-  if (content === "deposits") return <WalletWorkspace mode="deposit" requests={deposits} onSubmit={onCreateDeposit} />;
-  if (["balance", "billing", "transactions"].includes(content)) return <FinancialPage kind={content} finance={finance} deposits={deposits} onNavigate={onNavigate} />;
-  return <div className="workspace-page"><PageHeader title={content === "reports" ? "Reports" : "Analytics"} description="ستظهر بيانات الأداء هنا بمجرد بدء أول حملة." /><section className="light-panel"><div className="empty-state"><span className="empty-state-icon"><Icon name="shield" size={25} /></span><h2>No data yet</h2><p>لا توجد بيانات أداء بعد. أنشئ حملتك الأولى لتبدأ برؤية النتائج هنا.</p><button className="secondary-button" type="button" onClick={() => onNavigate("create-campaign")}><Icon name="plus" size={16} />Create Campaign</button></div></section></div>;
-}
+function CampaignsPage({ data, onNavigate }) { return <div className="workspace-page"><PageHeader title="Campaigns" description="كل حملة تفصل Creative عن Behavior وBudget وTargeting حتى يختار Ad Server الإعلان المؤهل فقط." action="Create Campaign" onAction={() => onNavigate("create-campaign")} />{!data.length ? <section className="light-panel"><div className="empty-state"><span className="empty-state-icon"><Icon name="megaphone" size={25} /></span><h2>No campaigns yet</h2><p>ابدأ بحملة، اختر نوع الإعلان، ثم استخدم المعاينة قبل الحفظ.</p><button className="secondary-button" type="button" onClick={() => onNavigate("create-campaign")}><Icon name="plus" size={16} />Create Campaign</button></div></section> : <section className="light-panel data-panel"><div className="panel-heading"><div><span className="eyebrow">CAMPAIGN LIBRARY</span><h2>{data.length} campaign{data.length === 1 ? "" : "s"}</h2></div><span className="result-count">Draft state</span></div><div className="data-list">{data.map(campaign => <div className="data-row campaign-row" key={campaign.id}><div className="row-main"><span className="row-icon"><Icon name={campaign.format === "video" ? "video" : "megaphone"} /></span><div><strong>{campaign.name}</strong><small>{TYPES.find(item => item.id === campaign.format)?.name || campaign.format} · {campaign.creative?.postFileName || campaign.creative?.fileName || "No media"}</small></div></div><div className="row-detail"><span className="row-label">Budget</span><strong>{formatMoney(campaign.budget)}</strong></div><div className="row-detail"><span className="row-label">Pricing / Duration</span><strong>{campaign.pricingModel} · {campaign.duration}d</strong></div><span className="status-badge draft">{campaign.status}</span></div>)}</div></section>}</div>; }
+function FinancialPage({ kind }) { const labels = kind === "balance" ? ["Available Balance", "Reserved Balance", "Total Spent", "Total Deposited"] : ["Available Balance", "Campaign Spend", "Pending Review", "Total Deposited"]; return <div className="workspace-page"><PageHeader title={kind === "deposits" ? "Deposit funds" : kind === "balance" ? "Balance" : "Billing & Transactions"} description="تابع رصيدك وسجل معاملاتك المالية من مكان واحد." />{kind === "deposits" && <section className="form-panel light-panel"><div className="form-grid"><Field label="Deposit amount"><input className="input" type="number" min="1" placeholder="500" /></Field><Field label="Payment method"><select className="input select"><option>Credit / Debit Card</option><option>Manual review</option></select></Field></div><div className="notice">Deposit requests are reviewed before your balance is updated.</div></section>}<section className="metric-grid financial-metrics">{labels.map(label => <article className="metric-card" key={label}><span className="metric-label">{label}</span><strong className="metric-value">$0.00</strong></article>)}</section><section className="light-panel data-panel"><div className="empty-state compact-empty"><Icon name="shield" size={25} /><h2>No financial records yet</h2><p>ستظهر إيداعاتك وإنفاقك وتقاريرك هنا بمجرد تسجيل أول عملية.</p></div></section></div>; }
+export default function AdvertiserWorkspace({ page, data, setData, onNavigate, deposits = [], setDeposits = () => {} }) { const content = useMemo(() => page, [page]); if (content === "campaigns") return <CampaignsPage data={data} onNavigate={onNavigate} />; if (content === "create-campaign") return <CreateCampaign data={data} setData={setData} onNavigate={onNavigate} />; if (content === "deposits") return <WalletWorkspace mode="deposit" requests={deposits} setRequests={setDeposits} />; if (["balance", "billing", "transactions"].includes(content)) return <FinancialPage kind={content} />; return <div className="workspace-page"><PageHeader title={content === "reports" ? "Reports" : "Analytics"} description="ستظهر بيانات الأداء هنا بمجرد بدء أول حملة." /><section className="light-panel"><div className="empty-state"><span className="empty-state-icon"><Icon name="shield" size={25} /></span><h2>No data yet</h2><p>لا توجد بيانات أداء بعد. أنشئ حملتك الأولى لتبدأ برؤية النتائج هنا.</p><button className="secondary-button" type="button" onClick={() => onNavigate("create-campaign")}><Icon name="plus" size={16} />Create Campaign</button></div></section></div>; }

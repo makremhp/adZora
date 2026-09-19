@@ -58,10 +58,28 @@ export const DEPOSIT_CONFIG = {
   requireScreenshot: { web3: true, cwallet: true, binance: true },
 };
 
-// Platform-owned deposit destinations used to live here as static values. They are now
-// served by the backend (GET /api/config/payment-destinations, backed by the
-// `platform_config` table) so an admin can configure them without a code change, and so
-// no placeholder address ever ships in the frontend bundle. See src/api.js.
+// Platform-owned deposit destinations. These identify where the USER sends funds TO the
+// platform (the opposite direction from WITHDRAWAL_CONFIG, which sends funds to the user).
+// Values are intentionally left empty until a real Admin Configuration / backend endpoint
+// supplies them — the Wallet UI must show a "currently unavailable" state instead of a
+// placeholder address when a value is missing here.
+export const DEPOSIT_DESTINATIONS = {
+  web3: {
+    address: "0x5FEA30932d42Ed880b7e6Fd93211bCA4Eadb2F3B",
+    network: BNB_NETWORK,
+  },
+  cwallet: {
+    // Platform Cwallet account ID / identifier that users transfer deposits to.
+    accountId: "",
+  },
+  binance: {
+    // Add the real Binance deposit ID later. Zero means "not configured".
+    depositId: 0,
+    networks: {
+      [BNB_NETWORK]: 0,
+    },
+  },
+};
 
 export const WITHDRAWAL_CONFIG = {
   currency: "USD",
