@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { DEPOSIT_CONFIG, DEPOSIT_DESTINATIONS, PAYMENT_METHODS, WITHDRAWAL_CONFIG, formatMoney } from "./config";
+import { BNB_NETWORK, DEPOSIT_CONFIG, DEPOSIT_DESTINATIONS, PAYMENT_ASSETS, PAYMENT_METHODS, WITHDRAWAL_CONFIG, formatMoney } from "./config";
 import { useNotifications } from "./NotificationSystem";
 
 function Icon({ name, size = 17 }) {
@@ -25,7 +25,9 @@ function Field({ label, hint, error, children }) {
 }
 
 function methodLabel(methodId) {
-  return PAYMENT_METHODS.find(method => method.id === methodId)?.label || methodId;
+  const method = PAYMENT_METHODS.find(item => item.id === methodId);
+  const asset = PAYMENT_ASSETS[methodId];
+  return method ? `${method.label}${asset ? ` · ${asset}` : ""}` : methodId;
 }
 
 function MethodSelector({ value, onChange, mode }) {
@@ -102,7 +104,7 @@ function WithdrawalWorkspace({ requests, setRequests, available }) {
       type: "withdrawal",
       method,
       amount,
-      currency: WITHDRAWAL_CONFIG.currency,
+      currency: PAYMENT_ASSETS[method] || WITHDRAWAL_CONFIG.currency,
       status: WITHDRAWAL_CONFIG.status,
       createdAt: new Date().toLocaleString("en-US"),
       destination: method === "cwallet" ? form.cwalletIdentifier.trim() : method === "binance" ? form.binanceUid.trim() : "TON wallet pending SDK integration",
@@ -148,8 +150,9 @@ function validateProofFile(file) {
 }
 
 function resolveDepositDestination(method, network) {
+  if (method === "web3") return DEPOSIT_DESTINATIONS.web3.address;
   if (method === "cwallet") return DEPOSIT_DESTINATIONS.cwallet.accountId || "";
-  if (method === "binance") return network ? (DEPOSIT_DESTINATIONS.binance.networks[network] || "") : "";
+  if (method === "binance") return DEPOSIT_DESTINATIONS.binance.depositId || "";
   return "";
 }
 
@@ -211,7 +214,7 @@ function ProofUpload({ file, error, onSelect, onRemove }) {
   </div>;
 }
 
-const EMPTY_DEPOSIT_FORM = { amount: "", network: "", txid: "", proofFile: null };
+const EMPTY_DEPOSIT_FORM = { amount: "", network: BNB_NETWORK, txid: "", proofFile: null };
 
 function DepositWorkspace({ requests, setRequests }) {
   const { notify } = useNotifications();
@@ -220,25 +223,20 @@ function DepositWorkspace({ requests, setRequests }) {
   const [errors, setErrors] = useState({});
   const [invoiceId, setInvoiceId] = useState(generateInvoiceId);
   const [submitting, setSubmitting] = useState(false);
-  const [tonAttempted, setTonAttempted] = useState(false);
   const [lastSubmitted, setLastSubmitted] = useState(null);
 
   const update = (key, value) => setForm(previous => ({ ...previous, [key]: value }));
 
   const changeMethod = nextMethod => {
     setMethod(nextMethod);
-    setForm(previous => ({ ...EMPTY_DEPOSIT_FORM, amount: previous.amount }));
+    setForm(previous => ({ ...EMPTY_DEPOSIT_FORM, amount: previous.amount, network: BNB_NETWORK }));
     setErrors({});
     setInvoiceId(generateInvoiceId());
-    setTonAttempted(false);
   };
-
-  const connectTon = () => { setTonAttempted(true); notify("TON wallet connection will be available after SDK integration.", "info"); };
 
   const amountValue = Number(form.amount);
   const amountValid = form.amount.trim() !== "" && Number.isFinite(amountValue) && amountValue >= DEPOSIT_CONFIG.minimumAmount;
-  const requiresNetworkFirst = method === "binance";
-  const invoiceUnlocked = method !== "ton" && amountValid && (!requiresNetworkFirst || Boolean(form.network));
+  const invoiceUnlocked = amountValid;
   const destination = resolveDepositDestination(method, form.network);
   const destinationAvailable = invoiceUnlocked && Boolean(destination);
   const needsTxid = Boolean(DEPOSIT_CONFIG.requireTxid[method]);
@@ -248,7 +246,6 @@ function DepositWorkspace({ requests, setRequests }) {
     if (submitting) return;
     const next = {};
     if (!amountValid) next.amount = form.amount.trim() === "" ? "Enter a valid amount." : `Minimum deposit is ${formatMoney(DEPOSIT_CONFIG.minimumAmount)}.`;
-    if (method === "binance" && !form.network) next.network = "Select a network.";
     if (invoiceUnlocked && !destinationAvailable) next.destination = "Deposit address is currently unavailable.";
     if (invoiceUnlocked && destinationAvailable && needsTxid && !form.txid.trim()) next.txid = "Enter the transaction ID / hash.";
     if (invoiceUnlocked && destinationAvailable && needsScreenshot) {
@@ -265,9 +262,9 @@ function DepositWorkspace({ requests, setRequests }) {
       type: "deposit",
       method,
       amount: amountValue,
-      currency: DEPOSIT_CONFIG.currency,
+      currency: PAYMENT_ASSETS[method] || DEPOSIT_CONFIG.currency,
       paymentDestination: method === "ton" ? "TON wallet pending SDK integration" : destination,
-      network: method === "binance" ? form.network : method === "ton" ? "TON" : "",
+      network: method === "web3" || method === "binance" ? BNB_NETWORK : "",
       txid: needsTxid ? form.txid.trim() : "",
       // No file storage backend is wired up yet: keep the file reference (name/type/size) so the
       // Admin Panel can be connected to real storage later without changing this contract.
@@ -304,19 +301,14 @@ function DepositWorkspace({ requests, setRequests }) {
         <Field label="Amount" error={errors.amount} hint={!errors.amount ? `Minimum deposit: ${formatMoney(DEPOSIT_CONFIG.minimumAmount)}` : undefined}>
           <input className="input" type="number" min="0" step="0.01" inputMode="decimal" value={form.amount} onChange={event => update("amount", event.target.value)} placeholder="0.00" />
         </Field>
-        {method === "binance" && <Field label="Network" error={errors.network}>
-          <select className="input select" value={form.network} onChange={event => update("network", event.target.value)}>
-            <option value="">Select network</option>
-            {DEPOSIT_CONFIG.networks.map(network => <option key={network} value={network}>{network}</option>)}
-          </select>
+        {(method === "web3" || method === "binance") && <Field label="Network">
+          <input className="input" value={BNB_NETWORK} readOnly />
         </Field>}
       </div>
 
-      {method === "ton" && <div className="wallet-field-span"><TonNotice onConnect={connectTon} connected={tonAttempted} /></div>}
+      {invoiceUnlocked && !destinationAvailable && <p className="invoice-unavailable"><Icon name="info" size={14} /> Deposit address is currently unavailable. Submitting is disabled until the platform destination is configured.</p>}
 
-      {method !== "ton" && invoiceUnlocked && !destinationAvailable && <p className="invoice-unavailable"><Icon name="info" size={14} /> Deposit address is currently unavailable. Submitting is disabled until the platform destination is configured.</p>}
-
-      {method !== "ton" && invoiceUnlocked && destinationAvailable && <div className="deposit-invoice">
+      {invoiceUnlocked && destinationAvailable && <div className="deposit-invoice">
         <div className="invoice-head">
           <div><span className="eyebrow">INVOICE</span><span className="invoice-head-id">Invoice #{invoiceId}</span></div>
           <span className="status-badge pending">Pending Payment</span>
@@ -325,7 +317,8 @@ function DepositWorkspace({ requests, setRequests }) {
         <div className="invoice-rows">
           <InvoiceRow label="Amount" value={formatMoney(amountValue)} />
           <InvoiceRow label="Payment Method" value={methodLabel(method)} />
-          {method === "binance" && <InvoiceRow label="Network" value={form.network} />}
+          <InvoiceRow label="Asset" value={PAYMENT_ASSETS[method] || DEPOSIT_CONFIG.currency} />
+           {(method === "web3" || method === "binance") && <InvoiceRow label="Network" value={BNB_NETWORK} />}
           <InvoiceRow label="Payment Destination" value={destination} copyable />
         </div>
 
