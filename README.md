@@ -13,10 +13,15 @@ Create a local `.env` from `.env.example`, set `DATABASE_URL` and a long random
 `JWT_SECRET`, then run:
 
 ```bash
+cp .env.example .env
 npm install
 npm run build
 npm run server
 ```
+
+The API exposes `GET /api/health` for deployment checks. It returns `200` only
+when `DATABASE_URL` and `JWT_SECRET` are configured; otherwise it returns a
+clear `503` instead of allowing a partially configured API to fail unpredictably.
 
 JWT access tokens last 30 days by default and can be changed with
 `JWT_EXPIRES_IN`. No database credentials or token values belong in the source

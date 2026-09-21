@@ -1,6 +1,5 @@
 import "dotenv/config";
 import http from "node:http";
-import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -12,15 +11,29 @@ const { Pool } = pg;
 const PORT = Number(process.env.PORT || 4000);
 const JWT_SECRET = process.env.JWT_SECRET;
 const TOKEN_TTL = process.env.JWT_EXPIRES_IN || "30d";
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+const DATABASE_URL = process.env.DATABASE_URL;
+const pool = DATABASE_URL
+  ? new Pool({
+      connectionString: DATABASE_URL,
+      ssl: process.env.PGSSLMODE === "disable" ? false : { rejectUnauthorized: false },
+    })
+  : null;
 
-if (!process.env.DATABASE_URL || !JWT_SECRET) {
+if (!DATABASE_URL || !JWT_SECRET) {
   console.warn("AdZora API is not configured. Set DATABASE_URL and JWT_SECRET before starting the server.");
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distPath = path.resolve(__dirname, "../dist");
 const jsonHeaders = { "Content-Type": "application/json; charset=utf-8" };
+
+class ApiError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
 
 function send(response, status, body) {
   response.writeHead(status, jsonHeaders);
@@ -33,6 +46,21 @@ function errorMessage(error) {
   return error instanceof Error ? error.message : "Request failed.";
 }
 
+function requireConfiguration() {
+  const missing = [];
+  if (!DATABASE_URL) missing.push("DATABASE_URL");
+  if (!JWT_SECRET) missing.push("JWT_SECRET");
+  if (missing.length) {
+    throw new ApiError(503, `API is not configured. Missing: ${missing.join(", ")}.`);
+  }
+}
+
+function requireDatabase() {
+  requireConfiguration();
+  if (!pool) throw new ApiError(503, "Database is not configured.");
+  return pool;
+}
+
 async function readJson(request) {
   let raw = "";
   for await (const chunk of request) {
@@ -40,18 +68,24 @@ async function readJson(request) {
     if (raw.length > 12 * 1024 * 1024) throw new Error("Request body is too large.");
   }
   if (!raw) return {};
-  return JSON.parse(raw);
+  try {
+    return JSON.parse(raw);
+  } catch {
+    throw new ApiError(400, "Request body must be valid JSON.");
+  }
 }
 
 function tokenFor(user) {
+  requireConfiguration();
   return jwt.sign({ sub: user.id, role: user.role }, JWT_SECRET, { expiresIn: TOKEN_TTL });
 }
 
 async function currentUser(request) {
+  const database = requireDatabase();
   const header = request.headers.authorization || "";
   if (!header.startsWith("Bearer ")) throw new Error("Authentication required.");
   const payload = jwt.verify(header.slice(7), JWT_SECRET);
-  const result = await pool.query(
+  const result = await database.query(
     "SELECT id, email, role, display_name AS \"displayName\", created_at AS \"createdAt\" FROM users WHERE id = $1",
     [payload.sub],
   );
@@ -73,16 +107,27 @@ function normalizeRequest(row) {
 }
 
 async function handleApi(request, response, pathname) {
+  if (request.method === "GET" && pathname.replace(/\/+$/, "") === "/api/health") {
+    const ready = Boolean(DATABASE_URL && JWT_SECRET);
+    return send(response, ready ? 200 : 503, {
+      ok: ready,
+      service: "adzora-api",
+      database: Boolean(DATABASE_URL),
+      authentication: Boolean(JWT_SECRET),
+    });
+  }
+
   const body = request.method === "GET" || request.method === "DELETE" ? {} : await readJson(request);
   const parts = pathname.replace(/^\/api\/?/, "").split("/").filter(Boolean);
 
   if (request.method === "POST" && parts.join("/") === "auth/signup") {
+    const database = requireDatabase();
     const email = String(body.email || "").trim().toLowerCase();
     const password = String(body.password || "");
     const role = body.role === "advertiser" ? "advertiser" : "publisher";
     if (!email.includes("@") || password.length < 8) return send(response, 400, { error: "Use a valid email and a password of at least 8 characters." });
     const passwordHash = await bcrypt.hash(password, 12);
-    const result = await pool.query(
+    const result = await database.query(
       "INSERT INTO users (email, password_hash, role, display_name) VALUES ($1, $2, $3, $4) RETURNING id, email, role, display_name AS \"displayName\", created_at AS \"createdAt\"",
       [email, passwordHash, role, email.split("@")[0]],
     );
@@ -91,8 +136,9 @@ async function handleApi(request, response, pathname) {
   }
 
   if (request.method === "POST" && parts.join("/") === "auth/login") {
+    const database = requireDatabase();
     const email = String(body.email || "").trim().toLowerCase();
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    const result = await database.query("SELECT * FROM users WHERE email = $1", [email]);
     const user = result.rows[0];
     if (!user || !(await bcrypt.compare(String(body.password || ""), user.password_hash))) return send(response, 401, { error: "Email or password is incorrect." });
     return send(response, 200, { token: tokenFor(user), user: { id: user.id, email: user.email, role: user.role, displayName: user.display_name, createdAt: user.created_at } });
@@ -226,7 +272,8 @@ const server = http.createServer(async (request, response) => {
     return serveStatic(request, response, pathname);
   } catch (error) {
     console.error(error);
-    return send(response, error.name === "JsonWebTokenError" || error.name === "TokenExpiredError" ? 401 : 500, { error: errorMessage(error) });
+    const status = error?.status || (error?.name === "JsonWebTokenError" || error?.name === "TokenExpiredError" ? 401 : 500);
+    return send(response, status, { error: errorMessage(error) });
   }
 });
 

@@ -17,7 +17,7 @@ export default async function handler(request, response) {
     return await handleApi(request, response, pathname);
   } catch (error) {
     console.error(error);
-    const status = error.name === "JsonWebTokenError" || error.name === "TokenExpiredError" ? 401 : 500;
+    const status = error?.status || (error?.name === "JsonWebTokenError" || error?.name === "TokenExpiredError" ? 401 : 500);
     response.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
     return response.end(JSON.stringify({ error: error instanceof Error ? error.message : "Request failed." }));
   }
