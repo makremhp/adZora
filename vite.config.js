@@ -14,6 +14,9 @@ export default defineConfig({
     port: Number(process.env.PORT || 5173),
     strictPort: Boolean(process.env.PORT),
     allowedHosts: true,
+    proxy: {
+      "/api": "http://localhost:4000",
+    },
   },
   preview: {
     host: "0.0.0.0",

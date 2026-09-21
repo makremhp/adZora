@@ -2,7 +2,27 @@
 
 AdZora is a React/Vite frontend foundation for an advertising marketplace connecting advertisers and publishers.
 
-## Phase 1
+## Current architecture
+
+The frontend uses the API in `src/api.js`. The Node API in `server/index.js` reads
+Neon/Postgres through `process.env.DATABASE_URL`; that value is never bundled into
+the browser. Run `server/schema.sql` once against the Neon database before starting
+the API.
+
+Create a local `.env` from `.env.example`, set `DATABASE_URL` and a long random
+`JWT_SECRET`, then run:
+
+```bash
+npm install
+npm run build
+npm run server
+```
+
+JWT access tokens last 30 days by default and can be changed with
+`JWT_EXPIRES_IN`. No database credentials or token values belong in the source
+archive.
+
+## Frontend foundation
 
 The first vertical slice establishes the product information architecture:
 
@@ -10,7 +30,7 @@ The first vertical slice establishes the product information architecture:
 - Role-specific navigation and financial terminology.
 - Centralized ad-format and pricing configuration.
 - Responsive sidebar with a real mobile drawer, overlay, close button, and Escape behavior.
-- Publisher and Advertiser overview dashboards with deliberate demo/empty states.
+- Publisher and Advertiser overview dashboards with real empty states until data exists.
 - Explicit Coming Soon states for routes not implemented yet.
 
 ## Run locally
@@ -18,4 +38,7 @@ The first vertical slice establishes the product information architecture:
 npm install
 npm run dev
 
-The current UI is intentionally frontend-only. It is structured so API data, authentication, real accounting, and blob upload can be added without changing the information architecture.
+Authentication, websites, campaigns, profile updates, wallet requests, and
+database-backed empty states are now connected to the API. Creative previews remain
+browser-local until a storage provider is configured; their temporary object URLs
+are not sent to Neon as production URLs.

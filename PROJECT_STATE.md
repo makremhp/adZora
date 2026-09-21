@@ -88,6 +88,15 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 
 ## Progress log
 
+### 2026-09-21 — Neon API foundation
+
+- Added a Node API in `server/index.js` with JWT authentication, bcrypt password hashing, database-backed users, websites, campaigns, and wallet requests.
+- Added `server/schema.sql` for Neon/Postgres and `.env.example`; the server reads `process.env.DATABASE_URL` and never exposes it to Vite.
+- Replaced frontend-only account, website, campaign, profile, website deletion, and wallet request mutations with API calls.
+- Removed hardcoded wallet destination and analytics/finance fixtures; empty states now reflect database data.
+- Verification: `npm install --no-audit --no-fund`, `npm run build`, `node --check server/index.js`, and `git diff --check` pass. No Neon credentials were used in this session, so a live database request was not run.
+- Commit SHA: not created in this file-only handoff; apply these files to the repository before committing.
+
 ### 2026-09-15 — Phase 3 completed
 
 - Added the Blob-ready Advertiser Creatives frontend slice.
