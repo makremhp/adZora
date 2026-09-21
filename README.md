@@ -22,6 +22,20 @@ JWT access tokens last 30 days by default and can be changed with
 `JWT_EXPIRES_IN`. No database credentials or token values belong in the source
 archive.
 
+## Deploy on Vercel
+
+The repository includes `vercel.json` and `api/index.js` so Vercel can serve
+the Vite SPA and run the API as a Node serverless function. Set these
+environment variables in the Vercel project:
+
+- `DATABASE_URL` — the Neon connection string.
+- `JWT_SECRET` — a long random secret.
+- `JWT_EXPIRES_IN` — optional; defaults to `30d`.
+
+Run `server/schema.sql` against Neon once before using authentication or
+database-backed features. Do not set `VITE_API_URL` for the same Vercel
+deployment; the frontend uses the same-origin `/api` route by default.
+
 ## Frontend foundation
 
 The first vertical slice establishes the product information architecture:

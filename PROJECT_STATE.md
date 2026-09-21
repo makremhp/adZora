@@ -95,6 +95,7 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Replaced frontend-only account, website, campaign, profile, website deletion, and wallet request mutations with API calls.
 - Removed hardcoded wallet destination and analytics/finance fixtures; empty states now reflect database data.
 - Verification: `npm install --no-audit --no-fund`, `npm run build`, `node --check server/index.js`, and `git diff --check` pass. No Neon credentials were used in this session, so a live database request was not run.
+- Added Vercel deployment support through `api/index.js` and `vercel.json`; the same-origin `/api` route is rewritten to the serverless handler and the SPA falls back to `index.html`.
 - Commit SHA: not created in this file-only handoff; apply these files to the repository before committing.
 
 ### 2026-09-15 — Phase 3 completed
