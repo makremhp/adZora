@@ -83,13 +83,13 @@ function tokenFor(user) {
 async function currentUser(request) {
   const database = requireDatabase();
   const header = request.headers.authorization || "";
-  if (!header.startsWith("Bearer ")) throw new Error("Authentication required.");
+  if (!header.startsWith("Bearer ")) throw new ApiError(401, "Authentication required.");
   const payload = jwt.verify(header.slice(7), JWT_SECRET);
   const result = await database.query(
     "SELECT id, email, role, display_name AS \"displayName\", created_at AS \"createdAt\" FROM users WHERE id = $1",
     [payload.sub],
   );
-  if (!result.rows[0]) throw new Error("Account not found.");
+  if (!result.rows[0]) throw new ApiError(401, "Account not found.");
   return result.rows[0];
 }
 
