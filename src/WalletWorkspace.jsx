@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BNB_NETWORK, DEPOSIT_CONFIG, DEPOSIT_DESTINATIONS, PAYMENT_ASSETS, PAYMENT_METHODS, WITHDRAWAL_CONFIG, formatMoney } from "./config";
 import { useNotifications } from "./NotificationSystem";
+import { api } from "./api";
 
 function Icon({ name, size = 17 }) {
   const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -89,7 +90,7 @@ function WithdrawalWorkspace({ requests, setRequests, available }) {
   const changeMethod = nextMethod => { setMethod(nextMethod); setForm(previous => ({ ...EMPTY_WITHDRAWAL_FORM, amount: previous.amount })); setErrors({}); setTonAttempted(false); };
   const connectTon = () => { setTonAttempted(true); notify("TON wallet connection will be available after SDK integration.", "info"); };
 
-  const submit = () => {
+  const submit = async () => {
     const next = {};
     const amount = Number(form.amount);
     if (!amount || amount <= 0) next.amount = "Enter a valid amount.";
@@ -99,21 +100,15 @@ function WithdrawalWorkspace({ requests, setRequests, available }) {
     if (method === "binance" && !form.binanceUid.trim()) next.binanceUid = "Enter the Binance ID / UID.";
     setErrors(next);
     if (Object.keys(next).length) return;
-    const request = {
-      id: `request-withdrawal-${Date.now()}`,
-      type: "withdrawal",
-      method,
-      amount,
-      currency: PAYMENT_ASSETS[method] || WITHDRAWAL_CONFIG.currency,
-      status: WITHDRAWAL_CONFIG.status,
-      createdAt: new Date().toLocaleString("en-US"),
-      destination: method === "cwallet" ? form.cwalletIdentifier.trim() : method === "binance" ? form.binanceUid.trim() : "TON wallet pending SDK integration",
-      network: method === "ton" ? "TON" : "",
-    };
-    setRequests(previous => [request, ...previous]);
-    setForm(EMPTY_WITHDRAWAL_FORM);
-    setErrors({});
-    notify("Withdrawal request submitted and is now pending review.", "success");
+    try {
+      const { request } = await api.createWithdrawal({ method, amount, currency: PAYMENT_ASSETS[method] || WITHDRAWAL_CONFIG.currency, destination: method === "cwallet" ? form.cwalletIdentifier.trim() : method === "binance" ? form.binanceUid.trim() : "", network: method === "ton" ? "TON" : "" });
+      setRequests(previous => [request, ...previous]);
+      setForm(EMPTY_WITHDRAWAL_FORM);
+      setErrors({});
+      notify("Withdrawal request submitted and is now pending review.", "success");
+    } catch (requestError) {
+      notify(requestError.message, "error");
+    }
   };
 
   return <div className="workspace-page wallet-workspace">
@@ -242,7 +237,7 @@ function DepositWorkspace({ requests, setRequests }) {
   const needsTxid = Boolean(DEPOSIT_CONFIG.requireTxid[method]);
   const needsScreenshot = Boolean(DEPOSIT_CONFIG.requireScreenshot[method]);
 
-  const submit = () => {
+  const submit = async () => {
     if (submitting) return;
     const next = {};
     if (!amountValid) next.amount = form.amount.trim() === "" ? "Enter a valid amount." : `Minimum deposit is ${formatMoney(DEPOSIT_CONFIG.minimumAmount)}.`;
@@ -256,29 +251,19 @@ function DepositWorkspace({ requests, setRequests }) {
     if (Object.keys(next).length) return;
 
     setSubmitting(true);
-    const request = {
-      id: `request-deposit-${Date.now()}`,
-      invoiceId,
-      type: "deposit",
-      method,
-      amount: amountValue,
-      currency: PAYMENT_ASSETS[method] || DEPOSIT_CONFIG.currency,
-      paymentDestination: method === "ton" ? "TON wallet pending SDK integration" : destination,
-      network: method === "web3" || method === "binance" ? BNB_NETWORK : "",
-      txid: needsTxid ? form.txid.trim() : "",
-      // No file storage backend is wired up yet: keep the file reference (name/type/size) so the
-      // Admin Panel can be connected to real storage later without changing this contract.
-      screenshot: form.proofFile ? { name: form.proofFile.name, type: form.proofFile.type, size: form.proofFile.size } : null,
-      status: DEPOSIT_CONFIG.status,
-      createdAt: new Date().toLocaleString("en-US"),
-    };
-    setRequests(previous => [request, ...previous]);
-    setLastSubmitted({ invoiceId, status: request.status });
-    setForm(EMPTY_DEPOSIT_FORM);
-    setErrors({});
-    setInvoiceId(generateInvoiceId());
-    setSubmitting(false);
-    notify("Deposit request submitted and is now pending review.", "success");
+    try {
+      const { request } = await api.createDeposit({ invoiceId, method, amount: amountValue, currency: PAYMENT_ASSETS[method] || DEPOSIT_CONFIG.currency, paymentDestination: destination, network: method === "web3" || method === "binance" ? BNB_NETWORK : "", txid: needsTxid ? form.txid.trim() : "", screenshot: form.proofFile ? { name: form.proofFile.name, type: form.proofFile.type, size: form.proofFile.size } : null });
+      setRequests(previous => [request, ...previous]);
+      setLastSubmitted({ invoiceId, status: request.status });
+      setForm(EMPTY_DEPOSIT_FORM);
+      setErrors({});
+      setInvoiceId(generateInvoiceId());
+      notify("Deposit request submitted and is now pending review.", "success");
+    } catch (requestError) {
+      notify(requestError.message, "error");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return <div className="workspace-page wallet-workspace">

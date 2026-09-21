@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNotifications } from "./NotificationSystem";
+import { api } from "./api";
 
 function SettingsIcon({ name, size = 18 }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -47,14 +48,19 @@ export default function SettingsPage({ workspace, publisherData, setPublisherDat
   const websites = publisherData?.websites || [];
   const isPublisher = workspace === "publisher";
 
-  const deleteWebsite = () => {
+  const deleteWebsite = async () => {
     if (!pendingWebsite) return;
-    setPublisherData(previous => ({
-      ...previous,
-      websites: previous.websites.filter(website => website.id !== pendingWebsite.id),
-    }));
-    notify("Website deleted successfully", "success", 3500, "The website was removed from your account.");
-    setPendingWebsite(null);
+    try {
+      await api.deleteWebsite(pendingWebsite.id);
+      setPublisherData(previous => ({
+        ...previous,
+        websites: previous.websites.filter(website => website.id !== pendingWebsite.id),
+      }));
+      notify("Website deleted successfully", "success", 3500, "The website was removed from your account.");
+      setPendingWebsite(null);
+    } catch (error) {
+      notify(error.message, "error");
+    }
   };
 
   const confirmLogout = () => {

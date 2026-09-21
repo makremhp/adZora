@@ -65,7 +65,7 @@ export const DEPOSIT_CONFIG = {
 // placeholder address when a value is missing here.
 export const DEPOSIT_DESTINATIONS = {
   web3: {
-    address: "0x5FEA30932d42Ed880b7e6Fd93211bCA4Eadb2F3B",
+    address: "",
     network: BNB_NETWORK,
   },
   cwallet: {

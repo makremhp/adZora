@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import WalletWorkspace from "./WalletWorkspace";
 import WebsiteDetailPage from "./WebsiteDetailPage";
 import { useNotifications } from "./NotificationSystem";
+import { api } from "./api";
 
 function MiniIcon({ name, size = 17 }) {
   const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -21,13 +22,14 @@ function WebsiteForm({ form, setForm, errors, onCancel, onSubmit }) { const upda
 function WebsitesPage({ data, setData, onNavigate, onDetails }) {
   const { notify } = useNotifications();
   const [showForm, setShowForm] = useState(data.websites.length === 0); const [form, setForm] = useState(blankWebsite); const [errors, setErrors] = useState({});
-  const addWebsite = () => { const next = {}; if (!form.name.trim()) next.name = "Enter a website name."; const normalized = form.url.trim().startsWith("http") ? form.url.trim() : "https://" + form.url.trim(); try { const parsed = new URL(normalized); if (parsed.protocol !== "https:" || !parsed.hostname.includes(".")) next.url = "Enter a valid HTTPS website address."; } catch { next.url = "Enter a valid HTTPS website address."; } setErrors(next); if (Object.keys(next).length) return; const website = { id: "website-" + Date.now(), name: form.name.trim(), url: new URL(normalized).toString(), status: "Pending", dateAdded: new Date().toLocaleDateString("en-US"), impressions: 0, clicks: 0 }; setData(previous => ({ ...previous, websites: [...previous.websites, website] })); setForm(blankWebsite); setErrors({}); setShowForm(false); notify("Website added. Your Universal AdZora Code is ready.", "success"); onNavigate("websites"); };
+  const [saving, setSaving] = useState(false);
+  const addWebsite = async () => { const next = {}; if (!form.name.trim()) next.name = "Enter a website name."; const normalized = form.url.trim().startsWith("http") ? form.url.trim() : "https://" + form.url.trim(); try { const parsed = new URL(normalized); if (parsed.protocol !== "https:" || !parsed.hostname.includes(".")) next.url = "Enter a valid HTTPS website address."; } catch { next.url = "Enter a valid HTTPS website address."; } setErrors(next); if (Object.keys(next).length) return; setSaving(true); try { const { website } = await api.createWebsite(form.name.trim(), new URL(normalized).toString()); setData(previous => ({ ...previous, websites: [website, ...previous.websites] })); setForm(blankWebsite); setErrors({}); setShowForm(false); notify("Website added. Your Universal AdZora Code is ready.", "success"); onNavigate("websites"); } catch (error) { notify(error.message, "error"); } finally { setSaving(false); } };
   return <div className="workspace-page"><PageHeader title="My Websites" description="أضف Website Name وWebsite URL فقط. احصل على Universal AdZora Code ثم راقب أداء موقعك من Analytics." action="Add Website" onAction={() => setShowForm(true)} />{showForm && <WebsiteForm form={form} setForm={setForm} errors={errors} onCancel={() => { setShowForm(false); setErrors({}); }} onSubmit={addWebsite} />}{!data.websites.length && !showForm ? <section className="light-panel"><EmptyState title="No websites yet" description="أضف موقعك للحصول على Universal AdZora Code ومتابعة التحليلات." action="Add Website" onAction={() => setShowForm(true)} /></section> : data.websites.length > 0 && <section className="light-panel data-panel"><div className="panel-heading"><div><span className="eyebrow">PUBLISHER WEBSITES</span><h2>{data.websites.length} website{data.websites.length === 1 ? "" : "s"}</h2></div><span className="result-count">Universal code ready</span></div><div className="publisher-site-grid">{data.websites.map(website => <article className="publisher-site-card" key={website.id}><button className="publisher-site-open" type="button" onClick={() => onDetails(website.id)} aria-label={`Open ${website.name} details`}><div className="publisher-site-heading"><div className="publisher-site-identity"><strong>{website.name}</strong><span>{website.url}</span></div><span className="status-badge pending">{website.status}</span></div></button><div className="publisher-website-actions"><button className="primary-button universal-code-button" type="button" onClick={() => onNavigate("ad-codes")}><MiniIcon name="code" size={16} />Universal Code</button><button className="secondary-button" type="button" onClick={() => onNavigate("analytics", website.id)}><MiniIcon name="trend" size={16} />Analytics</button><button className="icon-button website-view-details" type="button" onClick={() => onDetails(website.id)} aria-label={`View details for ${website.name}`}><MiniIcon name="arrow" size={16} /></button></div></article>)}</div></section>}</div>;
 }
 
 function AdCodesPage({ data, onNavigate }) {
   const { notify } = useNotifications();
-  const [copiedId, setCopiedId] = useState(""); const codeFor = website => "<!-- AdZora Universal Code -->" + String.fromCharCode(10) + "<script src=\"https://ad-zora.vercel.app/ad.js\" data-adzora-website=\"" + website.id + "\" async></script>";
+  const [copiedId, setCopiedId] = useState(""); const codeFor = website => "<!-- AdZora Universal Code -->" + String.fromCharCode(10) + "<script src=\"" + (import.meta.env.VITE_AD_SERVER_URL || "/ad.js") + "\" data-adzora-website=\"" + website.id + "\" async></script>";
   const copyCode = async website => { try { await navigator.clipboard.writeText(codeFor(website)); setCopiedId(website.id); notify("Universal AdZora Code copied.", "success"); setTimeout(() => setCopiedId(""), 1800); } catch { notify("Copy is unavailable in this browser.", "error"); } };
   return <div className="workspace-page"><PageHeader title="Universal AdZora Code" description="انسخ كودًا واحدًا إلى موقعك. الناشر لا يختار Campaign أو Creative أو Image أو Video أو Ad Size." action="Add Website" onAction={() => onNavigate("websites")} />{!data.websites.length ? <section className="light-panel"><EmptyState icon="code" title="Add a website first" description="بعد إضافة Website Name وWebsite URL سيظهر Universal AdZora Code هنا." action="Add Website" onAction={() => onNavigate("websites")} /></section> : <div className="code-list">{data.websites.map(website => <section className="light-panel code-card" key={website.id}><div className="code-card-heading"><div className="row-main"><span className="row-icon"><MiniIcon name="code" /></span><div><strong>{website.name}</strong><small>{website.url}</small></div></div><span className="status-badge ready">Universal</span></div><div className="code-note"><strong>One universal code for this website</strong><span>Ad Server will choose an eligible campaign and Creative later. Publisher settings do not include ad type, size, or Creative.</span></div><pre className="code-box"><code>{codeFor(website)}</code></pre><div className="code-actions"><button className="primary-button universal-code-button" type="button" onClick={() => copyCode(website)}><MiniIcon name={copiedId === website.id ? "check" : "copy"} size={16} />{copiedId === website.id ? "Copied" : "Copy Universal Code"}</button><button className="ghost-button" type="button" onClick={() => onNavigate("websites")}><MiniIcon name="globe" size={16} />Manage website</button></div><div className="code-install-note" role="note"><strong>ملاحظة</strong><span>ضع هذا الكود داخل وسم <code>&lt;head&gt;</code> في موقعك لتفعيل خدمة الإعلانات.</span></div></section>)}</div>}</div>;
 }
@@ -42,47 +44,6 @@ function WebsiteAnalyticsPage({ data, onNavigate }) {
   return <div className="workspace-page"><PageHeader title="Website Analytics" description="تابع مؤشرات العرض والنقرات والأرباح لكل Publisher Website في مساحة واحدة." />{!selectedWebsite ? <section className="light-panel"><EmptyState icon="trend" title="No analytics scope yet" description="بعد إضافة Website سيظهر نطاق التحليلات وحالات التتبع المناسبة." action="Add Website" onAction={() => onNavigate("websites")} /></section> : <><section className="light-panel analytics-toolbar"><div><span className="eyebrow">TRACKING SCOPE</span><h2>{selectedWebsite.name}</h2><p>{selectedWebsite.url}</p></div><label className="field analytics-select"><span>Select Website</span><select className="input select" value={selectedId} onChange={event => setSelectedId(event.target.value)}>{websites.map(website => <option key={website.id} value={website.id}>{website.name}</option>)}</select></label></section><section className="analytics-metric-grid">{metrics.map(([label, value, icon]) => <article className="metric-card analytics-metric" key={label}><div className="metric-top"><span className="metric-icon"><MiniIcon name={icon} size={16} /></span><span className="metric-label">{label}</span></div><strong className="metric-value">{value === "--" ? value : value}</strong></article>)}</section><section className="analytics-grid"><section className="light-panel analytics-chart-card"><div className="panel-heading"><div><span className="eyebrow">LAST 30 DAYS</span><h2>Website performance</h2></div></div><div className="analytics-chart"><svg viewBox="0 0 760 220" role="img" aria-label="Website analytics chart"><path d="M20 180H740M20 125H740M20 70H740" className="chart-grid-line" /><path d="M20 180 C130 180 170 180 250 180 S390 180 470 180 S620 180 740 180 L740 210 L20 210 Z" className="chart-fill" /><path d="M20 180 C130 180 170 180 250 180 S390 180 470 180 S620 180 740 180" className="chart-line" /><circle cx="740" cy="180" r="5" className="chart-point" /></svg><div className="chart-empty-state"><span className="chart-empty-icon"><MiniIcon name="trend" size={18} /></span><strong>No activity yet</strong><span>Your chart will appear here once visits start being tracked.</span></div></div></section><section className="light-panel analytics-detail-card"><div className="panel-heading"><div><span className="eyebrow">SELECTED WEBSITE</span><h2>Tracking details</h2></div></div><div className="analytics-detail-list"><div><span>Name</span><strong>{selectedWebsite.name}</strong></div><div><span>Website URL</span><strong>{selectedWebsite.url}</strong></div><div><span>Tracking status</span><strong className="status-text-pending">Awaiting activity</strong></div><div><span>Events</span><strong>Impression · Click · Earnings</strong></div></div></section></section></>}</div>;
 }
 
-const publisherWebsiteDemoAnalytics = [
-  {
-    impressions: 12420, clicks: 386, ctr: "3.11%", cpm: "$1.82", cpc: "$0.058", earnings: 22.61,
-    formats: {
-      native: { impressions: 7420, clicks: 218, ctr: "2.94%", earnings: 13.52 },
-      social: { impressions: 3800, clicks: 124, ctr: "3.26%", earnings: 6.81 },
-      video: { impressions: 1200, clicks: 44, ctr: "3.67%", earnings: 2.28 },
-    },
-    series: {
-      impressions: [620, 710, 680, 840, 790, 930, 1010, 980, 1100, 1060, 1170, 1240, 1190, 1310, 1280, 1390, 1360, 1450, 1410, 1520, 1490, 1610, 1580, 1690, 1650, 1780, 1740, 1880, 1960, 2040],
-      clicks: [18, 21, 20, 25, 23, 29, 31, 30, 34, 33, 36, 39, 38, 41, 40, 44, 43, 46, 45, 49, 48, 52, 50, 55, 53, 57, 56, 60, 64, 68],
-      earnings: [2.1, 2.4, 2.3, 2.8, 2.7, 3.1, 3.4, 3.2, 3.7, 3.5, 4.0, 4.3, 4.1, 4.6, 4.4, 4.9, 4.8, 5.2, 5.0, 5.6, 5.4, 5.9, 5.7, 6.2, 6.0, 6.6, 6.4, 7.1, 7.6, 8.2],
-    },
-  },
-  {
-    impressions: 8420, clicks: 256, ctr: "3.04%", cpm: "$1.68", cpc: "$0.055", earnings: 42.15,
-    formats: {
-      native: { impressions: 4860, clicks: 151, ctr: "3.11%", earnings: 24.18 },
-      social: { impressions: 2520, clicks: 72, ctr: "2.86%", earnings: 11.04 },
-      video: { impressions: 1040, clicks: 33, ctr: "3.17%", earnings: 6.93 },
-    },
-    series: {
-      impressions: [420, 510, 480, 590, 540, 630, 670, 640, 720, 700, 760, 810, 790, 860, 830, 900, 880, 940, 920, 990, 970, 1030, 1010, 1090, 1060, 1140, 1110, 1190, 1230, 1280],
-      clicks: [11, 14, 13, 16, 15, 18, 20, 19, 22, 21, 23, 25, 24, 27, 26, 28, 27, 30, 29, 31, 30, 33, 32, 35, 34, 36, 35, 38, 40, 42],
-      earnings: [1.4, 1.7, 1.6, 2.0, 1.9, 2.2, 2.4, 2.3, 2.6, 2.5, 2.8, 3.0, 2.9, 3.2, 3.1, 3.4, 3.3, 3.6, 3.5, 3.8, 3.7, 4.0, 3.9, 4.2, 4.1, 4.4, 4.3, 4.6, 4.8, 5.0],
-    },
-  },
-  {
-    impressions: 6580, clicks: 168, ctr: "2.55%", cpm: "$1.54", cpc: "$0.061", earnings: 24.45,
-    formats: {
-      native: { impressions: 3520, clicks: 92, ctr: "2.61%", earnings: 12.74 },
-      social: { impressions: 2080, clicks: 53, ctr: "2.55%", earnings: 7.72 },
-      video: { impressions: 980, clicks: 23, ctr: "2.35%", earnings: 3.99 },
-    },
-    series: {
-      impressions: [310, 360, 340, 420, 390, 460, 490, 470, 520, 500, 550, 580, 570, 610, 590, 630, 620, 660, 650, 700, 680, 730, 710, 760, 740, 790, 770, 820, 850, 890],
-      clicks: [8, 10, 9, 12, 11, 13, 14, 14, 15, 15, 16, 18, 17, 19, 18, 20, 19, 21, 20, 22, 21, 23, 22, 24, 23, 25, 24, 26, 28, 30],
-      earnings: [0.9, 1.1, 1.0, 1.3, 1.2, 1.4, 1.5, 1.5, 1.7, 1.6, 1.8, 1.9, 1.9, 2.1, 2.0, 2.2, 2.1, 2.3, 2.2, 2.4, 2.3, 2.5, 2.4, 2.6, 2.5, 2.7, 2.6, 2.8, 2.9, 3.1],
-    },
-  },
-];
 
 const formatLabels = { native: "Native", social: "Social", video: "Video" };
 const periodOptions = ["Today", "7 Days", "30 Days", "90 Days"];
@@ -91,31 +52,19 @@ function getWebsiteDomain(url) {
   try { return new URL(url).hostname; } catch { return url; }
 }
 
-function cloneDemoAnalytics(source) {
-  return {
-    ...source,
-    formats: Object.fromEntries(Object.entries(source.formats).map(([key, value]) => [key, { ...value }])),
-    series: Object.fromEntries(Object.entries(source.series).map(([key, value]) => [key, [...value]])),
-  };
-}
-
-function getDemoAnalytics(index) {
-  const source = cloneDemoAnalytics(publisherWebsiteDemoAnalytics[index % publisherWebsiteDemoAnalytics.length]);
-  if (index < publisherWebsiteDemoAnalytics.length) return source;
-  const multiplier = 1 + (index - publisherWebsiteDemoAnalytics.length + 1) * 0.08;
-  return {
-    ...source,
-    impressions: Math.round(source.impressions * multiplier),
-    clicks: Math.round(source.clicks * multiplier),
-    earnings: Number((source.earnings * multiplier).toFixed(2)),
-    series: Object.fromEntries(Object.entries(source.series).map(([key, values]) => [key, values.map(value => Number((value * multiplier).toFixed(2)))])),
-  };
-}
-
-function buildWebsiteAnalytics(website, index) {
+function buildWebsiteAnalytics(website) {
+  const impressions = Number(website.impressions || 0);
+  const clicks = Number(website.clicks || 0);
   return {
     ...website,
-    ...getDemoAnalytics(index),
+    impressions,
+    clicks,
+    ctr: impressions ? `${((clicks / impressions) * 100).toFixed(2)}%` : "--",
+    cpm: "--",
+    cpc: "--",
+    earnings: 0,
+    formats: {},
+    series: { impressions: [], clicks: [], earnings: [] },
     websiteId: website.id,
     domain: getWebsiteDomain(website.url),
     status: website.status || "Active",
@@ -180,18 +129,18 @@ function PublisherAnalyticsPage({ data, onNavigate, selectedWebsiteId = "" }) {
   useEffect(() => { if (selectedWebsiteId) setSelectedId(selectedWebsiteId); }, [selectedWebsiteId]);
   const websiteAnalytics = websites.map(buildWebsiteAnalytics);
   const selectedWebsite = websiteAnalytics.find(website => website.websiteId === selectedId);
-  const summaryMetrics = [["Impressions", "24,860", "eye"], ["Clicks", "742", "trend"], ["CTR", "2.98%", "chart"], ["Earnings", "$125.00", "wallet"], ["CPM", "$1.84", "wallet"], ["CPC", "$0.058", "trend"]];
+  const totals = websiteAnalytics.reduce((result, website) => ({ impressions: result.impressions + website.impressions, clicks: result.clicks + website.clicks }), { impressions: 0, clicks: 0 });
+  const summaryMetrics = [["Impressions", formatAnalyticsNumber(totals.impressions), "eye"], ["Clicks", formatAnalyticsNumber(totals.clicks), "trend"], ["CTR", totals.impressions ? `${((totals.clicks / totals.impressions) * 100).toFixed(2)}%` : "--", "chart"], ["Earnings", "$0.00", "wallet"], ["CPM", "--", "wallet"], ["CPC", "--", "trend"]];
   const periodControl = <div className="analytics-period-control" aria-label="Analytics period">{periodOptions.map(option => <button type="button" key={option} className={period === option ? "is-active" : ""} onClick={() => setPeriod(option)}>{option}</button>)}</div>;
   if (selectedWebsite) return <div className="workspace-page publisher-analytics"><PageHeader eyebrow="PUBLISHER / ANALYTICS" title="Analytics" description="Track your websites, ad performance, and earnings." aside={<div className="analytics-header-controls">{periodControl}</div>} /><WebsiteAnalyticsDetail website={selectedWebsite} websites={websiteAnalytics} period={period} setPeriod={setPeriod} onSelectWebsite={id => id === "all" ? setSelectedId("") : setSelectedId(id)} onBack={() => setSelectedId("")} /></div>;
-  const activitySites = websiteAnalytics.length ? [0, 1, 2].map(index => websiteAnalytics[index % websiteAnalytics.length]) : [{ name: "My Website" }, { name: "Store Website" }, { name: "Blog Website" }];
   return <div className="workspace-page publisher-analytics">
     <PageHeader eyebrow="PUBLISHER / ANALYTICS" title="Analytics" description="Track your websites, ad performance, and earnings." aside={<div className="analytics-header-controls">{periodControl}</div>} />
     <section className="analytics-metric-grid publisher-analytics-metrics">{summaryMetrics.map(([label, value, icon]) => <AnalyticsMetric key={label} label={label} value={value} icon={icon} />)}</section>
-    <section className="light-panel earnings-summary-panel"><div className="panel-heading"><div><span className="eyebrow">OVERVIEW</span><h2>Overview</h2></div></div><div className="earnings-summary-grid"><div><span>Available Earnings</span><strong>$125.00</strong></div><div><span>Pending Earnings</span><strong>$32.50</strong></div><div><span>Total Earned</span><strong>$642.50</strong></div><div><span>Total Withdrawn</span><strong>$485.00</strong></div></div></section>
+    <section className="light-panel earnings-summary-panel"><div className="panel-heading"><div><span className="eyebrow">OVERVIEW</span><h2>Overview</h2></div></div><div className="earnings-summary-grid"><div><span>Available Earnings</span><strong>$0.00</strong></div><div><span>Pending Earnings</span><strong>$0.00</strong></div><div><span>Total Earned</span><strong>$0.00</strong></div><div><span>Total Withdrawn</span><strong>$0.00</strong></div></div></section>
     <section className="light-panel website-performance-panel"><div className="panel-heading"><div><span className="eyebrow">PUBLISHER INVENTORY</span><h2>Websites Performance</h2></div><button className="text-button" type="button" onClick={() => onNavigate("websites")}>Manage websites <MiniIcon name="arrow" size={14} /></button></div>{!websiteAnalytics.length ? <EmptyState icon="globe" title="No websites yet" description="Add a website to start receiving AdZora ads and analytics." action="Add Website" onAction={() => onNavigate("websites")} /> : <div className="website-analytics-grid">{websiteAnalytics.map(website => <WebsitePerformanceCard website={website} key={website.websiteId} onDetails={setSelectedId} />)}</div>}</section>
-    <section className="light-panel activity-panel"><div className="panel-heading"><div><span className="eyebrow">ACTIVITY</span><h2>Recent Activity</h2></div></div><div className="activity-list"><div><span className="activity-icon"><MiniIcon name="eye" size={15} /></span><span><strong>Ad impression</strong><small>{activitySites[0].name} · Today, 14:32</small></span><b>+1,240</b></div><div><span className="activity-icon"><MiniIcon name="trend" size={15} /></span><span><strong>Ad click</strong><small>{activitySites[1].name} · Today, 13:48</small></span><b>+42</b></div><div><span className="activity-icon"><MiniIcon name="wallet" size={15} /></span><span><strong>Earnings update</strong><small>{activitySites[2].name} · Today, 12:15</small></span><b>$8.20</b></div></div></section>
+    <section className="light-panel activity-panel"><div className="panel-heading"><div><span className="eyebrow">ACTIVITY</span><h2>Recent Activity</h2></div></div><div className="empty-state compact-empty"><MiniIcon name="trend" size={22} /><h2>No activity yet</h2><p>Live impression, click, and earnings events will appear here once the ad server records them.</p></div></section>
   </div>;
 }
 
 function PublisherTransactions({ withdrawals }) { return <div className="workspace-page"><PageHeader title="Publisher Transactions" description="سجل منفصل لأرباح الناشر والتعديلات والسحوبات، دون خلطه بإنفاق المعلن." /><section className="light-panel data-panel"><div className="panel-heading"><div><span className="eyebrow">TRANSACTION HISTORY</span><h2>{withdrawals.length} records</h2></div></div>{!withdrawals.length ? <EmptyState icon="code" title="No transactions yet" description="ستظهر Earnings وAdjustments وWithdrawals هنا عند وجود بيانات." /> : <div className="data-list">{withdrawals.map(item => <div className="data-row" key={item.id}><div className="row-main"><span className="row-icon"><MiniIcon name="trend" /></span><div><strong>Withdrawal · {"$"}{item.amount.toFixed(2)}</strong><small>{item.date}</small></div></div><span className="status-badge pending">{item.status}</span></div>)}</div>}</section></div>; }
-export default function PublisherWorkspace({ page, data, setData, onNavigate, selectedWebsiteId = "", finance = { available: 125, pending: 32.5, earned: 642.5, withdrawn: 485, minimum: 50 }, setFinance = () => {}, withdrawals = [], setWithdrawals = () => {} }) { const content = useMemo(() => page, [page]); const selectedWebsite = data.websites?.find(website => website.id === selectedWebsiteId); const selectedIndex = data.websites?.findIndex(website => website.id === selectedWebsiteId) ?? 0; return <div className="publisher-workspace">{content === "websites" && <WebsitesPage data={data} setData={setData} onNavigate={onNavigate} onDetails={id => onNavigate("website-details", id)} />}{content === "website-details" && <WebsiteDetailPage website={selectedWebsite} websiteIndex={selectedIndex < 0 ? 0 : selectedIndex} onBack={() => onNavigate("websites")} onAnalytics={id => onNavigate("analytics", id)} />}{content === "ad-codes" && <AdCodesPage data={data} onNavigate={onNavigate} />}{content === "earnings" && <EarningsPage finance={finance} onNavigate={onNavigate} />}{content === "withdrawals" && <WalletWorkspace mode="withdrawal" requests={withdrawals} setRequests={setWithdrawals} available={finance.available} />}{content === "transactions" && <PublisherTransactions withdrawals={withdrawals} />}{content === "analytics" && <PublisherAnalyticsPage data={data} onNavigate={onNavigate} selectedWebsiteId={selectedWebsiteId} />}</div>; }
+export default function PublisherWorkspace({ page, data, setData, onNavigate, selectedWebsiteId = "", finance = { available: 0, pending: 0, earned: 0, withdrawn: 0, minimum: 50 }, setFinance = () => {}, withdrawals = [], setWithdrawals = () => {} }) { const content = useMemo(() => page, [page]); const selectedWebsite = data.websites?.find(website => website.id === selectedWebsiteId); const selectedIndex = data.websites?.findIndex(website => website.id === selectedWebsiteId) ?? 0; return <div className="publisher-workspace">{content === "websites" && <WebsitesPage data={data} setData={setData} onNavigate={onNavigate} onDetails={id => onNavigate("website-details", id)} />}{content === "website-details" && <WebsiteDetailPage website={selectedWebsite} websiteIndex={selectedIndex < 0 ? 0 : selectedIndex} onBack={() => onNavigate("websites")} onAnalytics={id => onNavigate("analytics", id)} />}{content === "ad-codes" && <AdCodesPage data={data} onNavigate={onNavigate} />}{content === "earnings" && <EarningsPage finance={finance} onNavigate={onNavigate} />}{content === "withdrawals" && <WalletWorkspace mode="withdrawal" requests={withdrawals} setRequests={setWithdrawals} available={finance.available} />}{content === "transactions" && <PublisherTransactions withdrawals={withdrawals} />}{content === "analytics" && <PublisherAnalyticsPage data={data} onNavigate={onNavigate} selectedWebsiteId={selectedWebsiteId} />}</div>; }

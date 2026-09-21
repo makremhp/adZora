@@ -1,6 +1,6 @@
-// Thin fetch wrapper for the AdZora backend. Set VITE_API_URL in a .env file to point
-// at your deployed API (defaults to a local dev server on port 4000).
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+// The browser talks only to the AdZora API. Keep DATABASE_URL server-side; it
+// must never be exposed through a Vite variable or bundled into this file.
+const API_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
 
 const TOKEN_KEY = "adzora_token";
 
@@ -14,7 +14,7 @@ export function setToken(token) {
 }
 
 async function request(path, { method = "GET", body, auth = true } = {}) {
-  const headers = { "Content-Type": "application/json" };
+  const headers = body instanceof FormData ? {} : { "Content-Type": "application/json" };
   if (auth) {
     const token = getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -22,11 +22,13 @@ async function request(path, { method = "GET", body, auth = true } = {}) {
   const response = await fetch(`${API_URL}${path}`, {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data.error || "Something went wrong. Please try again.");
+    const error = new Error(data.error || "Something went wrong. Please try again.");
+    error.status = response.status;
+    throw error;
   }
   return data;
 }
@@ -57,4 +59,5 @@ export const api = {
   createDeposit: (payload) => request("/wallet/deposits", { method: "POST", body: payload }),
 
   paymentDestinations: () => request("/config/payment-destinations"),
+  uploadCreative: (formData) => request("/creatives", { method: "POST", body: formData }),
 };

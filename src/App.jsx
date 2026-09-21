@@ -6,6 +6,7 @@ import adzoraLogo from "../images/adzora-logo.png";
 import ProfilePage from "./ProfilePage";
 import SettingsPage from "./SettingsPage";
 import { NotificationProvider, useNotifications } from "./NotificationSystem";
+import { api, getToken, setToken } from "./api";
 
 function Icon({ name, size = 18 }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -205,7 +206,7 @@ function getPasswordStrength(password) {
   return Math.min(strength, 100);
 }
 
-function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
+function AccountAccess({ onClose, onSuccess, role = "publisher", initialMode = "signup" }) {
   const { notify } = useNotifications();
   const [mode, setMode] = useState(initialMode);
   const [form, setForm] = useState({ email: "", password: "", confirmPassword: "" });
@@ -234,13 +235,18 @@ function AccountAccess({ onClose, onSuccess, initialMode = "signup" }) {
       return;
     }
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 350));
-    setLoading(false);
-    notify(
-      mode === "signup" ? "تم إنشاء حسابك التجريبي بنجاح." : "تم تسجيل الدخول التجريبي بنجاح.",
-      "success",
-    );
-    if (mode === "login" || mode === "signup") onSuccess();
+    try {
+      const result = mode === "signup"
+        ? await api.signup(form.email.trim(), form.password, role)
+        : await api.login(form.email.trim(), form.password);
+      setToken(result.token);
+      notify(mode === "signup" ? "تم إنشاء الحساب بنجاح." : "تم تسجيل الدخول بنجاح.", "success");
+      onSuccess(result.user);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isSignup = mode === "signup";
@@ -310,13 +316,62 @@ function AppContent() {
   const [selectedWebsiteId, setSelectedWebsiteId] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [publisherData, setPublisherData] = useState({ websites: [], zones: [] });
-  const [publisherFinance, setPublisherFinance] = useState({ available: 125, pending: 32.5, earned: 642.5, withdrawn: 485, minimum: WITHDRAWAL_CONFIG.minimumAmount });
+  const [publisherFinance, setPublisherFinance] = useState({ available: 0, pending: 0, earned: 0, withdrawn: 0, minimum: WITHDRAWAL_CONFIG.minimumAmount });
   const [publisherWithdrawals, setPublisherWithdrawals] = useState([]);
   const [advertiserDeposits, setAdvertiserDeposits] = useState([]);
   const [campaignData, setCampaignData] = useState([]);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [accountRole, setAccountRole] = useState("publisher");
+  const [user, setUser] = useState(null);
+  const [loadingWorkspace, setLoadingWorkspace] = useState(false);
   const config = useMemo(() => ROLE_CONFIG[workspace], [workspace]);
   const { notify } = useNotifications();
+
+  useEffect(() => {
+    if (!getToken()) return;
+    api.me().then(({ user: sessionUser }) => {
+      setUser(sessionUser);
+      setWorkspace(sessionUser.role);
+      setView("workspace");
+    }).catch(() => setToken(null));
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    setLoadingWorkspace(true);
+    const load = async () => {
+      try {
+        if (workspace === "publisher") {
+          const [websiteResult, financeResult, withdrawalResult] = await Promise.all([
+            api.listWebsites(),
+            api.walletSummary(),
+            api.listWithdrawals(),
+          ]);
+          if (!active) return;
+          setPublisherData({ websites: websiteResult.websites || [], zones: [] });
+          setPublisherFinance({ ...financeResult, minimum: financeResult.minimum || WITHDRAWAL_CONFIG.minimumAmount });
+          setPublisherWithdrawals(withdrawalResult.requests || []);
+        } else {
+          const [campaignResult, financeResult, depositResult] = await Promise.all([
+            api.listCampaigns(),
+            api.walletSummary(),
+            api.listDeposits(),
+          ]);
+          if (!active) return;
+          setCampaignData(campaignResult.campaigns || []);
+          setAdvertiserDeposits(depositResult.requests || []);
+          setPublisherFinance({ ...financeResult, minimum: WITHDRAWAL_CONFIG.minimumAmount });
+        }
+      } catch (requestError) {
+        if (active) notify(requestError.message, "error");
+      } finally {
+        if (active) setLoadingWorkspace(false);
+      }
+    };
+    load();
+    return () => { active = false; };
+  }, [user, workspace, notify]);
 
   useEffect(() => {
     const onKeyDown = (event) => { if (event.key === "Escape") setDrawerOpen(false); };
@@ -328,6 +383,7 @@ function AppContent() {
   const navigate = (page, websiteId = "") => { setActivePage(page); if (websiteId) setSelectedWebsiteId(websiteId); setDrawerOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const openWorkspace = (role, page = "overview") => {
     setWorkspace(role);
+    setAccountRole(role);
     setActivePage(page);
     setSelectedWebsiteId("");
     if (view === "landing") {
@@ -336,7 +392,10 @@ function AppContent() {
     }
     setView("workspace");
   };
-  const logout = () => {
+  const logout = async () => {
+    try { await api.logout(); } catch { /* the local session is still cleared */ }
+    setToken(null);
+    setUser(null);
     setView("landing");
     setActivePage("overview");
     setSelectedWebsiteId("");
@@ -345,15 +404,14 @@ function AppContent() {
   };
   const pageTitle = config.nav.find(item => item.id === activePage)?.arabic || (activePage === "website-details" ? "تفاصيل الموقع" : "نظرة عامة");
 
-  if (view === "landing") return <><LandingPage onLogin={() => setAccountOpen(true)} onStart={(role) => openWorkspace(role, role === "publisher" ? "websites" : "create-campaign")} />{accountOpen && <AccountAccess onClose={() => setAccountOpen(false)} onSuccess={() => { setAccountOpen(false); setView("workspace"); }} />}</>;
+  if (view === "landing") return <><LandingPage onLogin={() => { setAccountRole("publisher"); setAccountOpen(true); }} onStart={(role) => openWorkspace(role, role === "publisher" ? "websites" : "create-campaign")} />{accountOpen && <AccountAccess role={accountRole} onClose={() => setAccountOpen(false)} onSuccess={(nextUser) => { setUser(nextUser); setWorkspace(nextUser.role); setAccountOpen(false); setView("workspace"); }} />}</>;
 
   return <div className="app-shell">
      <Sidebar workspace={workspace} setWorkspace={(next) => { setWorkspace(next); setActivePage("overview"); setSelectedWebsiteId(""); }} activePage={activePage} onNavigate={navigate} drawerOpen={drawerOpen} closeDrawer={() => setDrawerOpen(false)} />
        <main className="main-content">
-        <header className="topbar"><button className="icon-button menu-button" onClick={() => setDrawerOpen(true)} aria-label="Open menu"><Icon name="menu" /></button><div className="breadcrumbs"><span>AdZora</span><Icon name="chevron" size={13} /><strong>{config.label}</strong><Icon name="chevron" size={13} /><span>{pageTitle}</span></div><div className="header-actions"><div className="header-balance" aria-label={config.balanceLabel}><span>{config.balanceLabel}</span><strong>$0.00</strong></div><button className="notification-button" type="button" aria-label="Notifications" onClick={() => notify("You are up to date.", "info")}><span className="notification-dot" /><Icon name="receipt" size={18} /></button></div></header>
-         <div className="page-content">{activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : activePage === "profile" ? <ProfilePage workspace={workspace} /> : activePage === "settings" ? <SettingsPage workspace={workspace} publisherData={publisherData} setPublisherData={setPublisherData} onNavigate={navigate} onLogout={logout} /> : workspace === "publisher" && ["websites", "website-details", "ad-codes", "earnings", "transactions", "withdrawals", "analytics"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} selectedWebsiteId={selectedWebsiteId} finance={publisherFinance} setFinance={setPublisherFinance} withdrawals={publisherWithdrawals} setWithdrawals={setPublisherWithdrawals} onNavigate={navigate} /> : workspace === "advertiser" && ["campaigns", "create-campaign", "balance", "deposits", "transactions", "billing", "analytics", "reports"].includes(activePage) ? <AdvertiserWorkspace page={activePage} data={campaignData} setData={setCampaignData} deposits={advertiserDeposits} setDeposits={setAdvertiserDeposits} onNavigate={navigate} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
+          <div className="page-content">{loadingWorkspace ? <section className="workspace-loading light-panel">Loading your AdZora data…</section> : activePage === "overview" ? <Overview workspace={workspace} onNavigate={navigate} /> : activePage === "profile" ? <ProfilePage workspace={workspace} user={user} onUserChange={setUser} /> : activePage === "settings" ? <SettingsPage workspace={workspace} publisherData={publisherData} setPublisherData={setPublisherData} onNavigate={navigate} onLogout={logout} /> : workspace === "publisher" && ["websites", "website-details", "ad-codes", "earnings", "transactions", "withdrawals", "analytics"].includes(activePage) ? <PublisherWorkspace page={activePage} data={publisherData} setData={setPublisherData} selectedWebsiteId={selectedWebsiteId} finance={publisherFinance} setFinance={setPublisherFinance} withdrawals={publisherWithdrawals} setWithdrawals={setPublisherWithdrawals} onNavigate={navigate} /> : workspace === "advertiser" && ["campaigns", "create-campaign", "balance", "deposits", "transactions", "billing", "analytics", "reports"].includes(activePage) ? <AdvertiserWorkspace page={activePage} data={campaignData} setData={setCampaignData} deposits={advertiserDeposits} setDeposits={setAdvertiserDeposits} onNavigate={navigate} /> : <ComingSoon workspace={workspace} page={activePage} onNavigate={navigate} />}</div>
     </main>
-    {accountOpen && <AccountAccess onClose={() => setAccountOpen(false)} onSuccess={() => { setAccountOpen(false); setView("workspace"); }} />}
+     {accountOpen && <AccountAccess role={accountRole} onClose={() => setAccountOpen(false)} onSuccess={(nextUser) => { setUser(nextUser); setWorkspace(nextUser.role); setAccountOpen(false); setView("workspace"); }} />}
   </div>;
 }
 

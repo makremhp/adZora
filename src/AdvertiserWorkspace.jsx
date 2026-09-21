@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PRICING_MODELS, formatMoney } from "./config";
 import WalletWorkspace from "./WalletWorkspace";
+import { api } from "./api";
 function Icon({ name, size = 17 }) { const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" }; const paths = { plus: <><path d="M12 5v14M5 12h14" /></>, megaphone: <><path d="m3 11 18-5v12L3 14z" /><path d="M11 15v5M6 16l1.5 4" /></>, image: <><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9" r="1.5" /><path d="m21 15-5-5L5 20" /></>, video: <><rect x="3" y="5" width="14" height="14" rx="2" /><path d="m17 10 4-2v8l-4-2z" /></>, check: <path d="m5 12 4 4L19 6" />, upload: <><path d="M12 16V4M7 9l5-5 5 5" /><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5" /></>, shield: <><path d="M12 3 4 6v5c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z" /><path d="m8 12 2.5 2.5L16 9" /></> }; return <svg {...props}>{paths[name] || paths.megaphone}</svg>; }
 function Field({ label, error, hint, children }) { return <label className="field"><span>{label}</span>{children}{hint && !error && <small>{hint}</small>}{error && <small className="field-error">{error}</small>}</label>; }
 function PageHeader({ title, description, action, onAction }) { return <div className="workspace-page-header"><div><span className="eyebrow">ADVERTISER WORKSPACE</span><h1>{title}</h1><p>{description}</p></div>{action && <button className="primary-button" type="button" onClick={onAction}><Icon name="plus" size={16} />{action}</button>}</div>; }
@@ -157,9 +158,10 @@ function Preview({ form }) {
 function CreateCampaign({ data, setData, onNavigate }) {
   const [form, setForm] = useState(INITIAL);
   const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
   const update = patch => setForm(previous => ({ ...previous, ...patch }));
   const changeFormat = format => update({ format, file: null, fileName: "", fileType: "", previewUrl: "", profileFile: null, profileFileName: "", profileFileType: "", profileUrl: "", postFile: null, postFileName: "", postFileType: "", postUrl: "", destination: "" });
-  const submit = () => {
+  const submit = async () => {
     const next = {};
     if (!form.name.trim()) next.name = "Enter a campaign name.";
     if (!form.destination.trim()) next.destination = "Enter a destination URL."; else { try { const url = new URL(form.destination); if (!["http:", "https:"].includes(url.protocol)) next.destination = "Use an HTTP or HTTPS destination."; } catch { next.destination = "Enter a valid destination URL."; } }
@@ -170,9 +172,16 @@ function CreateCampaign({ data, setData, onNavigate }) {
     if (form.format === "video" && !form.title.trim()) next.title = "Enter a title.";
     setErrors(next);
     if (Object.keys(next).length) return;
-    const campaign = { id: "campaign-" + Date.now(), name: form.name.trim(), format: form.format, status: "Draft", budget: Number(form.budget), pricingModel: form.pricingModel, duration: Number(form.duration) || 30, targeting: form.targeting || "All eligible publishers", creative: { fileName: form.fileName, fileType: form.fileType, previewUrl: form.previewUrl, profileFileName: form.profileFileName, profileUrl: form.profileUrl, postFileName: form.postFileName, postUrl: form.postUrl, title: form.title, description: form.description, brandName: form.brandName, username: form.username, text: form.text, cta: form.cta, destination: form.destination }, createdAt: new Date().toISOString() };
-    setData(previous => [campaign, ...previous]);
-    onNavigate("campaigns");
+    setSaving(true);
+    try {
+      const { campaign } = await api.createCampaign({ name: form.name.trim(), format: form.format, budget: Number(form.budget), pricingModel: form.pricingModel, duration: Number(form.duration) || 30, targeting: form.targeting || "", creative: { fileName: form.fileName, fileType: form.fileType, profileFileName: form.profileFileName, postFileName: form.postFileName, title: form.title, description: form.description, brandName: form.brandName, username: form.username, text: form.text, cta: form.cta, destination: form.destination } });
+      setData(previous => [campaign, ...previous]);
+      onNavigate("campaigns");
+    } catch (error) {
+      setErrors({ form: error.message });
+    } finally {
+      setSaving(false);
+    }
   };
   return <div className="workspace-page campaign-builder">
     <PageHeader title="Create Campaign" description="اختر Native أو Social أو Video؛ ستظهر فقط الحقول المناسبة للصيغة. كل صيغة لها متطلبات عرض واضحة." action="View Campaigns" onAction={() => onNavigate("campaigns")} />
@@ -181,7 +190,7 @@ function CreateCampaign({ data, setData, onNavigate }) {
     <section className="light-panel form-section"><div className="panel-heading"><div><span className="eyebrow">3 / CREATIVE</span><h2>{TYPES.find(item => item.id === form.format)?.name} content</h2></div><span className="phase-chip">Format-specific</span></div><ContentFields form={form} update={update} errors={errors} /></section>
      <section className="light-panel form-section"><div className="panel-heading"><div><span className="eyebrow">4 / AD BEHAVIOR</span><h2>Fixed by AdZora</h2></div></div><BehaviorFields format={form.format} /></section>
      <section className="light-panel preview-panel"><div className="panel-heading"><div><span className="eyebrow">LIVE PREVIEW</span><h2>Creative preview</h2></div><span className="phase-chip">Responsive</span></div><Preview form={form} /></section>
-    <section className="light-panel form-section tracking-roadmap"><div className="panel-heading"><div><span className="eyebrow">5 / TRACKING</span><h2>Events prepared for the Ad Server</h2></div></div><div className="event-chip-list"><span>Impression</span><span>Click</span><span>Video View</span><span>Video Completion</span></div><p className="muted-copy">سيتم استخدام هذه الأحداث لقياس أداء حملتك تلقائيًا مع بدء الحملة.</p><div className="form-actions"><button className="primary-button" type="button" onClick={submit}><Icon name="check" size={16} />Save Campaign Draft</button><button className="ghost-button" type="button" onClick={() => onNavigate("campaigns")}>Cancel</button></div></section>
+     <section className="light-panel form-section tracking-roadmap"><div className="panel-heading"><div><span className="eyebrow">5 / TRACKING</span><h2>Events prepared for the Ad Server</h2></div></div><div className="event-chip-list"><span>Impression</span><span>Click</span><span>Video View</span><span>Video Completion</span></div><p className="muted-copy">سيتم استخدام هذه الأحداث لقياس أداء حملتك تلقائيًا مع بدء الحملة.</p>{errors.form && <small className="field-error">{errors.form}</small>}<div className="form-actions"><button className="primary-button" type="button" onClick={submit} disabled={saving}><Icon name="check" size={16} />{saving ? "Saving…" : "Save Campaign Draft"}</button><button className="ghost-button" type="button" onClick={() => onNavigate("campaigns")}>Cancel</button></div></section>
   </div>;
 }
 

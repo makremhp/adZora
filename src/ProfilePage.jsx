@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNotifications } from "./NotificationSystem";
+import { api } from "./api";
 
 function ProfileIcon({ name, size = 18 }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -14,7 +15,7 @@ function ProfileIcon({ name, size = 18 }) {
 }
 
 const ROLE_LABELS = { publisher: "Publisher", advertiser: "Advertiser" };
-const INITIAL_PROFILE = { displayName: "Account Holder", email: "you@example.com" };
+const INITIAL_PROFILE = { displayName: "", email: "" };
 
 function initialsFor(name) {
   return name.split(/\s+/).filter(Boolean).map(part => part[0]).join("").slice(0, 2).toUpperCase() || "A";
@@ -24,27 +25,39 @@ function ProfileFact({ label, children }) {
   return <div className="profile-fact"><span>{label}</span><strong>{children}</strong></div>;
 }
 
-export default function ProfilePage({ workspace }) {
+export default function ProfilePage({ workspace, user, onUserChange }) {
   const { notify } = useNotifications();
   const role = ROLE_LABELS[workspace] || ROLE_LABELS.publisher;
-  const [profile, setProfile] = useState(INITIAL_PROFILE);
+  const [profile, setProfile] = useState(user || INITIAL_PROFILE);
   const [editing, setEditing] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState({ current: "", next: "" });
 
   const updateProfile = (key, value) => setProfile(previous => ({ ...previous, [key]: value }));
-  const saveProfile = () => {
-    setEditing(false);
-    notify("Profile updated successfully", "success");
+  const saveProfile = async () => {
+    try {
+      const { user: updatedUser } = await api.updateProfile(profile.displayName);
+      setProfile(updatedUser);
+      onUserChange?.(updatedUser);
+      setEditing(false);
+      notify("Profile updated successfully", "success");
+    } catch (error) {
+      notify(error.message, "error");
+    }
   };
   const cancelProfileEdit = () => {
     setEditing(false);
-    setProfile(INITIAL_PROFILE);
+    setProfile(user || INITIAL_PROFILE);
   };
-  const savePassword = () => {
-    setPassword("");
-    setPasswordOpen(false);
-    notify("Your password change request has been received.", "info");
+  const savePassword = async () => {
+    try {
+      await api.changePassword(password.current, password.next);
+      setPassword({ current: "", next: "" });
+      setPasswordOpen(false);
+      notify("Your password has been updated.", "success");
+    } catch (error) {
+      notify(error.message, "error");
+    }
   };
 
   return <div className="workspace-page profile-page">
@@ -84,7 +97,7 @@ export default function ProfilePage({ workspace }) {
         <div><strong>Password</strong><span>••••••••</span></div>
         <button className="secondary-button" type="button" onClick={() => setPasswordOpen(previous => !previous)} data-testid="button-change-password"><ProfileIcon name="lock" size={15} />Change Password</button>
       </div>
-      {passwordOpen && <div className="password-editor"><label className="field"><span>New Password</span><input className="input" type="password" value={password} onChange={event => setPassword(event.target.value)} placeholder="At least 6 characters" data-testid="input-new-password" /></label><button className="ghost-button" type="button" onClick={savePassword} data-testid="button-save-password">Save Password</button></div>}
+       {passwordOpen && <div className="password-editor"><label className="field"><span>Current Password</span><input className="input" type="password" value={password.current} onChange={event => setPassword(previous => ({ ...previous, current: event.target.value }))} placeholder="Enter current password" /></label><label className="field"><span>New Password</span><input className="input" type="password" value={password.next} onChange={event => setPassword(previous => ({ ...previous, next: event.target.value }))} placeholder="At least 8 characters" data-testid="input-new-password" /></label><button className="ghost-button" type="button" onClick={savePassword} data-testid="button-save-password">Save Password</button></div>}
       <div className="profile-security-note"><ProfileIcon name="shield" size={16} /><span>Password changes are reviewed to help keep your account secure.</span></div>
     </section>
   </div>;

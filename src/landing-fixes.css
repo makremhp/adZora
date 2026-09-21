@@ -154,10 +154,6 @@
   font-size: 13px;
 }
 
-.signup-modal .demo-note {
-  margin-top: 18px;
-}
-
 @media (max-height: 620px) {
   .modal-backdrop {
     align-items: flex-start;
@@ -198,7 +194,6 @@
 .modal-backdrop .access-modal .eyebrow,
 .modal-backdrop .access-modal .access-tab,
 .modal-backdrop .access-modal .access-submit,
-.modal-backdrop .access-modal .demo-note,
 .modal-backdrop .access-modal .access-link {
   font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif;
 }
