@@ -8,8 +8,8 @@ import jwt from "jsonwebtoken";
 import pg from "pg";
 
 const { Pool } = pg;
-const PORT = Number(process.env.PORT || 4000);
-const JWT_SECRET = process.env.JWT_SECRET;
+const PORT = Number(process.env.API_PORT || process.env.PORT || 4000);
+const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET;
 const TOKEN_TTL = process.env.JWT_EXPIRES_IN || "30d";
 const DATABASE_URL = process.env.DATABASE_URL;
 const pool = DATABASE_URL
@@ -20,7 +20,7 @@ const pool = DATABASE_URL
   : null;
 
 if (!DATABASE_URL || !JWT_SECRET) {
-  console.warn("AdZora API is not configured. Set DATABASE_URL and JWT_SECRET before starting the server.");
+  console.warn("AdZora API is not configured. Set DATABASE_URL and JWT_SECRET (or SESSION_SECRET) before starting the server.");
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -49,7 +49,7 @@ function errorMessage(error) {
 function requireConfiguration() {
   const missing = [];
   if (!DATABASE_URL) missing.push("DATABASE_URL");
-  if (!JWT_SECRET) missing.push("JWT_SECRET");
+  if (!JWT_SECRET) missing.push("JWT_SECRET or SESSION_SECRET");
   if (missing.length) {
     throw new ApiError(503, `API is not configured. Missing: ${missing.join(", ")}.`);
   }

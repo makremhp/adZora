@@ -23,6 +23,9 @@ The API exposes `GET /api/health` for deployment checks. It returns `200` only
 when `DATABASE_URL` and `JWT_SECRET` are configured; otherwise it returns a
 clear `503` instead of allowing a partially configured API to fail unpredictably.
 
+For local development, use `npm run dev`. This starts Vite and the API
+together, with Vite proxying `/api` requests to the API on port `4000`.
+
 JWT access tokens last 30 days by default and can be changed with
 `JWT_EXPIRES_IN`. No database credentials or token values belong in the source
 archive.
