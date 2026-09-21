@@ -171,3 +171,12 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Added compact advertiser and publisher `$0.00` balances to the workspace top bar.
 - Verification: `npm run build` and `git diff --check` pass with Vite 5.4.21.
 - Next step: review the pushed UI in the browser at desktop and mobile widths.
+
+### 2026-09-21 — Backend configuration hardening
+
+- Added explicit API configuration validation for `DATABASE_URL` and `JWT_SECRET`, including a clear `503` response instead of an ambiguous server error when either value is missing.
+- Added `GET /api/health` for deployment checks and proper `400` handling for malformed JSON request bodies.
+- Added `.env.example` and `.gitignore`, documented the health endpoint, and removed the unused one-byte `images/I.png` asset.
+- Verification: `npm ci --no-audit --no-fund`, `npm run build`, `node --check server/index.js`, `node --check api/index.js`, and a local unconfigured health check passed. A live database request was not run because no database credentials were available.
+- Source commit: `e85fb16a25be1e0d73272b9e7aa97d29a4abb16f`.
+- Next step: configure `DATABASE_URL` and `JWT_SECRET` in the deployment environment, apply `server/schema.sql`, and verify `/api/health` returns `200`.
