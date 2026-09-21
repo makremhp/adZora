@@ -37,7 +37,7 @@ the Vite SPA and run the API as a Node serverless function. Set these
 environment variables in the Vercel project:
 
 - `DATABASE_URL` — the Neon connection string.
-- `JWT_SECRET` — a long random secret.
+- `JWT_SECRET` — a long random secret; `SESSION_SECRET` is also accepted when `JWT_SECRET` is not set.
 - `JWT_EXPIRES_IN` — optional; defaults to `30d`.
 
 Run `server/schema.sql` against Neon once before using authentication or

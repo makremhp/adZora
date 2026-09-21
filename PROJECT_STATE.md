@@ -189,3 +189,10 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Verification: production build, JavaScript syntax checks, proxied health check, registration, login, and cleanup of the temporary verification account all passed.
 - Source commit: `eab4c55fa74a9336e0369b1b6557075eb4ae614f`.
 - Next step: configure the same database and server secret values in the production host before publishing.
+
+### 2026-09-21 — API reconnection error handling
+
+- Kept the API dependent only on the runtime-managed `DATABASE_URL` and the existing `SESSION_SECRET` fallback; no external API key is required for database-backed authentication.
+- Fixed unauthenticated requests to `auth/me` and missing accounts to return `401` instead of an incorrect `500`, so the frontend can renew or clear its session correctly.
+- Verification: database-backed health check returned `200`, unauthenticated `auth/me` returned `401`, signup returned `201` with a token, login returned `200` with a token, and the temporary account was deleted afterward.
+- Source commit: `f8391803c6dabc620cb61860904b2f413d149848`.
