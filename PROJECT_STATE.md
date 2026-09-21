@@ -190,6 +190,14 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Source commit: `eab4c55fa74a9336e0369b1b6557075eb4ae614f`.
 - Next step: configure the same database and server secret values in the production host before publishing.
 
+### 2026-09-21 — Clean backend rebuild and session reset
+
+- Rebuilt the backend into separate configuration, database, authentication, error, and HTTP route modules under `server/`.
+- Kept the runtime-managed `DATABASE_URL` and existing `SESSION_SECRET` path; no external API key or test account is required.
+- Changed the browser session key and cleared the legacy `adzora_token` key on startup so an old test session cannot log in automatically.
+- Verification: `npm run build`, JavaScript syntax checks, database-backed health `200`, unauthenticated `auth/me` `401`, signup `201`, login `200`, authenticated `auth/me` `200`, wrong-password rejection `400`, and test-account cleanup all passed.
+- Source commit: `8e5ad4a49ea8049a8c2ac39af83e05a31b51693d`.
+
 ### 2026-09-21 — API reconnection error handling
 
 - Kept the API dependent only on the runtime-managed `DATABASE_URL` and the existing `SESSION_SECRET` fallback; no external API key is required for database-backed authentication.
