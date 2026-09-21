@@ -1,7 +1,8 @@
 import { handleApi } from "../server/index.js";
+import { config } from "../server/config.js";
 
 export default async function handler(request, response) {
-  response.setHeader("Access-Control-Allow-Origin", process.env.CLIENT_ORIGIN || "*");
+  response.setHeader("Access-Control-Allow-Origin", config.clientOrigin);
   response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   response.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
 

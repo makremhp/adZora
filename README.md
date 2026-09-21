@@ -4,10 +4,11 @@ AdZora is a React/Vite frontend foundation for an advertising marketplace connec
 
 ## Current architecture
 
-The frontend uses the API in `src/api.js`. The Node API in `server/index.js` reads
-Neon/Postgres through `process.env.DATABASE_URL`; that value is never bundled into
-the browser. Run `server/schema.sql` once against the Neon database before starting
-the API.
+The frontend uses the API in `src/api.js`. The Node API is split into focused
+modules under `server/`: configuration, PostgreSQL access, authentication, and
+HTTP routes. `DATABASE_URL` is read only on the server and is never bundled into
+the browser. Run `server/schema.sql` once against the Neon database before
+starting the API.
 
 Create a local `.env` from `.env.example`, set `DATABASE_URL` and a long random
 `JWT_SECRET`, then run:
@@ -64,3 +65,7 @@ Authentication, websites, campaigns, profile updates, wallet requests, and
 database-backed empty states are now connected to the API. Creative previews remain
 browser-local until a storage provider is configured; their temporary object URLs
 are not sent to Neon as production URLs.
+
+The browser ignores the legacy `adzora_token` key and clears it on startup. A
+new session key is issued only after the user completes signup or login, so a
+previous test account cannot be opened automatically.

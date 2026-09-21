@@ -2,10 +2,15 @@
 // must never be exposed through a Vite variable or bundled into this file.
 const API_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
 
-const TOKEN_KEY = "adzora_token";
+const TOKEN_KEY = "adzora_session_v2";
+const LEGACY_TOKEN_KEY = "adzora_token";
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
+}
+
+export function clearLegacyToken() {
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
 }
 
 export function setToken(token) {

@@ -6,7 +6,7 @@ import adzoraLogo from "../images/adzora-logo.png";
 import ProfilePage from "./ProfilePage";
 import SettingsPage from "./SettingsPage";
 import { NotificationProvider, useNotifications } from "./NotificationSystem";
-import { api, getToken, setToken } from "./api";
+import { api, clearLegacyToken, getToken, setToken } from "./api";
 
 function Icon({ name, size = 18 }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" };
@@ -328,6 +328,7 @@ function AppContent() {
   const { notify } = useNotifications();
 
   useEffect(() => {
+    clearLegacyToken();
     if (!getToken()) return;
     api.me().then(({ user: sessionUser }) => {
       setUser(sessionUser);
