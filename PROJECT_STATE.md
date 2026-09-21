@@ -180,3 +180,12 @@ Build AdZora as a real advertising marketplace similar in category to Adsterra, 
 - Verification: `npm ci --no-audit --no-fund`, `npm run build`, `node --check server/index.js`, `node --check api/index.js`, and a local unconfigured health check passed. A live database request was not run because no database credentials were available.
 - Source commit: `e85fb16a25be1e0d73272b9e7aa97d29a4abb16f`.
 - Next step: configure `DATABASE_URL` and `JWT_SECRET` in the deployment environment, apply `server/schema.sql`, and verify `/api/health` returns `200`.
+
+### 2026-09-21 — Direct frontend-to-API authentication
+
+- `npm run dev` now starts Vite and the API together; Vite proxies `/api` to the API process on a dedicated port.
+- The API accepts the host-provided `SESSION_SECRET` as a server-side JWT signing secret when `JWT_SECRET` is not set, while preserving the explicit `JWT_SECRET` option.
+- Applied `server/schema.sql` to the development database and verified registration returns `201` with a token and login returns `200` with a token through the frontend proxy.
+- Verification: production build, JavaScript syntax checks, proxied health check, registration, login, and cleanup of the temporary verification account all passed.
+- Source commit: `eab4c55fa74a9336e0369b1b6557075eb4ae614f`.
+- Next step: configure the same database and server secret values in the production host before publishing.

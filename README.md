@@ -20,7 +20,7 @@ npm run server
 ```
 
 The API exposes `GET /api/health` for deployment checks. It returns `200` only
-when `DATABASE_URL` and `JWT_SECRET` are configured; otherwise it returns a
+when `DATABASE_URL` and either `JWT_SECRET` or `SESSION_SECRET` are configured; otherwise it returns a
 clear `503` instead of allowing a partially configured API to fail unpredictably.
 
 For local development, use `npm run dev`. This starts Vite and the API
